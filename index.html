@@ -1610,7 +1610,7 @@ input, select, textarea { font-family: 'Fredoka', sans-serif !important; font-we
   #tasks-dashboard { grid-template-columns: repeat(4, 1fr) !important; gap: 14px !important; margin-bottom: 20px !important; }
   .dash-card { min-height: 90px !important; padding: 16px 20px !important; }
   .dash-card-value { font-size: 2rem !important; }
-  #filter-dates {
+  #filter-dates, #menu-filter-dates {
     display: flex !important; flex-direction: row !important; flex-wrap: wrap !important;
     overflow-x: visible !important; padding: 6px 0 8px !important; gap: 8px !important; margin-bottom: 8px !important;
   }
@@ -1895,6 +1895,7 @@ input, select, textarea { font-family: 'Fredoka', sans-serif !important; font-we
     <span class="section-title" style="color:var(--acc)">🍽️ Menus</span>
     <button id="btn-add-menu" class="btn btn-acc" onclick="openAddMenuModal()" style="display:none">＋ Ajouter au menu</button>
   </div>
+  <div id="menu-filter-dates" class="date-filter-bar" style="margin-bottom:4px"></div>
   <div id="menu-list"></div>
 </div>
 
@@ -2666,6 +2667,7 @@ let DATA = JSON.parse(JSON.stringify(DEFAULT_DATA));
 let db = null;
 let dbRef = null;
 let taskDateFilter = 'all';
+let menuDateFilter = 'all';
 let progDay = '2026-07-12';
 let _progDayManual = false;
 let _suppressWrite = false;
@@ -8262,6 +8264,51 @@ const MENU_DATE_LABELS = {
 let _editMenuId = null;
 let _menuDragId = null;
 
+function getMenuUniqueDates() {
+  const raw = [...new Set((DATA.menu || []).map(i => normalizeDate(i.date)))];
+  return raw.sort((a, b) => {
+    if (a === 'amont') return -1;
+    if (b === 'amont') return 1;
+    return a.localeCompare(b);
+  });
+}
+
+function _renderMenuDatePills() {
+  const bar = document.getElementById('menu-filter-dates');
+  if (!bar) return;
+  const dates = getMenuUniqueDates();
+  if (!dates.length) { bar.innerHTML = ''; return; }
+  const allDates = ['all', ...dates];
+  const pills = bar.querySelectorAll('.date-pill');
+  if (pills.length === allDates.length) { bar.innerHTML = ''; }
+  const bgColors = { 'amont':'var(--gold)', '2026-07-11':'var(--acc)', '2026-07-12':'var(--acc2)', '2026-07-13':'#7FBFB0', '2026-07-14':'#9a9a9a' };
+  let html = `<button class="date-pill ${menuDateFilter==='all'?'active':''}" data-date="all" onclick="setMenuDateFilter('all')"
+    style="${menuDateFilter==='all'?'background:var(--muted);border-color:transparent;':''}">
+    <span class="dp-lbl" style="${menuDateFilter==='all'?'color:#fff':''}">Tous</span>
+  </button>`;
+  for (const d of dates) {
+    const cal = dateLabelCalendar(d);
+    const active = menuDateFilter === d;
+    const bg = active ? (bgColors[d] || 'var(--muted)') : '';
+    const inlineStyle = active ? `background:${bg};border-color:transparent;` : '';
+    const textColor = active ? 'color:#fff' : '';
+    const emojiHtml = cal.emoji
+      ? `<span class="dp-day" style="${textColor}">${cal.emoji}</span>`
+      : `<span class="dp-day" style="${textColor}">${cal.day}</span>`;
+    const weddingCls = cal.isWedding ? ' wedding' : '';
+    html += `<button class="date-pill${weddingCls} ${active?'active':''}" data-date="${d}"
+      style="${inlineStyle}" onclick="setMenuDateFilter('${d}')">
+      ${emojiHtml}<span class="dp-num" style="${textColor}">${cal.num}</span>
+    </button>`;
+  }
+  bar.innerHTML = html;
+}
+
+window.setMenuDateFilter = function(d) {
+  menuDateFilter = d;
+  renderMenu();
+};
+
 window.renderMenu = function() {
   const el = document.getElementById('menu-list');
   if (!el) return;
@@ -8270,7 +8317,13 @@ window.renderMenu = function() {
   const addBtn = document.getElementById('btn-add-menu');
   if (addBtn) addBtn.style.display = _canDo('menu','create') ? '' : 'none';
 
-  const items = (DATA.menu || []).slice().sort((a, b) => {
+  _renderMenuDatePills();
+
+  const allItems = (DATA.menu || []).slice();
+  const items = (menuDateFilter === 'all'
+    ? allItems
+    : allItems.filter(i => normalizeDate(i.date) === menuDateFilter)
+  ).sort((a, b) => {
     const dateA = parseInt(a.date) || 0;
     const dateB = parseInt(b.date) || 0;
     if (dateA !== dateB) return dateA - dateB;
