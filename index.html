@@ -1636,6 +1636,29 @@ input, select, textarea { font-family: 'Fredoka', sans-serif !important; font-we
 </head>
 <body>
 
+<!-- SPLASH SCREEN — couvre l'app au démarrage et lors des mises à jour SW -->
+<div id="app-splash" style="
+  position:fixed;inset:0;z-index:9999;
+  background:#1E3A5F;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  transition:opacity 0.35s ease;
+  opacity:1;pointer-events:all;
+">
+  <img src="icons/icon-192x192.png" style="width:80px;height:80px;border-radius:18px;" alt="">
+  <div style="color:#fff;font-family:'Nunito',sans-serif;font-size:1.1rem;font-weight:700;letter-spacing:.04em;">Jour J</div>
+  <div style="width:36px;height:3px;background:rgba(255,255,255,0.25);border-radius:2px;overflow:hidden;">
+    <div style="height:100%;background:#fff;border-radius:2px;animation:splash-bar 1.2s ease-in-out infinite;"></div>
+  </div>
+</div>
+<style>
+@keyframes splash-bar {
+  0%   { width:0%;   margin-left:0;   }
+  50%  { width:100%; margin-left:0;   }
+  100% { width:0%;   margin-left:100%;}
+}
+</style>
+
+
 <header style="position:relative">
   <h1><span class="name-sarah">Sarah</span> <span class="name-amp">&amp;</span> <span class="name-main">Antoine</span></h1>
   <div class="date-badge">💍 12 juillet 2026 · Gîte du Bonheur</div><br>
@@ -1655,6 +1678,7 @@ input, select, textarea { font-family: 'Fredoka', sans-serif !important; font-we
   <button              data-tab="guests"    onclick="switchTab('guests')" class="nav-hidden"><span class="nav-icon">👥</span><span class="nav-label">Invités</span></button>
   <button              data-tab="programme" onclick="switchTab('programme')"><span class="nav-icon">🗓️</span><span class="nav-label">Programme</span></button>
   <button              data-tab="rooms"     onclick="switchTab('rooms')"><span class="nav-icon">🛏️</span><span class="nav-label">Chambres</span></button>
+  <button              data-tab="courses"   onclick="switchTab('courses')"><span class="nav-icon">🛒</span><span class="nav-label">Courses</span></button>
   <button              data-tab="infos"     onclick="switchTab('infos')"><span class="nav-icon">ℹ️</span><span class="nav-label">Infos</span></button>
   <button              data-tab="settings"  onclick="switchTab('settings')" id="nav-settings" class="nav-hidden"><span class="nav-icon">⚙️</span><span class="nav-label">Paramètres</span></button>
 </nav>
@@ -1833,6 +1857,16 @@ input, select, textarea { font-family: 'Fredoka', sans-serif !important; font-we
   <div id="prog-desktop-layout">
     <div class="day-selector" id="day-selector"></div>
     <div class="timeline" id="programme-container"></div>
+  </div>
+</div>
+
+<!-- COURSES -->
+<div id="tab-courses" class="tab-panel">
+  <div class="section-header">
+    <span class="section-title" style="color:var(--acc2)">🛒 Courses</span>
+  </div>
+  <div style="padding:24px 16px;text-align:center;color:var(--muted);font-size:0.9rem">
+    Contenu à venir…
   </div>
 </div>
 
@@ -2659,6 +2693,9 @@ async function initFirebase(cfg) {
         _checkPendingRequests();
         if (!_isAdmin()) checkMyChangeRequest();
         setSyncStatus('connected', 'Synchronisé ✓');
+
+        // Cacher le splash une fois les données prêtes
+        _hideSplash();
 
         if (!_identityInitialized) {
           _identityInitialized = true;
@@ -7067,6 +7104,31 @@ const ADMIN_IDS  = ['Le Marié', 'La Mariée']; // rôles admin
 let CURRENT_USER = null;
 let _identityInitialized = false;
 
+// Splash screen
+function _hideSplash() {
+  const s = document.getElementById('app-splash');
+  if (!s || s.dataset.hidden) return;
+  s.dataset.hidden = '1';
+  s.style.opacity = '0';
+  s.style.pointerEvents = 'none';
+  setTimeout(() => s.remove(), 380);
+}
+function _showSplash() {
+  let s = document.getElementById('app-splash');
+  if (!s) {
+    s = document.createElement('div');
+    s.id = 'app-splash';
+    s.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#1E3A5F;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity 0.35s ease;opacity:0;pointer-events:all;';
+    s.innerHTML = '<img src="icons/icon-192x192.png" style="width:80px;height:80px;border-radius:18px;" alt=""><div style="color:#fff;font-family:\'Nunito\',sans-serif;font-size:1.1rem;font-weight:700;">Mise à jour…</div>';
+    document.body.appendChild(s);
+    requestAnimationFrame(() => { s.style.opacity = '1'; });
+  } else {
+    delete s.dataset.hidden;
+    s.style.opacity = '1';
+    s.style.pointerEvents = 'all';
+  }
+}
+
 // PWA install prompt
 let _installPrompt = null;
 window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); _installPrompt = e; });
@@ -8058,10 +8120,14 @@ if ('serviceWorker' in navigator) {
       .catch(err => console.warn('[SW] Erreur :', err));
   });
 
-  // Recharge la page quand un nouveau SW prend le contrôle (mise à jour appliquée)
+  // Recharge la page quand un nouveau SW prend le contrôle — avec transition douce
   let _reloading = false;
   navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (!_reloading) { _reloading = true; window.location.reload(); }
+    if (!_reloading) {
+      _reloading = true;
+      _showSplash();
+      setTimeout(() => window.location.reload(), 350);
+    }
   });
 }
 </script>
