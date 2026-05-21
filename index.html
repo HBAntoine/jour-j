@@ -1655,6 +1655,7 @@ input, select, textarea { font-family: 'Fredoka', sans-serif !important; font-we
   <button              data-tab="guests"    onclick="switchTab('guests')" class="nav-hidden"><span class="nav-icon">👥</span><span class="nav-label">Invités</span></button>
   <button              data-tab="programme" onclick="switchTab('programme')"><span class="nav-icon">🗓️</span><span class="nav-label">Programme</span></button>
   <button              data-tab="rooms"     onclick="switchTab('rooms')"><span class="nav-icon">🛏️</span><span class="nav-label">Chambres</span></button>
+  <button              data-tab="infos"     onclick="switchTab('infos')"><span class="nav-icon">ℹ️</span><span class="nav-label">Infos</span></button>
   <button              data-tab="settings"  onclick="switchTab('settings')" id="nav-settings" class="nav-hidden"><span class="nav-icon">⚙️</span><span class="nav-label">Paramètres</span></button>
 </nav>
 
@@ -1832,6 +1833,16 @@ input, select, textarea { font-family: 'Fredoka', sans-serif !important; font-we
   <div id="prog-desktop-layout">
     <div class="day-selector" id="day-selector"></div>
     <div class="timeline" id="programme-container"></div>
+  </div>
+</div>
+
+<!-- INFOS -->
+<div id="tab-infos" class="tab-panel">
+  <div class="section-header">
+    <span class="section-title" style="color:var(--sky)">ℹ️ Infos</span>
+  </div>
+  <div style="padding:24px 16px;text-align:center;color:var(--muted);font-size:0.9rem">
+    Contenu à venir…
   </div>
 </div>
 
