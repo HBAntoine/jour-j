@@ -2,7 +2,8 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<link rel="manifest" href="manifest.json">
+<link rel="manifest" id="manifest-link" href="manifest.json">
+<script>document.getElementById('manifest-link').href='manifest.json?v='+Date.now();</script>
 <meta name="theme-color" content="#1E4DB7">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">

@@ -4,8 +4,8 @@
                Cache-first pour les assets statiques (icônes, fonts)
    ═══════════════════════════════════════════════════════════ */
 
-const CACHE_NAME = 'jourj-v3';
-const CACHE_STATIC = 'jourj-static-v3';
+const CACHE_NAME = 'jourj-v4';
+const CACHE_STATIC = 'jourj-static-v4';
 
 /* Assets mis en cache à l'installation */
 const PRECACHE = [
@@ -49,7 +49,16 @@ self.addEventListener('fetch', event => {
   /* Firebase Realtime Database → toujours réseau, jamais cache */
   if (url.hostname.includes('firebaseio.com') ||
       url.hostname.includes('firebase.googleapis.com')) {
-    return; /* laisse passer sans interception */
+    return;
+  }
+
+  /* manifest.json → toujours réseau, jamais cache */
+  if (url.pathname.endsWith('/manifest.json') || url.pathname.includes('manifest.json')) {
+    event.respondWith(
+      fetch(new Request(request, { cache: 'no-cache' }))
+        .catch(() => caches.match(request))
+    );
+    return;
   }
 
   /* Google Fonts → cache-first (stable, rarement mis à jour) */
