@@ -8031,12 +8031,26 @@ initFirebase(HARDCODED_CONFIG);
 </script>
 
 <script>
-/* ── Service Worker — enregistrement ────────────────────── */
+/* ── Service Worker — enregistrement + mise à jour auto ─── */
 if ('serviceWorker' in navigator) {
+  let swReg = null;
+
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js')
-      .then(reg => console.log('[SW] Enregistré :', reg.scope))
+      .then(reg => {
+        swReg = reg;
+        // Vérifie une mise à jour à chaque fois que l'app repasse au premier plan
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') reg.update();
+        });
+      })
       .catch(err => console.warn('[SW] Erreur :', err));
+  });
+
+  // Recharge la page quand un nouveau SW prend le contrôle (mise à jour appliquée)
+  let _reloading = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!_reloading) { _reloading = true; window.location.reload(); }
   });
 }
 </script>

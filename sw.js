@@ -4,8 +4,8 @@
                Cache-first pour les assets statiques (icônes, fonts)
    ═══════════════════════════════════════════════════════════ */
 
-const CACHE_NAME = 'jourj-v1';
-const CACHE_STATIC = 'jourj-static-v1';
+const CACHE_NAME = 'jourj-v2';
+const CACHE_STATIC = 'jourj-static-v2';
 
 /* Assets mis en cache à l'installation */
 const PRECACHE = [
