@@ -404,6 +404,30 @@ textarea{resize:vertical;min-height:60px;}
 .cap-dot.filled{background:var(--acc);}
 .cap-dot.empty{background:rgba(30,77,183,0.12);}
 
+/* MENU */
+.menu-date-header{font-family:'Nunito',sans-serif;font-size:0.95rem;font-weight:800;color:var(--acc);padding:18px 0 6px;border-bottom:2px solid var(--border);margin-bottom:10px;}
+.menu-service-header{display:flex;align-items:center;gap:8px;padding:10px 0 6px;margin-bottom:6px;}
+.menu-service-badge{padding:3px 12px;border-radius:50px;font-size:0.72rem;font-weight:700;color:#fff;}
+.menu-card{background:#fff;border:1px solid rgba(30,77,183,0.1);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:10px;position:relative;transition:box-shadow 0.15s;}
+.menu-card:hover{box-shadow:0 4px 14px rgba(30,77,183,0.1);}
+.menu-drag-handle{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:3px;cursor:grab;padding:4px 4px;opacity:0.3;transition:opacity 0.15s;flex-shrink:0;touch-action:none;margin-top:2px;}
+.menu-drag-handle:hover{opacity:0.8;}
+.menu-drag-handle span{display:block;width:10px;height:1.5px;background:var(--muted);border-radius:2px;}
+.menu-card-body{flex:1;min-width:0;}
+.menu-card-name{font-family:'Nunito',sans-serif;font-size:0.95rem;font-weight:700;color:var(--text);}
+.menu-card-meta{font-size:0.75rem;color:var(--muted);margin-top:2px;}
+.menu-card-details{font-size:0.8rem;color:var(--text);margin-top:6px;line-height:1.5;display:none;}
+.menu-card-details.open{display:block;}
+.menu-card-actions{display:flex;gap:6px;flex-shrink:0;align-items:flex-start;}
+.menu-card-btn{background:none;border:none;cursor:pointer;padding:4px 7px;border-radius:8px;font-size:0.8rem;color:var(--muted);transition:all 0.15s;}
+.menu-card-btn:hover{background:var(--g2);color:var(--text);}
+.menu-card.menu-dragging{opacity:0.45;}
+.menu-card.menu-drag-above::before{content:'';display:block;height:2px;background:var(--acc);border-radius:2px;position:absolute;left:0;right:0;top:-1px;pointer-events:none;z-index:10;}
+.menu-card.menu-drag-below::after{content:'';display:block;height:2px;background:var(--acc);border-radius:2px;position:absolute;left:0;right:0;bottom:-1px;pointer-events:none;z-index:10;}
+.menu-service-pill{padding:6px 14px;border-radius:50px;border:1.5px solid var(--border);background:#fff;color:var(--text);font-family:'Nunito',sans-serif;font-size:0.8rem;font-weight:600;cursor:pointer;transition:all 0.15s;}
+.menu-service-pill:hover{border-color:var(--acc);color:var(--acc);}
+.menu-service-pill.active{background:var(--acc);border-color:var(--acc);color:#fff;}
+
 .guest-day-btn{padding:5px 12px;border-radius:50px;border:1.5px solid rgba(30,77,183,0.2);font-family:'Nunito',sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.15s;}
 .guest-day-btn:hover{filter:brightness(0.95);}
 
@@ -1679,6 +1703,7 @@ input, select, textarea { font-family: 'Fredoka', sans-serif !important; font-we
   <button              data-tab="guests"    onclick="switchTab('guests')" class="nav-hidden"><span class="nav-icon">👥</span><span class="nav-label">Invités</span></button>
   <button              data-tab="programme" onclick="switchTab('programme')"><span class="nav-icon">🗓️</span><span class="nav-label">Programme</span></button>
   <button              data-tab="rooms"     onclick="switchTab('rooms')"><span class="nav-icon">🛏️</span><span class="nav-label">Chambres</span></button>
+  <button              data-tab="menu"      onclick="switchTab('menu')" class="nav-hidden"><span class="nav-icon">🍽️</span><span class="nav-label">Menu</span></button>
   <button              data-tab="courses"   onclick="switchTab('courses')"><span class="nav-icon">🛒</span><span class="nav-label">Courses</span></button>
   <button              data-tab="infos"     onclick="switchTab('infos')"><span class="nav-icon">ℹ️</span><span class="nav-label">Infos</span></button>
   <button              data-tab="settings"  onclick="switchTab('settings')" id="nav-settings" class="nav-hidden"><span class="nav-icon">⚙️</span><span class="nav-label">Paramètres</span></button>
@@ -1858,6 +1883,66 @@ input, select, textarea { font-family: 'Fredoka', sans-serif !important; font-we
   <div id="prog-desktop-layout">
     <div class="day-selector" id="day-selector"></div>
     <div class="timeline" id="programme-container"></div>
+  </div>
+</div>
+
+<!-- MENU -->
+<div id="tab-menu" class="tab-panel">
+  <div class="section-header">
+    <span class="section-title" style="color:var(--acc)">🍽️ Menus</span>
+    <button id="btn-add-menu" class="btn btn-acc" onclick="openAddMenuModal()" style="display:none">＋ Ajouter au menu</button>
+  </div>
+  <div id="menu-list"></div>
+</div>
+
+<!-- MODAL ADD/EDIT MENU -->
+<div id="modal-addmenu" class="modal-overlay">
+  <div class="modal" style="max-width:520px">
+    <h3 id="modal-addmenu-title">Ajouter au menu</h3>
+
+    <div class="form-group">
+      <label>Date</label>
+      <select id="menu-date">
+        <option value="11">Vendredi 11 juillet</option>
+        <option value="12">Samedi 12 juillet</option>
+        <option value="13">Dimanche 13 juillet</option>
+        <option value="14">Lundi 14 juillet</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Service</label>
+      <div id="menu-service-pills" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">
+        <button type="button" class="menu-service-pill" data-service="petit-dejeuner" onclick="selectMenuService('petit-dejeuner')">☕ Petit-déjeuner</button>
+        <button type="button" class="menu-service-pill" data-service="dejeuner"       onclick="selectMenuService('dejeuner')">🍽️ Déjeuner</button>
+        <button type="button" class="menu-service-pill" data-service="aperitif"       onclick="selectMenuService('aperitif')">🥂 Apéritif</button>
+        <button type="button" class="menu-service-pill" data-service="diner"          onclick="selectMenuService('diner')">🌙 Dîner</button>
+        <button type="button" class="menu-service-pill" data-service="brunch"         onclick="selectMenuService('brunch')">🥞 Brunch</button>
+        <button type="button" class="menu-service-pill" data-service="buffet"         onclick="selectMenuService('buffet')">🍱 Buffet</button>
+        <button type="button" class="menu-service-pill" data-service="cocktail"       onclick="selectMenuService('cocktail')">🍹 Cocktail</button>
+      </div>
+      <input type="hidden" id="menu-service" value="diner">
+    </div>
+
+    <div class="form-group">
+      <label>Horaire</label>
+      <input type="time" id="menu-time" placeholder="19:30">
+    </div>
+
+    <div class="form-group">
+      <label>Nom du plat / service</label>
+      <input type="text" id="menu-name" placeholder="Plateau de charcuterie…">
+    </div>
+
+    <div class="form-group">
+      <label>Détails</label>
+      <textarea id="menu-details" rows="3" placeholder="Jambon, saucisson, grissinis, melon…"></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-addmenu')">Annuler</button>
+      <button class="btn btn-acc" id="modal-addmenu-save" onclick="saveMenu()">Ajouter</button>
+    </div>
   </div>
 </div>
 
@@ -2562,7 +2647,7 @@ const DEFAULT_DATA = {
     {id:'T035',categoryId:'CApero',  label:'Couper Saucisson',                    date:'12',   who:'',where:'',done:false,order:0},
     {id:'T036',categoryId:'CApero',  label:'Couper Jambon Pays',                  date:'12',   who:'',where:'',done:false,order:1}
   ],
-  expenses:[], guests:[], programme:[], rooms:[]
+  expenses:[], guests:[], programme:[], rooms:[], menu:[]
 };
 
 // ================================================================
@@ -2671,6 +2756,7 @@ async function initFirebase(cfg) {
           guests: r.guests ? Object.values(r.guests).filter(Boolean)
             : r.occupants ? Object.values(r.occupants).filter(Boolean) : []
         }));
+        DATA.menu = Object.values(DATA.menu || {});
 
         // Appliquer les permissions Firebase avant le rendu
         if (DATA.permissions) _applyFirebasePermissions(DATA.permissions);
@@ -2799,6 +2885,7 @@ window.switchTab = function(tab) {
   document.getElementById('tab-'+tab).classList.add('active');
   const navBtn = document.querySelector(`nav button[data-tab="${tab}"]`); if (navBtn) navBtn.classList.add('active');
   if (tab === 'settings') renderSettings();
+  if (tab === 'menu') renderMenu();
   // FAB visible uniquement sur l'onglet tâches
   const fab   = document.getElementById('fab-filter');
   const badge = document.getElementById('fab-badge');
@@ -2821,6 +2908,7 @@ function renderAll() {
   renderGuests();
   renderProgramme();
   renderRooms();
+  renderMenu();
   if (_isAdmin()) renderSettings();
   _renderUserBadge();
   // NE PAS appeler applyPermissions ici — appelé séparément après Firebase update
@@ -7221,6 +7309,28 @@ const APP_MODULES = [
       { id:'delete', label:'Supprimer un invité',                                 default:false },
     ]
   },
+  {
+    id: 'menu', label: 'Menu', icon: '🍽️',
+    actions: [
+      { id:'see',    label:'Voir les menus',                                       default:true  },
+      { id:'create', label:'Ajouter un plat / service',                            default:false },
+      { id:'edit',   label:'Modifier un plat / service',                           default:false },
+      { id:'delete', label:'Supprimer un plat / service',                          default:false },
+      { id:'move',   label:'Réorganiser (drag & drop)',                             default:false },
+    ]
+  },
+  {
+    id: 'courses', label: 'Courses', icon: '🛒',
+    actions: [
+      { id:'see', label:'Voir les courses',                                         default:true  },
+    ]
+  },
+  {
+    id: 'infos', label: 'Infos', icon: 'ℹ️',
+    actions: [
+      { id:'see', label:'Voir les infos',                                           default:true  },
+    ]
+  },
 ];
 
 // Droits effectifs — fusionnés depuis APP_MODULES + Firebase override
@@ -7775,6 +7885,11 @@ function applyPermissions() {
   if (evtBtn) evtBtn.style.display = _canDo('programme','create') ? '' : 'none';
   const roomBtn = document.getElementById('btn-add-room');
   if (roomBtn) roomBtn.style.display = _canDo('rooms','create') ? '' : 'none';
+  const menuBtn = document.getElementById('btn-add-menu');
+  if (menuBtn) menuBtn.style.display = _canDo('menu','create') ? '' : 'none';
+
+  // Re-render menu pour appliquer les droits drag/edit/delete
+  renderMenu();
 
   // Reset la navigation programme pour que le bon jour s'affiche
   _progDayManual = false;
@@ -8098,6 +8213,262 @@ document.addEventListener('click', function(e) {
     if (taskId) openEpWhoPicker(taskId);
   }
 });
+
+// ================================================================
+// MENU
+// ================================================================
+
+const MENU_SERVICE_ORDER = ['petit-dejeuner','brunch','dejeuner','aperitif','cocktail','buffet','diner'];
+
+const MENU_SERVICE_META = {
+  'petit-dejeuner': { label:'Petit-déjeuner', emoji:'☕',  color:'#E8A020' },
+  'dejeuner':       { label:'Déjeuner',        emoji:'🍽️', color:'var(--sky)' },
+  'aperitif':       { label:'Apéritif',        emoji:'🥂',  color:'var(--lavender)' },
+  'diner':          { label:'Dîner',           emoji:'🌙',  color:'var(--acc)' },
+  'brunch':         { label:'Brunch',          emoji:'🥞',  color:'var(--acc2)' },
+  'buffet':         { label:'Buffet',          emoji:'🍱',  color:'var(--coral)' },
+  'cocktail':       { label:'Cocktail',        emoji:'🍹',  color:'#20B2AA' },
+};
+
+const MENU_DATE_LABELS = {
+  '11': 'Vendredi 11 juillet',
+  '12': 'Samedi 12 juillet',
+  '13': 'Dimanche 13 juillet',
+  '14': 'Lundi 14 juillet',
+};
+
+let _editMenuId = null;
+let _menuDragId = null;
+
+window.renderMenu = function() {
+  const el = document.getElementById('menu-list');
+  if (!el) return;
+
+  // Show/hide add button
+  const addBtn = document.getElementById('btn-add-menu');
+  if (addBtn) addBtn.style.display = _canDo('menu','create') ? '' : 'none';
+
+  const items = (DATA.menu || []).slice().sort((a, b) => {
+    const dateA = parseInt(a.date) || 0;
+    const dateB = parseInt(b.date) || 0;
+    if (dateA !== dateB) return dateA - dateB;
+    const sA = MENU_SERVICE_ORDER.indexOf(a.service);
+    const sB = MENU_SERVICE_ORDER.indexOf(b.service);
+    if (sA !== sB) return (sA === -1 ? 99 : sA) - (sB === -1 ? 99 : sB);
+    return (a.order || 0) - (b.order || 0);
+  });
+
+  if (!items.length) {
+    el.innerHTML = '<div style="padding:32px 16px;text-align:center;color:var(--muted);font-size:0.9rem">Aucun plat / service pour l\'instant.</div>';
+    return;
+  }
+
+  const canMove   = _canDo('menu','move');
+  const canEdit   = _canDo('menu','edit');
+  const canDelete = _canDo('menu','delete');
+
+  // Group by date then service
+  const byDate = {};
+  items.forEach(item => {
+    const d = item.date || '12';
+    if (!byDate[d]) byDate[d] = {};
+    const s = item.service || 'diner';
+    if (!byDate[d][s]) byDate[d][s] = [];
+    byDate[d][s].push(item);
+  });
+
+  let html = '';
+  const sortedDates = Object.keys(byDate).sort((a,b) => parseInt(a)-parseInt(b));
+
+  sortedDates.forEach(date => {
+    const dateLabel = MENU_DATE_LABELS[date] || ('Jour ' + date);
+    html += `<div class="menu-date-header">${dateLabel}</div>`;
+
+    const services = byDate[date];
+    const sortedServices = Object.keys(services).sort((a,b) => {
+      return (MENU_SERVICE_ORDER.indexOf(a) === -1 ? 99 : MENU_SERVICE_ORDER.indexOf(a))
+           - (MENU_SERVICE_ORDER.indexOf(b) === -1 ? 99 : MENU_SERVICE_ORDER.indexOf(b));
+    });
+
+    sortedServices.forEach(service => {
+      const meta = MENU_SERVICE_META[service] || { label: service, emoji: '🍴', color: 'var(--muted)' };
+      html += `<div class="menu-service-header">
+        <span class="menu-service-badge" style="background:${meta.color}">${meta.emoji} ${meta.label}</span>
+      </div>`;
+
+      services[service].forEach(item => {
+        const dragAttrs = canMove
+          ? `draggable="true" ondragstart="menuDragStart(event,'${item.id}')" ondragover="menuDragOver(event,'${item.id}')" ondrop="menuDrop(event,'${item.id}')" ondragend="menuDragEnd(event)"`
+          : '';
+        const handleHtml = canMove
+          ? `<div class="menu-drag-handle"><span></span><span></span><span></span></div>`
+          : `<div style="width:18px"></div>`;
+        const timeStr = item.time ? `<span style="margin-left:8px">🕐 ${item.time}</span>` : '';
+        const detailsChevron = item.details
+          ? `<button class="menu-card-btn" onclick="toggleMenuDetails('${item.id}')" title="Détails">▾</button>`
+          : '';
+        const editBtn = canEdit
+          ? `<button class="menu-card-btn" onclick="openEditMenuModal('${item.id}')" title="Modifier">✏️</button>`
+          : '';
+        const deleteBtn = canDelete
+          ? `<button class="menu-card-btn" onclick="deleteMenu('${item.id}')" title="Supprimer">🗑️</button>`
+          : '';
+        const detailsHtml = item.details
+          ? `<div class="menu-card-details" id="menu-det-${item.id}">${item.details.replace(/\n/g,'<br>')}</div>`
+          : '';
+
+        html += `<div class="menu-card" id="mc-${item.id}" ${dragAttrs}>
+          ${handleHtml}
+          <div class="menu-card-body">
+            <div class="menu-card-name">${item.name || '(sans nom)'}</div>
+            <div class="menu-card-meta">${timeStr}</div>
+            ${detailsHtml}
+          </div>
+          <div class="menu-card-actions">
+            ${detailsChevron}${editBtn}${deleteBtn}
+          </div>
+        </div>`;
+      });
+    });
+  });
+
+  el.innerHTML = html;
+};
+
+window.toggleMenuDetails = function(id) {
+  const el = document.getElementById('menu-det-' + id);
+  if (el) el.classList.toggle('open');
+};
+
+// ── Drag & drop ──────────────────────────────────────────────────
+
+window.menuDragStart = function(event, id) {
+  _menuDragId = id;
+  event.dataTransfer.effectAllowed = 'move';
+  setTimeout(() => {
+    const el = document.getElementById('mc-' + id);
+    if (el) el.classList.add('menu-dragging');
+  }, 0);
+};
+
+window.menuDragOver = function(event, id) {
+  if (!_menuDragId || id === _menuDragId) return;
+  event.preventDefault();
+  event.stopPropagation();
+  event.dataTransfer.dropEffect = 'move';
+  document.querySelectorAll('.menu-drag-above,.menu-drag-below').forEach(el => el.classList.remove('menu-drag-above','menu-drag-below'));
+  const el = document.getElementById('mc-' + id);
+  if (!el) return;
+  const rect = el.getBoundingClientRect();
+  el.classList.add(event.clientY < rect.top + rect.height / 2 ? 'menu-drag-above' : 'menu-drag-below');
+};
+
+window.menuDragEnd = function(event) {
+  _menuDragId = null;
+  document.querySelectorAll('.menu-card').forEach(el => {
+    el.classList.remove('menu-dragging','menu-drag-above','menu-drag-below');
+  });
+};
+
+window.menuDrop = function(event, targetId) {
+  event.preventDefault();
+  const el = document.getElementById('mc-' + targetId);
+  if (el) el.classList.remove('menu-drag-above','menu-drag-below');
+  if (!_menuDragId || _menuDragId === targetId) return;
+
+  const rect = el ? el.getBoundingClientRect() : null;
+  const insertBefore = rect && event.clientY < rect.top + rect.height / 2;
+
+  const arr = DATA.menu;
+  const fromIdx = arr.findIndex(i => i.id === _menuDragId);
+  const toIdx   = arr.findIndex(i => i.id === targetId);
+  if (fromIdx === -1 || toIdx === -1) return;
+
+  const [moved] = arr.splice(fromIdx, 1);
+  const ins = insertBefore
+    ? (toIdx > fromIdx ? toIdx - 1 : toIdx)
+    : (toIdx > fromIdx ? toIdx     : toIdx + 1);
+  arr.splice(Math.max(0, ins), 0, moved);
+
+  // Update order fields
+  arr.forEach((item, idx) => { item.order = idx; });
+  pushData();
+  renderMenu();
+};
+
+// ── CRUD ──────────────────────────────────────────────────────────
+
+window.selectMenuService = function(service) {
+  document.getElementById('menu-service').value = service;
+  document.querySelectorAll('.menu-service-pill').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.service === service);
+  });
+};
+
+window.openAddMenuModal = function() {
+  _editMenuId = null;
+  document.getElementById('modal-addmenu-title').textContent = 'Ajouter au menu';
+  document.getElementById('modal-addmenu-save').textContent  = 'Ajouter';
+  document.getElementById('menu-date').value    = '12';
+  document.getElementById('menu-time').value    = '';
+  document.getElementById('menu-name').value    = '';
+  document.getElementById('menu-details').value = '';
+  selectMenuService('diner');
+  openModal('modal-addmenu');
+};
+
+window.openEditMenuModal = function(id) {
+  const item = (DATA.menu || []).find(i => i.id === id);
+  if (!item) return;
+  _editMenuId = id;
+  document.getElementById('modal-addmenu-title').textContent = 'Modifier le plat';
+  document.getElementById('modal-addmenu-save').textContent  = 'Modifier';
+  document.getElementById('menu-date').value    = item.date    || '12';
+  document.getElementById('menu-time').value    = item.time    || '';
+  document.getElementById('menu-name').value    = item.name    || '';
+  document.getElementById('menu-details').value = item.details || '';
+  selectMenuService(item.service || 'diner');
+  openModal('modal-addmenu');
+};
+
+window.saveMenu = function() {
+  const date    = document.getElementById('menu-date').value;
+  const service = document.getElementById('menu-service').value;
+  const time    = document.getElementById('menu-time').value.trim();
+  const name    = document.getElementById('menu-name').value.trim();
+  const details = document.getElementById('menu-details').value.trim();
+
+  if (!name) { toast('⚠️ Le nom est requis', 'var(--coral)'); return; }
+  if (!service) { toast('⚠️ Choisir un service', 'var(--coral)'); return; }
+
+  if (!DATA.menu) DATA.menu = [];
+
+  if (_editMenuId) {
+    const item = DATA.menu.find(i => i.id === _editMenuId);
+    if (item) {
+      item.date = date; item.service = service;
+      item.time = time || undefined; item.name = name; item.details = details || undefined;
+    }
+    toast('✅ Plat modifié');
+  } else {
+    const maxOrder = DATA.menu.reduce((m, i) => Math.max(m, i.order || 0), -1);
+    DATA.menu.push({ id: uid(), date, service, time: time || undefined, name, details: details || undefined, order: maxOrder + 1 });
+    toast('✅ Plat ajouté');
+  }
+
+  closeModal('modal-addmenu');
+  pushData();
+  renderMenu();
+};
+
+window.deleteMenu = function(id) {
+  openConfirm('Supprimer ce plat ?', 'Cette action est irréversible.', () => {
+    DATA.menu = (DATA.menu || []).filter(i => i.id !== id);
+    pushData();
+    renderMenu();
+    toast('🗑️ Plat supprimé');
+  });
+};
 
 renderAll();
 initFirebase(HARDCODED_CONFIG);
