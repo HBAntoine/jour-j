@@ -8050,7 +8050,7 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js')
       .then(reg => {
         swReg = reg;
-        // Vérifie une mise à jour à chaque fois que l'app repasse au premier plan
+        reg.update(); // Vérifie une mise à jour à chaque ouverture
         document.addEventListener('visibilitychange', () => {
           if (document.visibilityState === 'visible') reg.update();
         });

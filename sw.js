@@ -4,8 +4,8 @@
                Cache-first pour les assets statiques (icônes, fonts)
    ═══════════════════════════════════════════════════════════ */
 
-const CACHE_NAME = 'jourj-v2';
-const CACHE_STATIC = 'jourj-static-v2';
+const CACHE_NAME = 'jourj-v3';
+const CACHE_STATIC = 'jourj-static-v3';
 
 /* Assets mis en cache à l'installation */
 const PRECACHE = [
@@ -81,7 +81,11 @@ self.addEventListener('fetch', event => {
 /* ── Stratégie Network-First ─────────────────────────────── */
 async function networkFirst(request) {
   try {
-    const response = await fetch(request);
+    // Navigation HTML : bypass du cache HTTP pour toujours avoir la dernière version
+    const req = request.mode === 'navigate'
+      ? new Request(request, { cache: 'no-cache' })
+      : request;
+    const response = await fetch(req);
     if (response.ok) {
       const cache = await caches.open(CACHE_NAME);
       cache.put(request, response.clone());
