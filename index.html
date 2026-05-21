@@ -7056,6 +7056,11 @@ const ADMIN_IDS  = ['Le Marié', 'La Mariée']; // rôles admin
 let CURRENT_USER = null;
 let _identityInitialized = false;
 
+// PWA install prompt
+let _installPrompt = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); _installPrompt = e; });
+window.addEventListener('appinstalled', () => { _installPrompt = null; });
+
 // Charger l'identité immédiatement depuis localStorage — AVANT Firebase
 (function() {
   const stored = localStorage.getItem('mariage_user');
@@ -7750,8 +7755,25 @@ window.showIdentityOptions = function() {
   btnRequest.innerHTML = '📩 Demander un changement';
   btnRequest.addEventListener('click', () => { pop.remove(); requestIdentityChange(); });
 
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const btnInstall = document.createElement('button');
+  btnInstall.style.cssText = 'display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;border:none;background:none;cursor:pointer;font-family:\'Nunito\',sans-serif;font-size:0.82rem;font-weight:600;color:var(--accent);border-top:1px solid var(--border)';
+  btnInstall.innerHTML = '📲 Installer l\'app';
+  btnInstall.addEventListener('click', () => {
+    pop.remove();
+    if (_installPrompt) {
+      _installPrompt.prompt();
+    } else if (isIOS) {
+      toast('Sur iPhone : Safari → bouton Partager ↑ → "Sur l\'écran d\'accueil"');
+    } else {
+      toast('Pour installer : menu du navigateur → "Installer l\'app" ou "Ajouter à l\'écran d\'accueil"');
+    }
+  });
+
   pop.appendChild(header);
   pop.appendChild(btnAdmin);
+  if (!isStandalone) pop.appendChild(btnInstall);
   pop.appendChild(btnRequest);
   document.body.appendChild(pop);
 
