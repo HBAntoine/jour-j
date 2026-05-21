@@ -1926,7 +1926,13 @@ input, select, textarea { font-family: 'Fredoka', sans-serif !important; font-we
 
     <div class="form-group">
       <label>Horaire</label>
-      <input type="time" id="menu-time" placeholder="19:30">
+      <button type="button" onclick="openTimePickerCb(v=>{document.getElementById('menu-time').value=v;document.getElementById('menu-time-display').textContent=v;},document.getElementById('menu-time').value)"
+        style="display:flex;align-items:center;gap:10px;width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;background:rgba(30,77,183,0.02);cursor:pointer;font-family:'Nunito',sans-serif;text-align:left">
+        <span style="font-size:1.3rem">🕐</span>
+        <span id="menu-time-display" style="font-size:1rem;font-weight:700;color:var(--acc);font-family:'Nunito',sans-serif">Non défini</span>
+        <span style="color:var(--muted);font-size:0.75rem;margin-left:auto">Cliquer pour changer</span>
+      </button>
+      <input type="hidden" id="menu-time" value="">
     </div>
 
     <div class="form-group">
@@ -3972,13 +3978,21 @@ window.epSetTime = function(taskId, val) {
 };
 
 // EP TIME PICKER MODAL (horloge dans panneau édition tâche)
-let _epTpTaskId=null,_epTpMode='h',_epTpH=8,_epTpM=0;
+let _epTpTaskId=null,_epTpMode='h',_epTpH=8,_epTpM=0,_epTpCallback=null;
 
 window.openEpTimePicker=function(taskId){
-  _epTpTaskId=taskId;
+  _epTpTaskId=taskId; _epTpCallback=null;
   const task=DATA.tasks.find(t=>t.id===taskId);
   const cur=task&&task.time&&!['Toute la journée','Matin','Après-midi','Soirée'].includes(task.time)?task.time:'08:00';
   const parts=cur.split(':');_epTpH=parseInt(parts[0])||8;_epTpM=parseInt(parts[1])||0;
+  _epTpMode='h';_epTpApply();setEpTpMode('h');
+  openModal('modal-ep-time');
+};
+
+window.openTimePickerCb=function(callback, initialValue){
+  _epTpTaskId=null; _epTpCallback=callback;
+  const cur=initialValue&&initialValue.includes(':')&&!['Toute la journée','Matin','Après-midi','Soirée'].includes(initialValue)?initialValue:'12:00';
+  const parts=cur.split(':');_epTpH=parseInt(parts[0])||12;_epTpM=parseInt(parts[1])||0;
   _epTpMode='h';_epTpApply();setEpTpMode('h');
   openModal('modal-ep-time');
 };
@@ -3994,10 +4008,15 @@ window.setEpTpAmPm=function(ampm){
   if(ampm==='PM'&&_epTpH<12)_epTpH+=12;
   _epTpApply();
 };
-window.epTimePickerSet=function(val){closeModal('modal-ep-time');if(_epTpTaskId)epSetTime(_epTpTaskId,val);};
+window.epTimePickerSet=function(val){
+  closeModal('modal-ep-time');
+  if(_epTpCallback){_epTpCallback(val);_epTpCallback=null;}
+  else if(_epTpTaskId)epSetTime(_epTpTaskId,val);
+};
 window.confirmEpTimePicker=function(){
   const str=String(_epTpH).padStart(2,'0')+':'+String(_epTpM).padStart(2,'0');
-  if(_epTpTaskId)epSetTime(_epTpTaskId,str);
+  if(_epTpCallback){_epTpCallback(str);_epTpCallback=null;}
+  else if(_epTpTaskId)epSetTime(_epTpTaskId,str);
   closeModal('modal-ep-time');
 };
 function _epTpApply(){
@@ -8411,6 +8430,7 @@ window.openAddMenuModal = function() {
   document.getElementById('modal-addmenu-save').textContent  = 'Ajouter';
   document.getElementById('menu-date').value    = '12';
   document.getElementById('menu-time').value    = '';
+  document.getElementById('menu-time-display').textContent = 'Non défini';
   document.getElementById('menu-name').value    = '';
   document.getElementById('menu-details').value = '';
   selectMenuService('diner');
@@ -8425,6 +8445,7 @@ window.openEditMenuModal = function(id) {
   document.getElementById('modal-addmenu-save').textContent  = 'Modifier';
   document.getElementById('menu-date').value    = item.date    || '12';
   document.getElementById('menu-time').value    = item.time    || '';
+  document.getElementById('menu-time-display').textContent = item.time || 'Non défini';
   document.getElementById('menu-name').value    = item.name    || '';
   document.getElementById('menu-details').value = item.details || '';
   selectMenuService(item.service || 'diner');
