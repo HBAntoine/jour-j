@@ -9401,7 +9401,8 @@ window.saveInfosCagnotte = function() {
 };
 
 // ── Personnes ──────────────────────────────────────────────────
-let _infosSelectedGuestId = null;
+let _infosSelectedGuestIds = [];
+let _infosEditMode = false;
 
 function _renderInfosGuestPicker() {
   const grid = document.getElementById('infos-pers-guest-grid'); if (!grid) return;
@@ -9411,7 +9412,7 @@ function _renderInfosGuestPicker() {
     return;
   }
   grid.innerHTML = guests.map(g => {
-    const sel = _infosSelectedGuestId === g.id;
+    const sel = _infosSelectedGuestIds.includes(g.id);
     const col = avatarColor(g.fname);
     return `<button type="button" class="who-guest-btn ${sel?'selected':''}" onclick="_infosSelectGuest('${g.id}')">
       <span style="width:20px;height:20px;border-radius:50%;background:${col};display:inline-flex;align-items:center;justify-content:center;font-size:0.6rem;font-weight:700;color:#F0F6FF;flex-shrink:0">${initials(g)}</span>
@@ -9421,9 +9422,17 @@ function _renderInfosGuestPicker() {
 }
 
 window._infosSelectGuest = function(id) {
-  _infosSelectedGuestId = _infosSelectedGuestId === id ? null : id;
-  if (_infosSelectedGuestId) {
-    const g = (DATA.guests||[]).find(x=>x.id===_infosSelectedGuestId);
+  if (_infosEditMode) {
+    _infosSelectedGuestIds = _infosSelectedGuestIds[0] === id ? [] : [id];
+  } else {
+    if (_infosSelectedGuestIds.includes(id)) {
+      _infosSelectedGuestIds = _infosSelectedGuestIds.filter(x => x !== id);
+    } else {
+      _infosSelectedGuestIds.push(id);
+    }
+  }
+  if (_infosSelectedGuestIds.length === 1) {
+    const g = (DATA.guests||[]).find(x=>x.id===_infosSelectedGuestIds[0]);
     if (g && g.phone) document.getElementById('infos-pers-phone').value = g.phone;
   }
   _renderInfosGuestPicker();
@@ -9431,7 +9440,8 @@ window._infosSelectGuest = function(id) {
 
 window.openAddInfosPersonne = function(catId) {
   _editInfosPersId = null;
-  _infosSelectedGuestId = null;
+  _infosSelectedGuestIds = [];
+  _infosEditMode = false;
   document.getElementById('modal-infos-pers-title').textContent = 'Ajouter une personne';
   document.getElementById('modal-infos-pers-save').textContent  = 'Ajouter';
   document.getElementById('infos-pers-phone').value = '';
@@ -9442,7 +9452,8 @@ window.openAddInfosPersonne = function(catId) {
 window.openEditInfosPersonne = function(id) {
   const p = (DATA.infosPersonnes||[]).find(x=>x.id===id); if (!p) return;
   _editInfosPersId = id;
-  _infosSelectedGuestId = p.guestId || null;
+  _infosSelectedGuestIds = p.guestId ? [p.guestId] : [];
+  _infosEditMode = true;
   document.getElementById('modal-infos-pers-title').textContent = 'Modifier la personne';
   document.getElementById('modal-infos-pers-save').textContent  = 'Enregistrer';
   document.getElementById('infos-pers-phone').value = p.phone||'';
@@ -9456,18 +9467,24 @@ function _fillInfosPersCatSel(selectedId) {
   sel.innerHTML = cats.map(c=>`<option value="${c.id}" ${c.id===selectedId?'selected':''}>${c.label}</option>`).join('');
 }
 window.saveInfosPersonne = function() {
-  if (!_infosSelectedGuestId) { toast('Sélectionne un invité'); return; }
-  const g = (DATA.guests||[]).find(x=>x.id===_infosSelectedGuestId);
-  const name = g ? `${g.fname} ${g.lname||''}`.trim() : '';
-  if (!name) { toast('Invité introuvable'); return; }
+  if (!_infosSelectedGuestIds.length) { toast('Sélectionne au moins un invité'); return; }
   const catId = document.getElementById('infos-pers-cat').value;
-  const phone = document.getElementById('infos-pers-phone').value.trim();
+  const manualPhone = document.getElementById('infos-pers-phone').value.trim();
   DATA.infosPersonnes = DATA.infosPersonnes||[];
   if (_editInfosPersId) {
+    const guestId = _infosSelectedGuestIds[0];
+    const g = (DATA.guests||[]).find(x=>x.id===guestId);
+    const name = g ? `${g.fname} ${g.lname||''}`.trim() : '';
+    if (!name) { toast('Invité introuvable'); return; }
     const p = DATA.infosPersonnes.find(x=>x.id===_editInfosPersId);
-    if (p) { p.name=name; p.guestId=_infosSelectedGuestId; p.phone=phone; p.catId=catId; }
+    if (p) { p.name=name; p.guestId=guestId; p.phone=manualPhone; p.catId=catId; }
   } else {
-    DATA.infosPersonnes.push({id:'IP'+Date.now(), catId, name, guestId:_infosSelectedGuestId, phone, order:DATA.infosPersonnes.length});
+    _infosSelectedGuestIds.forEach(guestId => {
+      const g = (DATA.guests||[]).find(x=>x.id===guestId); if (!g) return;
+      const name = `${g.fname} ${g.lname||''}`.trim();
+      const phone = _infosSelectedGuestIds.length === 1 ? manualPhone : (g.phone || '');
+      DATA.infosPersonnes.push({id:'IP'+Date.now()+Math.random().toString(36).slice(2,5), catId, name, guestId, phone, order:DATA.infosPersonnes.length});
+    });
   }
   closeModal('modal-infos-personne'); pushData(); renderInfos(); _editInfosPersId=null;
 };
