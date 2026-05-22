@@ -3093,6 +3093,7 @@ async function initFirebase(cfg) {
         migrateDates();
         // Appliquer les droits de façon synchrone après le rendu — pas de setTimeout
         applyPermissions();
+        switchTab(_getFirstVisibleTab());
         _checkPendingRequests();
         if (!_isAdmin()) checkMyChangeRequest();
         setSyncStatus('connected', 'Synchronisé ✓');
@@ -8182,6 +8183,7 @@ window.selectIdentity = function(guestId) {
   registerDevice();
   closeModal('modal-identity');
   applyPermissions();
+  switchTab(_getFirstVisibleTab());
   toast(`👋 Bienvenue ${g.fname} !`);
 };
 
@@ -8267,6 +8269,11 @@ window.resetIdentity = function() {
 };
 
 // ── Appliquer les droits ───────────────────────────────────────
+function _getFirstVisibleTab() {
+  const admin = _isAdmin();
+  return getTabOrder().find(id => admin || GUEST_PERMISSIONS.tabs.includes(id)) || 'tasks';
+}
+
 function applyPermissions() {
   try {
   const isAdmin = _isAdmin();
@@ -8281,7 +8288,7 @@ function applyPermissions() {
     if (tab === 'settings') return;
     const canSee = isAdmin || GUEST_PERMISSIONS.tabs.includes(tab);
     btn.classList.toggle('nav-hidden', !canSee);
-    if (!canSee && btn.classList.contains('active')) switchTab('tasks');
+    if (!canSee && btn.classList.contains('active')) switchTab(_getFirstVisibleTab());
   });
 
   // Réordonner les boutons nav selon DATA.tabOrder
