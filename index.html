@@ -4394,14 +4394,13 @@ window.confirmEpTimePicker=function(){
   closeModal('modal-ep-time');
 };
 function _epTpApply(){
-  const h12=_epTpH%12||12;
   const dh=document.getElementById('ep-tp-digi-h'),dm=document.getElementById('ep-tp-digi-m');
-  if(dh)dh.textContent=String(h12).padStart(2,'0');
+  if(dh)dh.textContent=String(_epTpH).padStart(2,'0');
   if(dm)dm.textContent=String(_epTpM).padStart(2,'0');
   const am=document.getElementById('ep-tp-am'),pm=document.getElementById('ep-tp-pm');
   if(am){am.style.background=_epTpH<12?'var(--acc)':'#fff';am.style.color=_epTpH<12?'#fff':'var(--muted)';}
   if(pm){pm.style.background=_epTpH>=12?'var(--acc)':'#fff';pm.style.color=_epTpH>=12?'#fff':'var(--muted)';}
-  _epTpRenderClockHand();
+  _epTpRenderClock();
 }
 let _epTpDragging=false;
 function _epTpAngle(e){const svg=document.getElementById('ep-tp-clock-svg');if(!svg)return 0;const rect=svg.getBoundingClientRect();const cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;const clientX=e.touches?e.touches[0].clientX:e.clientX,clientY=e.touches?e.touches[0].clientY:e.clientY;return Math.atan2(clientX-cx,-(clientY-cy));}
