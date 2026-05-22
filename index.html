@@ -2223,8 +2223,8 @@ input, select, textarea { font-family: 'Fredoka', sans-serif !important; font-we
   <div class="modal">
     <h3 id="modal-infos-pers-title">Ajouter une personne</h3>
     <div class="form-group">
-      <label>Nom *</label>
-      <input type="text" id="infos-pers-name" placeholder="Marie Dupont">
+      <label>Invité *</label>
+      <div id="infos-pers-guest-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px;max-height:220px;overflow-y:auto;padding-right:4px;border:1px solid var(--border);border-radius:8px;padding:8px;"></div>
     </div>
     <div class="form-group">
       <label>Téléphone</label>
@@ -9401,23 +9401,53 @@ window.saveInfosCagnotte = function() {
 };
 
 // ── Personnes ──────────────────────────────────────────────────
+let _infosSelectedGuestId = null;
+
+function _renderInfosGuestPicker() {
+  const grid = document.getElementById('infos-pers-guest-grid'); if (!grid) return;
+  const guests = DATA.guests || [];
+  if (!guests.length) {
+    grid.innerHTML = '<div style="color:var(--muted);font-size:0.78rem;padding:10px">Aucun invité enregistré.</div>';
+    return;
+  }
+  grid.innerHTML = guests.map(g => {
+    const sel = _infosSelectedGuestId === g.id;
+    const col = avatarColor(g.fname);
+    return `<button type="button" class="who-guest-btn ${sel?'selected':''}" onclick="_infosSelectGuest('${g.id}')">
+      <span style="width:20px;height:20px;border-radius:50%;background:${col};display:inline-flex;align-items:center;justify-content:center;font-size:0.6rem;font-weight:700;color:#F0F6FF;flex-shrink:0">${initials(g)}</span>
+      ${g.fname} ${g.lname||''}
+    </button>`;
+  }).join('');
+}
+
+window._infosSelectGuest = function(id) {
+  _infosSelectedGuestId = _infosSelectedGuestId === id ? null : id;
+  if (_infosSelectedGuestId) {
+    const g = (DATA.guests||[]).find(x=>x.id===_infosSelectedGuestId);
+    if (g && g.phone) document.getElementById('infos-pers-phone').value = g.phone;
+  }
+  _renderInfosGuestPicker();
+};
+
 window.openAddInfosPersonne = function(catId) {
   _editInfosPersId = null;
+  _infosSelectedGuestId = null;
   document.getElementById('modal-infos-pers-title').textContent = 'Ajouter une personne';
   document.getElementById('modal-infos-pers-save').textContent  = 'Ajouter';
-  document.getElementById('infos-pers-name').value  = '';
   document.getElementById('infos-pers-phone').value = '';
   _fillInfosPersCatSel(catId);
+  _renderInfosGuestPicker();
   openModal('modal-infos-personne');
 };
 window.openEditInfosPersonne = function(id) {
   const p = (DATA.infosPersonnes||[]).find(x=>x.id===id); if (!p) return;
   _editInfosPersId = id;
+  _infosSelectedGuestId = p.guestId || null;
   document.getElementById('modal-infos-pers-title').textContent = 'Modifier la personne';
   document.getElementById('modal-infos-pers-save').textContent  = 'Enregistrer';
-  document.getElementById('infos-pers-name').value  = p.name||'';
   document.getElementById('infos-pers-phone').value = p.phone||'';
   _fillInfosPersCatSel(p.catId);
+  _renderInfosGuestPicker();
   openModal('modal-infos-personne');
 };
 function _fillInfosPersCatSel(selectedId) {
@@ -9426,16 +9456,18 @@ function _fillInfosPersCatSel(selectedId) {
   sel.innerHTML = cats.map(c=>`<option value="${c.id}" ${c.id===selectedId?'selected':''}>${c.label}</option>`).join('');
 }
 window.saveInfosPersonne = function() {
-  const name = document.getElementById('infos-pers-name').value.trim();
-  if (!name) { toast('Nom requis'); return; }
+  if (!_infosSelectedGuestId) { toast('Sélectionne un invité'); return; }
+  const g = (DATA.guests||[]).find(x=>x.id===_infosSelectedGuestId);
+  const name = g ? `${g.fname} ${g.lname||''}`.trim() : '';
+  if (!name) { toast('Invité introuvable'); return; }
   const catId = document.getElementById('infos-pers-cat').value;
   const phone = document.getElementById('infos-pers-phone').value.trim();
   DATA.infosPersonnes = DATA.infosPersonnes||[];
   if (_editInfosPersId) {
     const p = DATA.infosPersonnes.find(x=>x.id===_editInfosPersId);
-    if (p) { p.name=name; p.phone=phone; p.catId=catId; }
+    if (p) { p.name=name; p.guestId=_infosSelectedGuestId; p.phone=phone; p.catId=catId; }
   } else {
-    DATA.infosPersonnes.push({id:'IP'+Date.now(), catId, name, phone, order:DATA.infosPersonnes.length});
+    DATA.infosPersonnes.push({id:'IP'+Date.now(), catId, name, guestId:_infosSelectedGuestId, phone, order:DATA.infosPersonnes.length});
   }
   closeModal('modal-infos-personne'); pushData(); renderInfos(); _editInfosPersId=null;
 };
