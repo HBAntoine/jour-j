@@ -407,29 +407,66 @@ textarea{resize:vertical;min-height:60px;}
 .cap-dot.filled{background:var(--acc);}
 .cap-dot.empty{background:rgba(30,77,183,0.12);}
 
-/* MENU */
-.menu-date-header{font-family:'Nunito',sans-serif;font-size:0.95rem;font-weight:800;color:var(--acc);padding:18px 0 6px;border-bottom:2px solid var(--border);margin-bottom:10px;}
-.menu-service-header{display:flex;align-items:center;gap:8px;padding:10px 0 6px;margin-bottom:6px;}
-.menu-service-badge{padding:3px 12px;border-radius:50px;font-size:0.72rem;font-weight:700;color:#fff;}
-.menu-card{background:#fff;border:1px solid rgba(30,77,183,0.1);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:10px;position:relative;transition:box-shadow 0.15s;}
-.menu-card:hover{box-shadow:0 4px 14px rgba(30,77,183,0.1);}
-.menu-drag-handle{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:3px;cursor:grab;padding:4px 4px;opacity:0.3;transition:opacity 0.15s;flex-shrink:0;touch-action:none;margin-top:2px;}
-.menu-drag-handle:hover{opacity:0.8;}
-.menu-drag-handle span{display:block;width:10px;height:1.5px;background:var(--muted);border-radius:2px;}
-.menu-card-body{flex:1;min-width:0;}
-.menu-card-name{font-family:'Nunito',sans-serif;font-size:0.95rem;font-weight:700;color:var(--text);}
-.menu-card-meta{font-size:0.75rem;color:var(--muted);margin-top:2px;}
-.menu-card-details{font-size:0.8rem;color:var(--text);margin-top:6px;line-height:1.5;display:none;}
+/* MENU — style carte restaurant botanique */
+#tab-menu{background:#f0f4ff;}
+
+/* Pills de filtre date — carrées dans l'onglet Menu */
+#menu-filter-dates{min-height:72px;}
+#menu-filter-dates .date-pill{width:64px;height:64px;border-radius:14px;background:#fff;border:1.5px solid #e0e6f5;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0;min-width:unset;}
+#menu-filter-dates .date-pill.active{background:#1E4DB7;border-color:#1E4DB7;}
+#menu-filter-dates .date-pill .dp-day{font-size:1.1rem;line-height:1;}
+#menu-filter-dates .date-pill .dp-num{font-size:0.88rem;font-weight:800;line-height:1;}
+#menu-filter-dates .date-pill .dp-lbl{font-size:0.68rem;font-weight:700;}
+
+/* Carte englobante par jour */
+.menu-day-card{background:#fdf9f4;border:1px solid #e8ddd0;border-radius:16px;padding:24px 20px;margin-bottom:20px;position:relative;overflow:hidden;text-align:center;}
+.menu-day-card::before{content:'🌿';position:absolute;top:8px;left:10px;font-size:2rem;opacity:0.1;pointer-events:none;line-height:1;}
+.menu-day-card::after{content:'🌿';position:absolute;bottom:8px;right:10px;font-size:2rem;opacity:0.1;pointer-events:none;line-height:1;}
+
+/* Entête de date */
+.menu-date-header{font-family:Georgia,serif;font-style:italic;font-size:0.75rem;letter-spacing:0.14em;color:#9a8878;text-align:center;margin-bottom:16px;padding:0;border:none;font-weight:normal;}
+.menu-date-ornament{display:inline-block;color:#1E4DB7;opacity:0.5;margin-left:6px;}
+
+/* Titre de service */
+.menu-service-title{display:flex;align-items:center;justify-content:center;gap:8px;font-size:0.65rem;letter-spacing:0.22em;color:#1E4DB7;font-weight:700;font-family:sans-serif;text-transform:uppercase;margin:12px 0 8px;}
+.menu-service-title::before,.menu-service-title::after{content:'';height:1px;width:30px;background:#1E4DB7;opacity:0.25;display:block;flex-shrink:0;}
+
+/* Séparateur entre services */
+.menu-sep{height:1px;background:#e8ddd0;margin:12px 32px;}
+
+/* Cards de plat */
+.menu-card{background:transparent;border:none;border-radius:0;padding:5px 0;margin-bottom:0;display:flex;align-items:flex-start;gap:8px;position:relative;}
+.menu-card:hover{box-shadow:none;}
+.menu-card-body{flex:1;min-width:0;text-align:center;}
+.menu-card-name{font-family:Georgia,serif;font-size:0.9rem;font-weight:normal;color:#3d3530;}
+.menu-card-detail{font-style:italic;color:#9a8878;font-size:0.75rem;margin-top:2px;}
+.menu-card-details{font-style:italic;font-size:0.78rem;color:#9a8878;margin-top:5px;line-height:1.5;display:none;}
 .menu-card-details.open{display:block;}
-.menu-card-actions{display:flex;gap:6px;flex-shrink:0;align-items:flex-start;}
-.menu-card-btn{background:none;border:none;cursor:pointer;padding:4px 7px;border-radius:8px;font-size:0.8rem;color:var(--muted);transition:all 0.15s;}
-.menu-card-btn:hover{background:var(--g2);color:var(--text);}
+.menu-card-actions{display:flex;gap:4px;flex-shrink:0;align-items:flex-start;}
+.menu-card-btn{background:none;border:none;cursor:pointer;padding:4px 6px;border-radius:8px;font-size:0.78rem;color:var(--muted);transition:all 0.15s;}
+.menu-card-btn:hover{background:rgba(30,77,183,0.07);color:var(--text);}
+.menu-drag-handle{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:3px;cursor:grab;padding:4px 3px;opacity:0.2;transition:opacity 0.15s;flex-shrink:0;touch-action:none;margin-top:3px;}
+.menu-drag-handle:hover{opacity:0.7;}
+.menu-drag-handle span{display:block;width:10px;height:1.5px;background:var(--muted);border-radius:2px;}
 .menu-card.menu-dragging{opacity:0.45;}
 .menu-card.menu-drag-above::before{content:'';display:block;height:2px;background:var(--acc);border-radius:2px;position:absolute;left:0;right:0;top:-1px;pointer-events:none;z-index:10;}
 .menu-card.menu-drag-below::after{content:'';display:block;height:2px;background:var(--acc);border-radius:2px;position:absolute;left:0;right:0;bottom:-1px;pointer-events:none;z-index:10;}
-.menu-service-pill{padding:6px 14px;border-radius:50px;border:1.5px solid var(--border);background:#fff;color:var(--text);font-family:'Nunito',sans-serif;font-size:0.8rem;font-weight:600;cursor:pointer;transition:all 0.15s;}
-.menu-service-pill:hover{border-color:var(--acc);color:var(--acc);}
-.menu-service-pill.active{background:var(--acc);border-color:var(--acc);color:#fff;}
+
+/* Desktop — centré, colonne unique */
+@media(min-width:769px){
+  #tab-menu{padding:20px;}
+  #tab-menu .menu-day-card{max-width:680px;margin-left:auto;margin-right:auto;}
+  #menu-filter-dates{max-width:680px;margin-left:auto;margin-right:auto;}
+}
+
+/* Mobile */
+@media(max-width:768px){
+  #menu-filter-dates .date-pill{width:54px;height:54px;border-radius:12px;}
+  #menu-filter-dates{min-height:62px;}
+  .menu-day-card{padding:16px 12px;}
+  .menu-service-title{font-size:0.6rem;}
+  .menu-card-name{font-size:0.85rem;}
+}
 
 .guest-day-btn{padding:5px 12px;border-radius:50px;border:1.5px solid rgba(30,77,183,0.2);font-family:'Nunito',sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.15s;}
 .guest-day-btn:hover{filter:brightness(0.95);}
@@ -8357,7 +8394,8 @@ window.renderMenu = function() {
 
   sortedDates.forEach(date => {
     const dateLabel = MENU_DATE_LABELS[date] || ('Jour ' + date);
-    html += `<div class="menu-date-header">${dateLabel}</div>`;
+    html += `<div class="menu-day-card">`;
+    html += `<div class="menu-date-header">${dateLabel} <span class="menu-date-ornament">✿</span></div>`;
 
     const services = byDate[date];
     const sortedServices = Object.keys(services).sort((a,b) => {
@@ -8365,11 +8403,9 @@ window.renderMenu = function() {
            - (MENU_SERVICE_ORDER.indexOf(b) === -1 ? 99 : MENU_SERVICE_ORDER.indexOf(b));
     });
 
-    sortedServices.forEach(service => {
+    sortedServices.forEach((service, sIdx) => {
       const meta = MENU_SERVICE_META[service] || { label: service, emoji: '🍴', color: 'var(--muted)' };
-      html += `<div class="menu-service-header">
-        <span class="menu-service-badge" style="background:${meta.color}">${meta.emoji} ${meta.label}</span>
-      </div>`;
+      html += `<div class="menu-service-title"><span>${meta.emoji} ${meta.label}</span></div>`;
 
       services[service].forEach(item => {
         const dragAttrs = canMove
@@ -8378,7 +8414,7 @@ window.renderMenu = function() {
         const handleHtml = canMove
           ? `<div class="menu-drag-handle"><span></span><span></span><span></span></div>`
           : `<div style="width:18px"></div>`;
-        const timeStr = item.time ? `<span style="margin-left:8px">🕐 ${item.time}</span>` : '';
+        const timeStr = item.time ? `🕐 ${item.time}` : '';
         const detailsChevron = item.details
           ? `<button class="menu-card-btn" onclick="toggleMenuDetails('${item.id}')" title="Détails">▾</button>`
           : '';
@@ -8396,7 +8432,7 @@ window.renderMenu = function() {
           ${handleHtml}
           <div class="menu-card-body">
             <div class="menu-card-name">${item.name || '(sans nom)'}</div>
-            <div class="menu-card-meta">${timeStr}</div>
+            ${timeStr ? `<div class="menu-card-detail">${timeStr}</div>` : ''}
             ${detailsHtml}
           </div>
           <div class="menu-card-actions">
@@ -8404,7 +8440,11 @@ window.renderMenu = function() {
           </div>
         </div>`;
       });
+
+      if (sIdx < sortedServices.length - 1) html += `<div class="menu-sep"></div>`;
     });
+
+    html += `</div>`;
   });
 
   el.innerHTML = html;
