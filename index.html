@@ -452,11 +452,15 @@ textarea{resize:vertical;min-height:60px;}
 .menu-card.menu-drag-above::before{content:'';display:block;height:2px;background:var(--acc);border-radius:2px;position:absolute;left:0;right:0;top:-1px;pointer-events:none;z-index:10;}
 .menu-card.menu-drag-below::after{content:'';display:block;height:2px;background:var(--acc);border-radius:2px;position:absolute;left:0;right:0;bottom:-1px;pointer-events:none;z-index:10;}
 
-/* Desktop — centré, colonne unique */
+/* Desktop — centré puis grille 2 colonnes */
 @media(min-width:769px){
   #tab-menu{padding:20px;}
-  #tab-menu .menu-day-card{max-width:680px;margin-left:auto;margin-right:auto;}
-  #menu-filter-dates{max-width:680px;margin-left:auto;margin-right:auto;}
+  #menu-filter-dates,#menu-list{max-width:720px;margin-left:auto;margin-right:auto;}
+}
+@media(min-width:1100px){
+  #menu-filter-dates,#menu-list{max-width:1180px;}
+  #menu-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(520px,1fr));gap:24px;align-items:start;}
+  #menu-list .menu-day-card{margin-bottom:0;}
 }
 
 /* Mobile */
@@ -8933,9 +8937,9 @@ window.renderMenu = function() {
     ? allItems
     : allItems.filter(i => normalizeDate(i.date) === menuDateFilter)
   ).sort((a, b) => {
-    const dateA = parseInt(a.date) || 0;
-    const dateB = parseInt(b.date) || 0;
-    if (dateA !== dateB) return dateA - dateB;
+    const dateA = normalizeDate(a.date);
+    const dateB = normalizeDate(b.date);
+    if (dateA !== dateB) return dateA.localeCompare(dateB);
     const sA = MENU_SERVICE_ORDER.indexOf(a.service);
     const sB = MENU_SERVICE_ORDER.indexOf(b.service);
     if (sA !== sB) return (sA === -1 ? 99 : sA) - (sB === -1 ? 99 : sB);
@@ -8962,12 +8966,12 @@ window.renderMenu = function() {
   });
 
   let html = '';
-  const sortedDates = Object.keys(byDate).sort((a,b) => parseInt(a)-parseInt(b));
+  const sortedDates = Object.keys(byDate).sort((a,b) => normalizeDate(a).localeCompare(normalizeDate(b)));
 
   sortedDates.forEach(date => {
-    const dateLabel = MENU_DATE_LABELS[date] || ('Jour ' + date);
+    const dLabel = dateLabel(normalizeDate(date)).replace(/^\S+\s/, '');
     html += `<div class="menu-day-card">`;
-    html += `<div class="menu-date-header">${dateLabel} <span class="menu-date-ornament">✿</span></div>`;
+    html += `<div class="menu-date-header">${dLabel} <span class="menu-date-ornament">✿</span></div>`;
 
     const services = byDate[date];
     const sortedServices = Object.keys(services).sort((a,b) => {
