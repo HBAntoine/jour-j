@@ -9409,42 +9409,62 @@ function _renderInfosLieu() {
 
 function _renderInfosPratique() {
   const d = DATA.infosPratique || {};
-  function _fmtDateHeure(date, heure) {
-    if (!date && !heure) return '—';
+
+  function _fmtH(h) {
+    if (!h) return '';
+    if (!/^\d+:\d+$/.test(h)) return h; // "Matin", "Soirée", etc.
+    const [hh, mm] = h.split(':').map(Number);
+    return mm === 0 ? `${hh}h` : `${hh}h${String(mm).padStart(2,'0')}`;
+  }
+  function _fmtDate(date) {
+    if (!date) return '';
+    return dateLabel(normalizeDate(date)).replace(/^\S+\s/, '').replace(/\s*·.+$/, '');
+  }
+  function _fmtDH(date, heure) {
     const parts = [];
-    if (date) { const lbl = dateLabel(normalizeDate(date)).replace(/^\S+\s/, '').replace(/\s*·.+$/, ''); parts.push(lbl); }
-    if (heure) parts.push(heure);
-    return parts.join(' à ');
+    if (date) parts.push(_fmtDate(date));
+    const h = _fmtH(heure);
+    if (h) parts.push(h);
+    return parts.join(' ') || '—';
   }
-  let arriveeVal, departVal;
-  if (!_isAdmin() && CURRENT_USER?.id) {
-    const g = (DATA.guests||[]).find(x => x.id === CURRENT_USER.id);
-    if (g) {
-      arriveeVal = _fmtDateHeure(g.fromDate, g.fromHeure);
-      departVal  = _fmtDateHeure(g.toDate,   g.toHeure);
-    }
-  }
-  if (!arriveeVal) arriveeVal = _fmtDateHeure(d.arriveeDate, d.arriveeHeure);
-  if (!departVal)  departVal  = _fmtDateHeure(d.departDate,  d.departHeure);
-  const cards = [
-    {label:'WiFi',         val:d.wifi||'—'},
-    {label:'Mot de passe', val:d.wifiPass||'—'},
-    {label:'Arrivée',      val:arriveeVal},
-    {label:'Départ',       val:departVal},
-  ];
+
   const canEdit = _canDo('infos','edit');
   const notes = DATA.infosPratiqueNotes || [];
-  let notesHtml = '';
-  if (notes.length || canEdit) {
-    const items = notes.map(n => {
-      const editBtn = canEdit ? `<button class="infos-person-btn" onclick="openEditInfosNote('${n.id}')" title="Modifier">✏️</button>` : '';
-      const delBtn  = canEdit ? `<button class="infos-person-btn" onclick="deleteInfosNote('${n.id}')" title="Supprimer">✕</button>` : '';
-      return `<div class="infos-note-item"><span class="infos-note-text">${n.texte}</span><div style="display:flex;gap:2px">${editBtn}${delBtn}</div></div>`;
-    }).join('');
-    const addBtn = canEdit ? `<button class="infos-add-note-btn" onclick="openAddInfosNote()">＋ Ajouter une info</button>` : '';
-    notesHtml = `<div class="infos-notes-section">${items}${addBtn}</div>`;
+  const noteItems = notes.map(n => {
+    const editBtn = canEdit ? `<button class="infos-person-btn" onclick="openEditInfosNote('${n.id}')" title="Modifier">✏️</button>` : '';
+    const delBtn  = canEdit ? `<button class="infos-person-btn" onclick="deleteInfosNote('${n.id}')" title="Supprimer">✕</button>` : '';
+    return `<div class="infos-note-item"><span class="infos-note-text">${n.texte}</span><div style="display:flex;gap:2px">${editBtn}${delBtn}</div></div>`;
+  }).join('');
+  const addBtn = canEdit ? `<button class="infos-add-note-btn" onclick="openAddInfosNote()">＋ Ajouter une info</button>` : '';
+  const notesHtml = (notes.length || canEdit) ? `<div class="infos-notes-section">${noteItems}${addBtn}</div>` : '';
+
+  const wifiGrid = `<div class="infos-pratique-grid">
+    <div class="infos-pratique-card"><div class="infos-pratique-label">WiFi</div><div class="infos-pratique-val">${d.wifi||'—'}</div></div>
+    <div class="infos-pratique-card"><div class="infos-pratique-label">Mot de passe</div><div class="infos-pratique-val">${d.wifiPass||'—'}</div></div>
+  </div>`;
+
+  if (!_isAdmin() && CURRENT_USER?.id) {
+    const g = (DATA.guests||[]).find(x => x.id === CURRENT_USER.id);
+    if (g && (g.fromDate || g.toDate || g.fromHeure || g.toHeure)) {
+      const from = _fmtDH(g.fromDate, g.fromHeure);
+      const to   = _fmtDH(g.toDate,   g.toHeure);
+      const sentence = `<div style="margin-top:10px;padding:12px 14px;background:var(--g1);border:1px solid var(--border);border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.92rem;color:var(--text);line-height:1.5">
+        Vous êtes invité(e) du <strong>${from}</strong> au <strong>${to}</strong>
+      </div>`;
+      return `${wifiGrid}${sentence}${notesHtml}`;
+    }
   }
-  return `<div class="infos-pratique-grid">${cards.map(c=>`<div class="infos-pratique-card"><div class="infos-pratique-label">${c.label}</div><div class="infos-pratique-val">${c.val}</div></div>`).join('')}</div>${notesHtml}`;
+
+  // Admin ou invité sans dates perso → grille complète
+  const arriveeVal = _fmtDH(d.arriveeDate, d.arriveeHeure);
+  const departVal  = _fmtDH(d.departDate,  d.departHeure);
+  const fullGrid = `<div class="infos-pratique-grid">
+    <div class="infos-pratique-card"><div class="infos-pratique-label">WiFi</div><div class="infos-pratique-val">${d.wifi||'—'}</div></div>
+    <div class="infos-pratique-card"><div class="infos-pratique-label">Mot de passe</div><div class="infos-pratique-val">${d.wifiPass||'—'}</div></div>
+    <div class="infos-pratique-card"><div class="infos-pratique-label">Arrivée</div><div class="infos-pratique-val">${arriveeVal}</div></div>
+    <div class="infos-pratique-card"><div class="infos-pratique-label">Départ</div><div class="infos-pratique-val">${departVal}</div></div>
+  </div>`;
+  return `${fullGrid}${notesHtml}`;
 }
 
 function _renderInfosCagnotte() {
