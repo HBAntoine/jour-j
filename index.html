@@ -8377,7 +8377,6 @@ function applyPermissions() {
   _progDayManual = false;
   _menuDateManual = false;
   _taskDateManual = false;
-  _firstTabSwitchDone = false;
 
   // Badge identité
   _renderUserBadge();
@@ -9412,7 +9411,7 @@ function _renderInfosPratique() {
   function _fmtDateHeure(date, heure) {
     if (!date && !heure) return '—';
     const parts = [];
-    if (date) { const lbl = dateLabel(normalizeDate(date)); parts.push(lbl.replace(/^📅 |^🏡 |^💍 |^🥂 |^👋 /,'')); }
+    if (date) { const lbl = dateLabel(normalizeDate(date)).replace(/^\S+\s/, '').replace(/\s*·.+$/, ''); parts.push(lbl); }
     if (heure) parts.push(heure);
     return parts.join(' à ');
   }
