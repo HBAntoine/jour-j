@@ -8871,6 +8871,20 @@ const MENU_DATE_LABELS = {
 let _editMenuId = null;
 let _menuDragId = null;
 
+function _getGuestAllowedMenuDates() {
+  if (_isAdmin() || !CURRENT_USER?.id) return null;
+  const g = DATA.guests?.find(x => x.id === CURRENT_USER.id);
+  if (!g) return null;
+  if (g.days?.length) return new Set(g.days);
+  if (g.fromDate || g.toDate) {
+    const from = normalizeDate(g.fromDate || '2026-07-11');
+    const to   = normalizeDate(g.toDate   || '2026-07-14');
+    const all = [...new Set((DATA.menu||[]).map(i => normalizeDate(i.date)))];
+    return new Set(all.filter(d => d !== 'amont' && d >= from && d <= to));
+  }
+  return null;
+}
+
 function getMenuUniqueDates() {
   const raw = [...new Set((DATA.menu || []).map(i => normalizeDate(i.date)))];
   return raw.sort((a, b) => {
@@ -8883,7 +8897,8 @@ function getMenuUniqueDates() {
 function _renderMenuDatePills() {
   const bar = document.getElementById('menu-filter-dates');
   if (!bar) return;
-  const dates = getMenuUniqueDates();
+  const _allowed = _getGuestAllowedMenuDates();
+  const dates = getMenuUniqueDates().filter(d => !_allowed || _allowed.has(d));
   if (!dates.length) { bar.innerHTML = ''; return; }
   const allDates = ['all', ...dates];
   const pills = bar.querySelectorAll('.date-pill');
@@ -8927,8 +8942,10 @@ window.renderMenu = function() {
   _renderMenuDatePills();
 
   const allItems = (DATA.menu || []).slice();
+  const _guestDates = _getGuestAllowedMenuDates();
+  if (_guestDates && menuDateFilter !== 'all' && !_guestDates.has(menuDateFilter)) menuDateFilter = 'all';
   const items = (menuDateFilter === 'all'
-    ? allItems
+    ? (_guestDates ? allItems.filter(i => _guestDates.has(normalizeDate(i.date))) : allItems)
     : allItems.filter(i => normalizeDate(i.date) === menuDateFilter)
   ).sort((a, b) => {
     const dateA = normalizeDate(a.date);
