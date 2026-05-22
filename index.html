@@ -471,6 +471,29 @@ textarea{resize:vertical;min-height:60px;}
 .guest-day-btn{padding:5px 12px;border-radius:50px;border:1.5px solid rgba(30,77,183,0.2);font-family:'Nunito',sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.15s;}
 .guest-day-btn:hover{filter:brightness(0.95);}
 
+/* COURSES */
+.courses-subbar{display:flex;align-items:center;justify-content:space-between;padding:6px 0 10px;gap:10px;flex-wrap:wrap;}
+.courses-toggle-btn{display:flex;align-items:center;gap:7px;padding:5px 12px;border-radius:50px;border:1.5px solid var(--border);background:#fff;font-family:'Nunito',sans-serif;font-size:0.78rem;font-weight:600;color:var(--text);cursor:pointer;transition:all 0.15s;}
+.courses-toggle-btn.active{background:var(--acc);border-color:var(--acc);color:#fff;}
+.courses-counter{font-family:'Nunito',sans-serif;font-size:0.78rem;color:var(--muted);font-weight:600;white-space:nowrap;}
+.courses-group-header{font-family:'Nunito',sans-serif;font-size:0.72rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;padding:14px 0 5px;border-bottom:1.5px solid var(--border);margin-bottom:6px;}
+.courses-item{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--g2);transition:opacity 0.15s;}
+.courses-item.done{opacity:0.38;}
+.courses-item.done .courses-item-name{text-decoration:line-through;}
+.courses-item-check{flex-shrink:0;width:22px;height:22px;border-radius:6px;border:2px solid var(--border);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-size:0.85rem;}
+.courses-item-check.checked{background:var(--acc);border-color:var(--acc);color:#fff;}
+.courses-item-body{flex:1;min-width:0;}
+.courses-item-name{font-family:'Nunito',sans-serif;font-size:0.88rem;font-weight:700;color:var(--text);}
+.courses-item-note{font-size:0.72rem;color:var(--muted);margin-top:1px;}
+.courses-qty-badge{flex-shrink:0;padding:2px 9px;border-radius:50px;background:var(--g1);border:1px solid var(--border);font-family:'Nunito',sans-serif;font-size:0.72rem;font-weight:700;color:var(--text);}
+.courses-del-btn{flex-shrink:0;background:none;border:none;cursor:pointer;padding:4px 6px;border-radius:8px;font-size:0.82rem;color:var(--muted);transition:all 0.15s;}
+.courses-del-btn:hover{background:rgba(220,60,60,0.08);color:#dc3c3c;}
+.courses-cats-list{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;max-height:320px;overflow-y:auto;}
+.courses-cat-row{display:flex;align-items:center;gap:8px;padding:7px 10px;border:1px solid var(--border);border-radius:10px;background:#fff;}
+.courses-cat-label{flex:1;font-family:'Nunito',sans-serif;font-size:0.85rem;font-weight:600;color:var(--text);}
+.courses-cat-del{background:none;border:none;cursor:pointer;padding:3px 7px;border-radius:7px;font-size:0.78rem;color:var(--muted);transition:all 0.15s;}
+.courses-cat-del:hover{background:rgba(220,60,60,0.08);color:#dc3c3c;}
+
 /* TIME PICKER */
 .time-quick-btn{padding:5px 12px;border-radius:50px;border:1.5px solid var(--border);background:#fff;color:var(--text);font-family:'Nunito',sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.15s;}
 .time-quick-btn:hover,.time-quick-btn.active{background:var(--gold);border-color:var(--gold);color:#fff;}
@@ -1993,14 +2016,64 @@ input, select, textarea { font-family: 'Fredoka', sans-serif !important; font-we
   </div>
 </div>
 
+<!-- MODAL ADD/EDIT COURSE -->
+<div id="modal-addcourse" class="modal-overlay">
+  <div class="modal">
+    <h3 id="modal-addcourse-title">Ajouter un article</h3>
+    <div class="form-group">
+      <label>Article *</label>
+      <input type="text" id="course-name" placeholder="Tomates cerises…">
+    </div>
+    <div class="form-group">
+      <label>Catégorie</label>
+      <select id="course-cat"></select>
+    </div>
+    <div class="form-group">
+      <label>Nouvelle catégorie <span style="color:var(--muted);font-size:0.72rem">(si non listée ci-dessus)</span></label>
+      <input type="text" id="course-newcat" placeholder="Ex : 🧃 Jus de fruits">
+    </div>
+    <div class="form-group">
+      <label>Quantité</label>
+      <input type="text" id="course-qty" placeholder="2 kg, x6…">
+    </div>
+    <div class="form-group">
+      <label>Note</label>
+      <input type="text" id="course-note" placeholder="Bio de préférence…">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-addcourse')">Annuler</button>
+      <button class="btn btn-acc" id="modal-addcourse-save" onclick="saveCourse()">Ajouter</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL GESTION CATÉGORIES COURSES -->
+<div id="modal-courses-cats" class="modal-overlay">
+  <div class="modal">
+    <h3>⚙️ Catégories</h3>
+    <div id="courses-cats-list" class="courses-cats-list"></div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <input type="text" id="courses-newcat-input" placeholder="Nouvelle catégorie…" style="flex:1">
+      <button class="btn btn-acc" onclick="addCoursesCat()" style="flex-shrink:0">＋</button>
+    </div>
+    <div class="modal-actions" style="margin-top:14px">
+      <button class="btn btn-ghost" onclick="closeModal('modal-courses-cats')">Fermer</button>
+    </div>
+  </div>
+</div>
+
 <!-- COURSES -->
 <div id="tab-courses" class="tab-panel">
   <div class="section-header">
-    <span class="section-title" style="color:var(--acc2)">🛒 Courses</span>
+    <span class="section-title" style="color:var(--acc)">🛒 Courses</span>
+    <div style="display:flex;gap:8px">
+      <button id="btn-courses-cats" class="btn btn-ghost" onclick="openCoursesCatModal()" style="display:none">⚙️ Catégories</button>
+      <button id="btn-add-course" class="btn btn-acc" onclick="openAddCourseModal()" style="display:none">＋ Ajouter</button>
+    </div>
   </div>
-  <div style="padding:24px 16px;text-align:center;color:var(--muted);font-size:0.9rem">
-    Contenu à venir…
-  </div>
+  <div id="courses-subbar" class="courses-subbar"></div>
+  <div id="courses-cat-bar" class="date-filter-bar" style="margin-bottom:8px"></div>
+  <div id="courses-list"></div>
 </div>
 
 <!-- INFOS -->
@@ -2694,7 +2767,7 @@ const DEFAULT_DATA = {
     {id:'T035',categoryId:'CApero',  label:'Couper Saucisson',                    date:'12',   who:'',where:'',done:false,order:0},
     {id:'T036',categoryId:'CApero',  label:'Couper Jambon Pays',                  date:'12',   who:'',where:'',done:false,order:1}
   ],
-  expenses:[], guests:[], programme:[], rooms:[], menu:[]
+  expenses:[], guests:[], programme:[], rooms:[], menu:[], courses:[], coursesCats:[]
 };
 
 // ================================================================
@@ -2805,6 +2878,8 @@ async function initFirebase(cfg) {
             : r.occupants ? Object.values(r.occupants).filter(Boolean) : []
         }));
         DATA.menu = Object.values(DATA.menu || {});
+        DATA.courses = Object.values(DATA.courses || {});
+        DATA.coursesCats = Object.values(DATA.coursesCats || {});
 
         // Appliquer les permissions Firebase avant le rendu
         if (DATA.permissions) _applyFirebasePermissions(DATA.permissions);
@@ -2934,6 +3009,7 @@ window.switchTab = function(tab) {
   const navBtn = document.querySelector(`nav button[data-tab="${tab}"]`); if (navBtn) navBtn.classList.add('active');
   if (tab === 'settings') renderSettings();
   if (tab === 'menu') renderMenu();
+  if (tab === 'courses') renderCourses();
   // FAB visible uniquement sur l'onglet tâches
   const fab   = document.getElementById('fab-filter');
   const badge = document.getElementById('fab-badge');
@@ -2957,6 +3033,7 @@ function renderAll() {
   renderProgramme();
   renderRooms();
   renderMenu();
+  renderCourses();
   if (_isAdmin()) renderSettings();
   _renderUserBadge();
   // NE PAS appeler applyPermissions ici — appelé séparément après Firebase update
@@ -7383,7 +7460,11 @@ const APP_MODULES = [
   {
     id: 'courses', label: 'Courses', icon: '🛒',
     actions: [
-      { id:'see', label:'Voir les courses',                                         default:true  },
+      { id:'see',    label:'Voir les courses',          default:true  },
+      { id:'check',  label:'Cocher / décocher',         default:true  },
+      { id:'create', label:'Ajouter un article',        default:false },
+      { id:'edit',   label:'Modifier un article',       default:false },
+      { id:'delete', label:'Supprimer un article',      default:false },
     ]
   },
   {
@@ -7948,9 +8029,14 @@ function applyPermissions() {
   if (roomBtn) roomBtn.style.display = _canDo('rooms','create') ? '' : 'none';
   const menuBtn = document.getElementById('btn-add-menu');
   if (menuBtn) menuBtn.style.display = _canDo('menu','create') ? '' : 'none';
+  const courseAddBtn = document.getElementById('btn-add-course');
+  if (courseAddBtn) courseAddBtn.style.display = _canDo('courses','create') ? '' : 'none';
+  const courseCatsBtn = document.getElementById('btn-courses-cats');
+  if (courseCatsBtn) courseCatsBtn.style.display = _canDo('courses','create') ? '' : 'none';
 
   // Re-render menu pour appliquer les droits drag/edit/delete
   renderMenu();
+  renderCourses();
 
   // Reset la navigation programme pour que le bon jour s'affiche
   _progDayManual = false;
@@ -8274,6 +8360,300 @@ document.addEventListener('click', function(e) {
     if (taskId) openEpWhoPicker(taskId);
   }
 });
+
+// ================================================================
+// COURSES
+// ================================================================
+
+const DEFAULT_COURSES_CATS = [
+  '🥩 Viandes & poissons', '🥦 Fruits & légumes', '🧀 Crémerie',
+  '🥖 Boulangerie', '🧴 Épicerie sèche', '🍷 Boissons',
+  '❄️ Surgelés', '🎉 Décoration', '🧹 Entretien',
+  '🛒 Matériel & jetable', '📦 Divers'
+];
+
+function _ensureDefaultCoursesCats() {
+  if (!DATA.coursesCats || DATA.coursesCats.length === 0) {
+    DATA.coursesCats = DEFAULT_COURSES_CATS.map((label, i) => ({
+      id: 'CC' + i,
+      label
+    }));
+  }
+}
+
+let hideDoneCoursesItems = false;
+let coursesCatFilter = 'all';
+let _editCourseId = null;
+
+window.renderCourses = function() {
+  _ensureDefaultCoursesCats();
+
+  // Buttons visibility
+  const addBtn = document.getElementById('btn-add-course');
+  if (addBtn) addBtn.style.display = _canDo('courses','create') ? '' : 'none';
+  const catsBtn = document.getElementById('btn-courses-cats');
+  if (catsBtn) catsBtn.style.display = _canDo('courses','create') ? '' : 'none';
+
+  const items = DATA.courses || [];
+  const cats  = DATA.coursesCats || [];
+
+  // ── Subbar (toggle + compteur) ──────────────────────────────
+  const subbar = document.getElementById('courses-subbar');
+  if (subbar) {
+    const total = items.length;
+    const done  = items.filter(i => i.done).length;
+    subbar.innerHTML = `
+      <button class="courses-toggle-btn ${hideDoneCoursesItems ? 'active' : ''}"
+        onclick="toggleHideDoneCourses()">
+        ${hideDoneCoursesItems ? '👁 Afficher les faits' : '✓ Masquer les faits'}
+      </button>
+      <span class="courses-counter">${done} / ${total} acheté${done > 1 ? 's' : ''}</span>`;
+  }
+
+  // ── Filtres catégories ──────────────────────────────────────
+  const catBar = document.getElementById('courses-cat-bar');
+  if (catBar) {
+    const usedCatIds = new Set(items.map(i => i.catId));
+    const visibleCats = cats.filter(c => usedCatIds.has(c.id));
+    if (visibleCats.length > 1) {
+      let html = `<button class="date-pill ${coursesCatFilter === 'all' ? 'active' : ''}"
+        data-date="all" onclick="setCoursesCatFilter('all')"
+        style="${coursesCatFilter === 'all' ? 'background:var(--muted);border-color:transparent;' : ''}">
+        <span class="dp-lbl" style="${coursesCatFilter === 'all' ? 'color:#fff' : ''}">Tous</span>
+      </button>`;
+      visibleCats.forEach(c => {
+        const active = coursesCatFilter === c.id;
+        html += `<button class="date-pill ${active ? 'active' : ''}"
+          data-date="${c.id}" onclick="setCoursesCatFilter('${c.id}')"
+          style="${active ? 'background:var(--acc);border-color:transparent;' : ''}">
+          <span class="dp-lbl" style="${active ? 'color:#fff' : ''}">${c.label}</span>
+        </button>`;
+      });
+      catBar.innerHTML = html;
+    } else {
+      catBar.innerHTML = '';
+    }
+  }
+
+  // ── Liste ────────────────────────────────────────────────────
+  const el = document.getElementById('courses-list');
+  if (!el) return;
+
+  const filtered = coursesCatFilter === 'all'
+    ? items
+    : items.filter(i => i.catId === coursesCatFilter);
+
+  if (!filtered.length) {
+    el.innerHTML = `<div style="padding:32px 16px;text-align:center;color:var(--muted);font-size:0.9rem">
+      Aucun article${coursesCatFilter !== 'all' ? ' dans cette catégorie' : ''}. Appuyez sur ＋ pour ajouter.
+    </div>`;
+    return;
+  }
+
+  // Group by catId, respecting cats order
+  const byCat = {};
+  filtered.forEach(i => {
+    const cid = i.catId || '__none__';
+    if (!byCat[cid]) byCat[cid] = [];
+    byCat[cid].push(i);
+  });
+
+  const catOrder = [...cats.map(c => c.id), '__none__'];
+  const canCheck  = _canDo('courses','check');
+  const canDelete = _canDo('courses','delete');
+  const canEdit   = _canDo('courses','edit');
+
+  let html = '';
+  catOrder.forEach(cid => {
+    if (!byCat[cid]) return;
+    const catLabel = cats.find(c => c.id === cid)?.label || '📦 Divers';
+    html += `<div class="courses-group-header">${catLabel}</div>`;
+    byCat[cid].forEach(item => {
+      const doneClass = item.done ? ' done' : '';
+      const checkMark = item.done ? '✓' : '';
+      const displayStyle = hideDoneCoursesItems && item.done ? 'display:none;' : '';
+      const qtyHtml = item.qty
+        ? `<span class="courses-qty-badge">${item.qty}</span>` : '';
+      const noteHtml = item.note
+        ? `<div class="courses-item-note">${item.note}</div>` : '';
+      const editBtn = canEdit
+        ? `<button class="courses-del-btn" onclick="openEditCourseModal('${item.id}')" title="Modifier">✏️</button>` : '';
+      const delBtn = canDelete
+        ? `<button class="courses-del-btn" onclick="deleteCourseItem('${item.id}')" title="Supprimer">✕</button>` : '';
+      html += `<div class="courses-item${doneClass}" id="ci-${item.id}" style="${displayStyle}">
+        <div class="courses-item-check ${item.done ? 'checked' : ''}"
+          onclick="${canCheck ? `toggleCourseItem('${item.id}')` : ''}"
+          style="${canCheck ? 'cursor:pointer' : 'cursor:default'}">${checkMark}</div>
+        <div class="courses-item-body">
+          <div class="courses-item-name">${item.label}</div>
+          ${noteHtml}
+        </div>
+        ${qtyHtml}
+        ${editBtn}
+        ${delBtn}
+      </div>`;
+    });
+  });
+
+  el.innerHTML = html;
+};
+
+window.toggleHideDoneCourses = function() {
+  hideDoneCoursesItems = !hideDoneCoursesItems;
+  renderCourses();
+};
+
+window.setCoursesCatFilter = function(id) {
+  coursesCatFilter = id;
+  renderCourses();
+};
+
+window.toggleCourseItem = function(id) {
+  if (!_canDo('courses','check')) { toast('⛔ Non autorisé'); return; }
+  const item = (DATA.courses || []).find(i => i.id === id);
+  if (!item) return;
+  item.done = !item.done;
+  pushData();
+  renderCourses();
+};
+
+window.deleteCourseItem = function(id) {
+  if (!_canDo('courses','delete')) { toast('⛔ Non autorisé'); return; }
+  openConfirm('Supprimer cet article ?', 'Cette action est irréversible.', () => {
+    DATA.courses = (DATA.courses || []).filter(i => i.id !== id);
+    pushData();
+    renderCourses();
+  });
+};
+
+window.openAddCourseModal = function() {
+  if (!_canDo('courses','create')) { toast('⛔ Non autorisé'); return; }
+  _ensureDefaultCoursesCats();
+  _editCourseId = null;
+  document.getElementById('modal-addcourse-title').textContent = 'Ajouter un article';
+  document.getElementById('modal-addcourse-save').textContent  = 'Ajouter';
+  document.getElementById('course-name').value    = '';
+  document.getElementById('course-qty').value     = '';
+  document.getElementById('course-note').value    = '';
+  document.getElementById('course-newcat').value  = '';
+  _fillCourseCatSelect('');
+  openModal('modal-addcourse');
+};
+
+window.openEditCourseModal = function(id) {
+  if (!_canDo('courses','edit')) { toast('⛔ Non autorisé'); return; }
+  _ensureDefaultCoursesCats();
+  const item = (DATA.courses || []).find(i => i.id === id);
+  if (!item) return;
+  _editCourseId = id;
+  document.getElementById('modal-addcourse-title').textContent = 'Modifier l\'article';
+  document.getElementById('modal-addcourse-save').textContent  = 'Enregistrer';
+  document.getElementById('course-name').value    = item.label || '';
+  document.getElementById('course-qty').value     = item.qty   || '';
+  document.getElementById('course-note').value    = item.note  || '';
+  document.getElementById('course-newcat').value  = '';
+  _fillCourseCatSelect(item.catId || '');
+  openModal('modal-addcourse');
+};
+
+function _fillCourseCatSelect(selectedId) {
+  const sel = document.getElementById('course-cat');
+  if (!sel) return;
+  const cats = DATA.coursesCats || [];
+  sel.innerHTML = cats.map(c =>
+    `<option value="${c.id}" ${c.id === selectedId ? 'selected' : ''}>${c.label}</option>`
+  ).join('');
+}
+
+window.saveCourse = function() {
+  const label = document.getElementById('course-name').value.trim();
+  if (!label) { toast('Nom requis'); return; }
+
+  _ensureDefaultCoursesCats();
+
+  // Créer une nouvelle catégorie à la volée si rempli
+  let catId = document.getElementById('course-cat').value;
+  const newCatLabel = document.getElementById('course-newcat').value.trim();
+  if (newCatLabel) {
+    const nc = { id: 'CC' + Date.now(), label: newCatLabel };
+    DATA.coursesCats = DATA.coursesCats || [];
+    DATA.coursesCats.push(nc);
+    catId = nc.id;
+  }
+
+  if (_editCourseId) {
+    const item = (DATA.courses || []).find(i => i.id === _editCourseId);
+    if (item) {
+      item.label = label;
+      item.catId = catId;
+      item.qty   = document.getElementById('course-qty').value.trim();
+      item.note  = document.getElementById('course-note').value.trim();
+    }
+  } else {
+    if (!_canDo('courses','create')) { toast('⛔ Non autorisé'); return; }
+    DATA.courses = DATA.courses || [];
+    DATA.courses.push({
+      id:    'CI' + Date.now(),
+      label,
+      catId,
+      qty:   document.getElementById('course-qty').value.trim(),
+      note:  document.getElementById('course-note').value.trim(),
+      done:  false,
+      order: DATA.courses.length
+    });
+  }
+
+  closeModal('modal-addcourse');
+  pushData();
+  renderCourses();
+  toast(_editCourseId ? '✏️ Modifié' : '✅ Ajouté');
+  _editCourseId = null;
+};
+
+window.openCoursesCatModal = function() {
+  _ensureDefaultCoursesCats();
+  _renderCoursesCatsList();
+  document.getElementById('courses-newcat-input').value = '';
+  openModal('modal-courses-cats');
+};
+
+function _renderCoursesCatsList() {
+  const el = document.getElementById('courses-cats-list');
+  if (!el) return;
+  const cats = DATA.coursesCats || [];
+  if (!cats.length) { el.innerHTML = '<div style="color:var(--muted);font-size:0.85rem">Aucune catégorie.</div>'; return; }
+  el.innerHTML = cats.map(c => `
+    <div class="courses-cat-row">
+      <span class="courses-cat-label">${c.label}</span>
+      <button class="courses-cat-del" onclick="deleteCoursesCat('${c.id}')" title="Supprimer">✕</button>
+    </div>`).join('');
+}
+
+window.addCoursesCat = function() {
+  const label = document.getElementById('courses-newcat-input').value.trim();
+  if (!label) return;
+  DATA.coursesCats = DATA.coursesCats || [];
+  DATA.coursesCats.push({ id: 'CC' + Date.now(), label });
+  document.getElementById('courses-newcat-input').value = '';
+  pushData();
+  _renderCoursesCatsList();
+};
+
+window.deleteCoursesCat = function(id) {
+  const cat = (DATA.coursesCats || []).find(c => c.id === id);
+  if (!cat) return;
+  const count = (DATA.courses || []).filter(i => i.catId === id).length;
+  const msg = count > 0
+    ? `⚠️ ${count} article${count > 1 ? 's seront supprimés' : ' sera supprimé'}.`
+    : 'Cette action est irréversible.';
+  openConfirm(`Supprimer "${cat.label}" ?`, msg, () => {
+    DATA.coursesCats = (DATA.coursesCats || []).filter(c => c.id !== id);
+    DATA.courses     = (DATA.courses     || []).filter(i => i.catId !== id);
+    pushData();
+    _renderCoursesCatsList();
+    renderCourses();
+  });
+};
 
 // ================================================================
 // MENU
