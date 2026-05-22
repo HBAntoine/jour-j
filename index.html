@@ -2131,16 +2131,12 @@ input, select, textarea { font-family: 'Fredoka', sans-serif !important; font-we
   <div class="modal">
     <h3>📍 Modifier le lieu</h3>
     <div class="form-group">
-      <label>Adresse</label>
+      <label>Nom du lieu</label>
+      <input type="text" id="infos-lieu-nom" placeholder="Gîte du Bonheur">
+    </div>
+    <div class="form-group">
+      <label>Adresse complète</label>
       <textarea id="infos-lieu-addr-input" rows="3" placeholder="3 Route du Bonheur, 31000 Toulouse"></textarea>
-    </div>
-    <div class="form-group">
-      <label>Lien Google Maps</label>
-      <input type="url" id="infos-lieu-maps" placeholder="https://maps.google.com/…">
-    </div>
-    <div class="form-group">
-      <label>Lien Waze</label>
-      <input type="url" id="infos-lieu-waze" placeholder="https://waze.com/…">
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('modal-infos-lieu')">Annuler</button>
@@ -2161,12 +2157,42 @@ input, select, textarea { font-family: 'Fredoka', sans-serif !important; font-we
       <input type="text" id="infos-pratique-wifipass" placeholder="motdepasse123">
     </div>
     <div class="form-group">
+      <label>Date d'arrivée</label>
+      <button type="button" class="date-pick-btn" onclick="openDatePicker(d=>{document.getElementById('infos-arrivee-date').value=d;document.getElementById('infos-arrivee-date-display').textContent=dateLabel(d);document.getElementById('infos-arrivee-date-display').className='dp-val';},document.getElementById('infos-arrivee-date').value)">
+        <span>📅</span>
+        <span id="infos-arrivee-date-display" class="dp-placeholder">Choisir une date…</span>
+        <span style="color:var(--muted);font-size:0.75rem">▼</span>
+      </button>
+      <input type="hidden" id="infos-arrivee-date" value="">
+    </div>
+    <div class="form-group">
       <label>Heure d'arrivée</label>
-      <input type="text" id="infos-pratique-arrivee" placeholder="15h00">
+      <button type="button" onclick="openTimePickerCb(v=>{document.getElementById('infos-arrivee-heure').value=v;document.getElementById('infos-arrivee-heure-display').textContent=v;},document.getElementById('infos-arrivee-heure').value)"
+        style="display:flex;align-items:center;gap:10px;width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;background:rgba(30,77,183,0.02);cursor:pointer;font-family:'Nunito',sans-serif;text-align:left">
+        <span style="font-size:1.3rem">🕐</span>
+        <span id="infos-arrivee-heure-display" style="font-size:1rem;font-weight:700;color:var(--acc);font-family:'Nunito',sans-serif">Non défini</span>
+        <span style="color:var(--muted);font-size:0.75rem;margin-left:auto">Cliquer pour changer</span>
+      </button>
+      <input type="hidden" id="infos-arrivee-heure" value="">
+    </div>
+    <div class="form-group">
+      <label>Date de départ</label>
+      <button type="button" class="date-pick-btn" onclick="openDatePicker(d=>{document.getElementById('infos-depart-date').value=d;document.getElementById('infos-depart-date-display').textContent=dateLabel(d);document.getElementById('infos-depart-date-display').className='dp-val';},document.getElementById('infos-depart-date').value)">
+        <span>📅</span>
+        <span id="infos-depart-date-display" class="dp-placeholder">Choisir une date…</span>
+        <span style="color:var(--muted);font-size:0.75rem">▼</span>
+      </button>
+      <input type="hidden" id="infos-depart-date" value="">
     </div>
     <div class="form-group">
       <label>Heure de départ</label>
-      <input type="text" id="infos-pratique-depart" placeholder="11h00">
+      <button type="button" onclick="openTimePickerCb(v=>{document.getElementById('infos-depart-heure').value=v;document.getElementById('infos-depart-heure-display').textContent=v;},document.getElementById('infos-depart-heure').value)"
+        style="display:flex;align-items:center;gap:10px;width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;background:rgba(30,77,183,0.02);cursor:pointer;font-family:'Nunito',sans-serif;text-align:left">
+        <span style="font-size:1.3rem">🕐</span>
+        <span id="infos-depart-heure-display" style="font-size:1rem;font-weight:700;color:var(--acc);font-family:'Nunito',sans-serif">Non défini</span>
+        <span style="color:var(--muted);font-size:0.75rem;margin-left:auto">Cliquer pour changer</span>
+      </button>
+      <input type="hidden" id="infos-depart-heure" value="">
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('modal-infos-pratique')">Annuler</button>
@@ -2919,8 +2945,8 @@ const DEFAULT_DATA = {
     {id:'T036',categoryId:'CApero',  label:'Couper Jambon Pays',                  date:'12',   who:'',where:'',done:false,order:1}
   ],
   expenses:[], guests:[], programme:[], rooms:[], menu:[], courses:[], coursesCats:[],
-  infosBlocs:[], infosLieu:{adresse:'',mapsUrl:'',wazeUrl:''},
-  infosPratique:{wifi:'',wifiPass:'',arrivee:'',depart:''},
+  infosBlocs:[], infosLieu:{nom:'',adresse:''},
+  infosPratique:{wifi:'',wifiPass:'',arriveeDate:'',arriveeHeure:'',departDate:'',departHeure:''},
   infosCagnotte:{url:'',texte:''},
   infosPersonnesCats:[], infosPersonnes:[]
 };
@@ -3038,8 +3064,8 @@ async function initFirebase(cfg) {
         DATA.infosPersonnesCats = Object.values(DATA.infosPersonnesCats || {});
         DATA.infosPersonnes     = Object.values(DATA.infosPersonnes     || {});
         DATA.infosBlocs = DATA.infosBlocs ? Object.values(DATA.infosBlocs) : [];
-        if (!DATA.infosLieu)     DATA.infosLieu     = {adresse:'',mapsUrl:'',wazeUrl:''};
-        if (!DATA.infosPratique) DATA.infosPratique = {wifi:'',wifiPass:'',arrivee:'',depart:''};
+        if (!DATA.infosLieu)     DATA.infosLieu     = {nom:'',adresse:''};
+        if (!DATA.infosPratique) DATA.infosPratique = {wifi:'',wifiPass:'',arriveeDate:'',arriveeHeure:'',departDate:'',departHeure:''};
         if (!DATA.infosCagnotte) DATA.infosCagnotte = {url:'',texte:''};
 
         // Appliquer les permissions Firebase avant le rendu
@@ -9146,8 +9172,8 @@ let _editInfosPersId = null;
 function _ensureInfosDefaults() {
   if (!DATA.infosBlocs || !DATA.infosBlocs.length)
     DATA.infosBlocs = [...DEFAULT_INFOS_BLOCS];
-  if (!DATA.infosLieu)     DATA.infosLieu     = {adresse:'',mapsUrl:'',wazeUrl:''};
-  if (!DATA.infosPratique) DATA.infosPratique = {wifi:'',wifiPass:'',arrivee:'',depart:''};
+  if (!DATA.infosLieu)     DATA.infosLieu     = {nom:'',adresse:''};
+  if (!DATA.infosPratique) DATA.infosPratique = {wifi:'',wifiPass:'',arriveeDate:'',arriveeHeure:'',departDate:'',departHeure:''};
   if (!DATA.infosCagnotte) DATA.infosCagnotte = {url:'',texte:''};
   if (!DATA.infosPersonnesCats || !DATA.infosPersonnesCats.length)
     DATA.infosPersonnesCats = DEFAULT_INFOS_CATS.map((label, i) => ({id:'IPC'+i, label, order:i}));
@@ -9182,15 +9208,32 @@ window.renderInfos = function() {
 
 function _renderInfosLieu() {
   const d = DATA.infosLieu || {};
-  const addr = (d.adresse || '').trim() || '<span style="color:var(--muted)">Adresse non renseignée</span>';
-  const maps = d.mapsUrl ? `<button class="btn btn-ghost" onclick="window.open('${d.mapsUrl}','_blank')">🗺 Google Maps</button>` : '';
-  const waze = d.wazeUrl ? `<button class="btn btn-ghost" onclick="window.open('${d.wazeUrl}','_blank')">🚗 Waze</button>` : '';
-  return `<p class="infos-lieu-addr">${(d.adresse||'').replace(/\n/g,'<br>') || '<span style="color:var(--muted)">Adresse non renseignée</span>'}</p><div class="infos-lieu-btns">${maps}${waze}</div>`;
+  const nomHtml = d.nom ? `<div style="font-family:'Nunito',sans-serif;font-size:0.95rem;font-weight:800;color:var(--text);margin-bottom:4px">${d.nom}</div>` : '';
+  const addrText = (d.adresse||'').trim();
+  const addrHtml = addrText
+    ? `<p class="infos-lieu-addr">${addrText.replace(/\n/g,'<br>')}</p>`
+    : `<p class="infos-lieu-addr" style="color:var(--muted)">Adresse non renseignée</p>`;
+  const enc = addrText ? encodeURIComponent(addrText) : '';
+  const maps = enc ? `<button class="btn btn-ghost" onclick="window.open('https://www.google.com/maps/dir/?api=1&destination=${enc}','_blank')">🗺 Google Maps</button>` : '';
+  const waze = enc ? `<button class="btn btn-ghost" onclick="window.open('https://waze.com/ul?q=${enc}','_blank')">🚗 Waze</button>` : '';
+  return `${nomHtml}${addrHtml}<div class="infos-lieu-btns">${maps}${waze}</div>`;
 }
 
 function _renderInfosPratique() {
   const d = DATA.infosPratique || {};
-  const cards = [{label:'WiFi',val:d.wifi||'—'},{label:'Mot de passe',val:d.wifiPass||'—'},{label:'Arrivée',val:d.arrivee||'—'},{label:'Départ',val:d.depart||'—'}];
+  function _fmtDateHeure(date, heure) {
+    if (!date && !heure) return '—';
+    const parts = [];
+    if (date) { const lbl = dateLabel(date); parts.push(lbl.replace(/^📅 |^🏡 |^💍 |^🥂 |^👋 /,'')); }
+    if (heure) parts.push(heure);
+    return parts.join(' à ');
+  }
+  const cards = [
+    {label:'WiFi',      val:d.wifi||'—'},
+    {label:'Mot de passe', val:d.wifiPass||'—'},
+    {label:'Arrivée',   val:_fmtDateHeure(d.arriveeDate, d.arriveeHeure)},
+    {label:'Départ',    val:_fmtDateHeure(d.departDate,  d.departHeure)},
+  ];
   return `<div class="infos-pratique-grid">${cards.map(c=>`<div class="infos-pratique-card"><div class="infos-pratique-label">${c.label}</div><div class="infos-pratique-val">${c.val}</div></div>`).join('')}</div>`;
 }
 
@@ -9308,16 +9351,48 @@ window.infosCatDrop = function(event, targetId) {
 
 // ── Modals ─────────────────────────────────────────────────────
 window.openInfosModal = function(blocId) {
-  if (blocId==='lieu')     { const d=DATA.infosLieu||{}; document.getElementById('infos-lieu-addr-input').value=d.adresse||''; document.getElementById('infos-lieu-maps').value=d.mapsUrl||''; document.getElementById('infos-lieu-waze').value=d.wazeUrl||''; openModal('modal-infos-lieu'); }
-  else if (blocId==='pratique') { const d=DATA.infosPratique||{}; document.getElementById('infos-pratique-wifi').value=d.wifi||''; document.getElementById('infos-pratique-wifipass').value=d.wifiPass||''; document.getElementById('infos-pratique-arrivee').value=d.arrivee||''; document.getElementById('infos-pratique-depart').value=d.depart||''; openModal('modal-infos-pratique'); }
-  else if (blocId==='cagnotte') { const d=DATA.infosCagnotte||{}; document.getElementById('infos-cagnotte-url').value=d.url||''; document.getElementById('infos-cagnotte-texte-input').value=d.texte||''; openModal('modal-infos-cagnotte'); }
+  if (blocId==='lieu') {
+    const d=DATA.infosLieu||{};
+    document.getElementById('infos-lieu-nom').value        = d.nom     ||'';
+    document.getElementById('infos-lieu-addr-input').value = d.adresse ||'';
+    openModal('modal-infos-lieu');
+  } else if (blocId==='pratique') {
+    const d=DATA.infosPratique||{};
+    document.getElementById('infos-pratique-wifi').value     = d.wifi     ||'';
+    document.getElementById('infos-pratique-wifipass').value = d.wifiPass ||'';
+    const ad = d.arriveeDate||'', ah = d.arriveeHeure||'';
+    const dd = d.departDate ||'', dh = d.departHeure ||'';
+    document.getElementById('infos-arrivee-date').value          = ad;
+    document.getElementById('infos-arrivee-date-display').textContent = ad ? dateLabel(ad) : 'Choisir une date…';
+    document.getElementById('infos-arrivee-date-display').className   = ad ? 'dp-val' : 'dp-placeholder';
+    document.getElementById('infos-arrivee-heure').value         = ah;
+    document.getElementById('infos-arrivee-heure-display').textContent = ah || 'Non défini';
+    document.getElementById('infos-depart-date').value           = dd;
+    document.getElementById('infos-depart-date-display').textContent  = dd ? dateLabel(dd) : 'Choisir une date…';
+    document.getElementById('infos-depart-date-display').className    = dd ? 'dp-val' : 'dp-placeholder';
+    document.getElementById('infos-depart-heure').value          = dh;
+    document.getElementById('infos-depart-heure-display').textContent  = dh || 'Non défini';
+    openModal('modal-infos-pratique');
+  } else if (blocId==='cagnotte') {
+    const d=DATA.infosCagnotte||{};
+    document.getElementById('infos-cagnotte-url').value         = d.url  ||'';
+    document.getElementById('infos-cagnotte-texte-input').value = d.texte||'';
+    openModal('modal-infos-cagnotte');
+  }
 };
 window.saveInfosLieu = function() {
-  DATA.infosLieu = {adresse:document.getElementById('infos-lieu-addr-input').value.trim(), mapsUrl:document.getElementById('infos-lieu-maps').value.trim(), wazeUrl:document.getElementById('infos-lieu-waze').value.trim()};
+  DATA.infosLieu = {nom:document.getElementById('infos-lieu-nom').value.trim(), adresse:document.getElementById('infos-lieu-addr-input').value.trim()};
   closeModal('modal-infos-lieu'); pushData(); renderInfos();
 };
 window.saveInfosPratique = function() {
-  DATA.infosPratique = {wifi:document.getElementById('infos-pratique-wifi').value.trim(), wifiPass:document.getElementById('infos-pratique-wifipass').value.trim(), arrivee:document.getElementById('infos-pratique-arrivee').value.trim(), depart:document.getElementById('infos-pratique-depart').value.trim()};
+  DATA.infosPratique = {
+    wifi:        document.getElementById('infos-pratique-wifi').value.trim(),
+    wifiPass:    document.getElementById('infos-pratique-wifipass').value.trim(),
+    arriveeDate: document.getElementById('infos-arrivee-date').value,
+    arriveeHeure:document.getElementById('infos-arrivee-heure').value,
+    departDate:  document.getElementById('infos-depart-date').value,
+    departHeure: document.getElementById('infos-depart-heure').value,
+  };
   closeModal('modal-infos-pratique'); pushData(); renderInfos();
 };
 window.saveInfosCagnotte = function() {
