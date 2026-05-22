@@ -6117,6 +6117,7 @@ function renderGuests() {
         <span style="font-size:0.65rem;font-weight:800;padding:3px 9px;border-radius:20px;background:${RSVP_BG[rsvp]||'rgba(0,0,0,0.05)'};color:${RSVP_COLORS[rsvp]||'var(--muted)'}">
           ${RSVP_LABELS[rsvp]||'⏳ En attente'}
         </span>
+        ${(g.fromHeure||g.toHeure)?`<span style="font-size:0.62rem;padding:1px 6px;border-radius:10px;background:rgba(30,77,183,0.08);color:var(--acc);font-weight:700">⏰ ${g.fromHeure||'?'}→${g.toHeure||'?'}</span>`:''}
       </div>
     </div>`;
   }).join(''));
