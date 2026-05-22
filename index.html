@@ -494,6 +494,55 @@ textarea{resize:vertical;min-height:60px;}
 .courses-cat-del{background:none;border:none;cursor:pointer;padding:3px 7px;border-radius:7px;font-size:0.78rem;color:var(--muted);transition:all 0.15s;}
 .courses-cat-del:hover{background:rgba(220,60,60,0.08);color:#dc3c3c;}
 
+/* INFOS */
+.infos-blocs-container{display:flex;flex-direction:column;gap:14px;}
+.infos-bloc{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;position:relative;}
+.infos-bloc.infos-dragging{opacity:0.45;}
+.infos-bloc.infos-drag-above{box-shadow:0 -3px 0 0 var(--acc);}
+.infos-bloc.infos-drag-below{box-shadow:0 3px 0 0 var(--acc);}
+.infos-bloc-header{display:flex;align-items:center;gap:8px;padding:12px 14px 10px;border-bottom:1px solid var(--g2);}
+.infos-bloc-drag-handle{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:3px;cursor:grab;padding:4px;opacity:0.25;transition:opacity 0.15s;flex-shrink:0;touch-action:none;}
+.infos-bloc-drag-handle:hover{opacity:0.7;}
+.infos-bloc-drag-handle span{display:block;width:14px;height:1.5px;background:var(--muted);border-radius:2px;}
+.infos-bloc-title{flex:1;font-family:'Nunito',sans-serif;font-size:0.92rem;font-weight:800;color:var(--text);}
+.infos-bloc-body{padding:14px 16px;}
+.infos-lieu-addr{font-family:'Nunito',sans-serif;font-size:0.88rem;color:var(--text);user-select:all;-webkit-user-select:all;margin-bottom:12px;line-height:1.6;}
+.infos-lieu-btns{display:flex;gap:8px;flex-wrap:wrap;}
+.infos-pratique-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.infos-pratique-card{background:var(--g1);border:1px solid var(--border);border-radius:10px;padding:10px 12px;}
+.infos-pratique-label{font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;}
+.infos-pratique-val{font-family:'Nunito',sans-serif;font-size:0.9rem;font-weight:700;color:var(--text);word-break:break-all;}
+.infos-cagnotte-link{display:inline-block;font-family:'Nunito',sans-serif;font-size:0.9rem;font-weight:700;color:var(--acc);word-break:break-all;text-decoration:underline;cursor:pointer;margin-bottom:6px;}
+.infos-cagnotte-texte{font-size:0.8rem;color:var(--muted);line-height:1.5;margin:0;}
+.infos-pers-cat{margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--g2);position:relative;}
+.infos-pers-cat:last-of-type{border-bottom:none;}
+.infos-pers-cat.infos-cat-dragging{opacity:0.4;}
+.infos-pers-cat.infos-cat-above{box-shadow:0 -2px 0 0 var(--acc);}
+.infos-pers-cat.infos-cat-below{box-shadow:0 2px 0 0 var(--acc);}
+.infos-pers-cat-header{display:flex;align-items:center;gap:6px;margin-bottom:8px;}
+.infos-pers-cat-drag{display:flex;flex-direction:column;gap:3px;cursor:grab;padding:4px 3px;opacity:0.25;transition:opacity 0.15s;touch-action:none;flex-shrink:0;}
+.infos-pers-cat-drag:hover{opacity:0.7;}
+.infos-pers-cat-drag span{display:block;width:10px;height:1.5px;background:var(--muted);border-radius:2px;}
+.infos-pers-cat-label{flex:1;font-family:'Nunito',sans-serif;font-size:0.72rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
+.infos-pers-cat-del{background:none;border:none;cursor:pointer;padding:3px 6px;border-radius:6px;font-size:0.78rem;color:var(--muted);transition:all 0.15s;}
+.infos-pers-cat-del:hover{background:rgba(220,60,60,0.08);color:#dc3c3c;}
+.infos-pers-list{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;}
+.infos-person-card{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 10px;background:var(--g1);border:1px solid var(--border);border-radius:10px;min-width:78px;}
+.infos-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;font-size:0.78rem;font-weight:800;color:#fff;flex-shrink:0;}
+.infos-person-name{font-family:'Nunito',sans-serif;font-size:0.72rem;font-weight:700;color:var(--text);text-align:center;}
+.infos-person-phone{font-size:0.65rem;color:var(--muted);text-align:center;}
+.infos-person-actions{display:flex;gap:2px;}
+.infos-person-btn{background:none;border:none;cursor:pointer;padding:2px 5px;border-radius:5px;font-size:0.72rem;color:var(--muted);transition:all 0.15s;}
+.infos-person-btn:hover{background:var(--g2);color:var(--text);}
+.infos-add-cat-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:50px;border:1.5px dashed var(--border);background:transparent;font-family:'Nunito',sans-serif;font-size:0.78rem;font-weight:600;color:var(--muted);cursor:pointer;transition:all 0.15s;margin-top:6px;}
+.infos-add-cat-btn:hover{border-color:var(--acc);color:var(--acc);}
+.infos-add-pers-btn{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;border:1.5px dashed var(--border);background:transparent;font-size:1rem;color:var(--muted);cursor:pointer;transition:all 0.15s;flex-shrink:0;}
+.infos-add-pers-btn:hover{border-color:var(--acc);color:var(--acc);}
+@media(max-width:768px){
+  .infos-pratique-grid{grid-template-columns:1fr;}
+  .infos-lieu-btns{flex-direction:column;}
+}
+
 /* TIME PICKER */
 .time-quick-btn{padding:5px 12px;border-radius:50px;border:1.5px solid var(--border);background:#fff;color:var(--text);font-family:'Nunito',sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.15s;}
 .time-quick-btn:hover,.time-quick-btn.active{background:var(--gold);border-color:var(--gold);color:#fff;}
@@ -2077,13 +2126,115 @@ input, select, textarea { font-family: 'Fredoka', sans-serif !important; font-we
 </div>
 
 <!-- INFOS -->
+<!-- MODALS INFOS -->
+<div id="modal-infos-lieu" class="modal-overlay">
+  <div class="modal">
+    <h3>📍 Modifier le lieu</h3>
+    <div class="form-group">
+      <label>Adresse</label>
+      <textarea id="infos-lieu-addr-input" rows="3" placeholder="3 Route du Bonheur, 31000 Toulouse"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Lien Google Maps</label>
+      <input type="url" id="infos-lieu-maps" placeholder="https://maps.google.com/…">
+    </div>
+    <div class="form-group">
+      <label>Lien Waze</label>
+      <input type="url" id="infos-lieu-waze" placeholder="https://waze.com/…">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-infos-lieu')">Annuler</button>
+      <button class="btn btn-acc" onclick="saveInfosLieu()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-infos-pratique" class="modal-overlay">
+  <div class="modal">
+    <h3>📋 Infos pratiques</h3>
+    <div class="form-group">
+      <label>Réseau WiFi</label>
+      <input type="text" id="infos-pratique-wifi" placeholder="GiteDuBonheur">
+    </div>
+    <div class="form-group">
+      <label>Mot de passe WiFi</label>
+      <input type="text" id="infos-pratique-wifipass" placeholder="motdepasse123">
+    </div>
+    <div class="form-group">
+      <label>Heure d'arrivée</label>
+      <input type="text" id="infos-pratique-arrivee" placeholder="15h00">
+    </div>
+    <div class="form-group">
+      <label>Heure de départ</label>
+      <input type="text" id="infos-pratique-depart" placeholder="11h00">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-infos-pratique')">Annuler</button>
+      <button class="btn btn-acc" onclick="saveInfosPratique()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-infos-cagnotte" class="modal-overlay">
+  <div class="modal">
+    <h3>🎁 Cagnotte</h3>
+    <div class="form-group">
+      <label>URL de la cagnotte</label>
+      <input type="url" id="infos-cagnotte-url" placeholder="https://leetchi.com/…">
+    </div>
+    <div class="form-group">
+      <label>Texte descriptif</label>
+      <textarea id="infos-cagnotte-texte-input" rows="3" placeholder="Pour nous aider à financer notre voyage de noces…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-infos-cagnotte')">Annuler</button>
+      <button class="btn btn-acc" onclick="saveInfosCagnotte()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-infos-personne" class="modal-overlay">
+  <div class="modal">
+    <h3 id="modal-infos-pers-title">Ajouter une personne</h3>
+    <div class="form-group">
+      <label>Nom *</label>
+      <input type="text" id="infos-pers-name" placeholder="Marie Dupont">
+    </div>
+    <div class="form-group">
+      <label>Téléphone</label>
+      <input type="tel" id="infos-pers-phone" placeholder="06 12 34 56 78">
+    </div>
+    <div class="form-group">
+      <label>Catégorie</label>
+      <select id="infos-pers-cat"></select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-infos-personne')">Annuler</button>
+      <button class="btn btn-acc" id="modal-infos-pers-save" onclick="saveInfosPersonne()">Ajouter</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-infos-catpers" class="modal-overlay">
+  <div class="modal">
+    <h3>Ajouter une catégorie</h3>
+    <div class="form-group">
+      <label>Nom *</label>
+      <input type="text" id="infos-catpers-label" placeholder="Les Témoins">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-infos-catpers')">Annuler</button>
+      <button class="btn btn-acc" onclick="saveInfosCatPersonne()">Ajouter</button>
+    </div>
+  </div>
+</div>
+
+<!-- INFOS -->
 <div id="tab-infos" class="tab-panel">
   <div class="section-header">
     <span class="section-title" style="color:var(--sky)">ℹ️ Infos</span>
   </div>
-  <div style="padding:24px 16px;text-align:center;color:var(--muted);font-size:0.9rem">
-    Contenu à venir…
-  </div>
+  <div id="infos-blocs-container" class="infos-blocs-container"></div>
 </div>
 
 <!-- SETTINGS (admin only) -->
@@ -2767,7 +2918,11 @@ const DEFAULT_DATA = {
     {id:'T035',categoryId:'CApero',  label:'Couper Saucisson',                    date:'12',   who:'',where:'',done:false,order:0},
     {id:'T036',categoryId:'CApero',  label:'Couper Jambon Pays',                  date:'12',   who:'',where:'',done:false,order:1}
   ],
-  expenses:[], guests:[], programme:[], rooms:[], menu:[], courses:[], coursesCats:[]
+  expenses:[], guests:[], programme:[], rooms:[], menu:[], courses:[], coursesCats:[],
+  infosBlocs:[], infosLieu:{adresse:'',mapsUrl:'',wazeUrl:''},
+  infosPratique:{wifi:'',wifiPass:'',arrivee:'',depart:''},
+  infosCagnotte:{url:'',texte:''},
+  infosPersonnesCats:[], infosPersonnes:[]
 };
 
 // ================================================================
@@ -2880,6 +3035,12 @@ async function initFirebase(cfg) {
         DATA.menu = Object.values(DATA.menu || {});
         DATA.courses = Object.values(DATA.courses || {});
         DATA.coursesCats = Object.values(DATA.coursesCats || {});
+        DATA.infosPersonnesCats = Object.values(DATA.infosPersonnesCats || {});
+        DATA.infosPersonnes     = Object.values(DATA.infosPersonnes     || {});
+        DATA.infosBlocs = DATA.infosBlocs ? Object.values(DATA.infosBlocs) : [];
+        if (!DATA.infosLieu)     DATA.infosLieu     = {adresse:'',mapsUrl:'',wazeUrl:''};
+        if (!DATA.infosPratique) DATA.infosPratique = {wifi:'',wifiPass:'',arrivee:'',depart:''};
+        if (!DATA.infosCagnotte) DATA.infosCagnotte = {url:'',texte:''};
 
         // Appliquer les permissions Firebase avant le rendu
         if (DATA.permissions) _applyFirebasePermissions(DATA.permissions);
@@ -3010,6 +3171,7 @@ window.switchTab = function(tab) {
   if (tab === 'settings') renderSettings();
   if (tab === 'menu') renderMenu();
   if (tab === 'courses') renderCourses();
+  if (tab === 'infos') renderInfos();
   // FAB visible uniquement sur l'onglet tâches
   const fab   = document.getElementById('fab-filter');
   const badge = document.getElementById('fab-badge');
@@ -3034,6 +3196,7 @@ function renderAll() {
   renderRooms();
   renderMenu();
   renderCourses();
+  renderInfos();
   if (_isAdmin()) renderSettings();
   _renderUserBadge();
   // NE PAS appeler applyPermissions ici — appelé séparément après Firebase update
@@ -7470,7 +7633,8 @@ const APP_MODULES = [
   {
     id: 'infos', label: 'Infos', icon: 'ℹ️',
     actions: [
-      { id:'see', label:'Voir les infos',                                           default:true  },
+      { id:'see',  label:'Voir les infos',   default:true  },
+      { id:'edit', label:'Modifier les infos', default:false },
     ]
   },
 ];
@@ -8037,6 +8201,7 @@ function applyPermissions() {
   // Re-render menu pour appliquer les droits drag/edit/delete
   renderMenu();
   renderCourses();
+  renderInfos();
 
   // Reset la navigation programme pour que le bon jour s'affiche
   _progDayManual = false;
@@ -8964,6 +9129,267 @@ window.deleteMenu = function(id) {
     pushData();
     renderMenu();
     toast('🗑️ Plat supprimé');
+  });
+};
+
+// ================================================================
+// INFOS
+// ================================================================
+
+const DEFAULT_INFOS_BLOCS = ['lieu', 'pratique', 'cagnotte', 'personnes'];
+const DEFAULT_INFOS_CATS  = ['Les Mariés', 'Les Témoins', 'Les Parents', 'Les Officiants'];
+
+let _infoBlocDragId  = null;
+let _infosCatDragId  = null;
+let _editInfosPersId = null;
+
+function _ensureInfosDefaults() {
+  if (!DATA.infosBlocs || !DATA.infosBlocs.length)
+    DATA.infosBlocs = [...DEFAULT_INFOS_BLOCS];
+  if (!DATA.infosLieu)     DATA.infosLieu     = {adresse:'',mapsUrl:'',wazeUrl:''};
+  if (!DATA.infosPratique) DATA.infosPratique = {wifi:'',wifiPass:'',arrivee:'',depart:''};
+  if (!DATA.infosCagnotte) DATA.infosCagnotte = {url:'',texte:''};
+  if (!DATA.infosPersonnesCats || !DATA.infosPersonnesCats.length)
+    DATA.infosPersonnesCats = DEFAULT_INFOS_CATS.map((label, i) => ({id:'IPC'+i, label, order:i}));
+  if (!DATA.infosPersonnes) DATA.infosPersonnes = [];
+}
+
+window.renderInfos = function() {
+  _ensureInfosDefaults();
+  const container = document.getElementById('infos-blocs-container');
+  if (!container) return;
+  const canEdit = _canDo('infos','edit');
+  const blocs = DATA.infosBlocs.length ? DATA.infosBlocs : DEFAULT_INFOS_BLOCS;
+  const titles = {lieu:'📍 Lieu', pratique:'📋 Infos pratiques', cagnotte:'🎁 Cagnotte', personnes:'👥 Personnes référentes'};
+  const renders = {lieu:_renderInfosLieu, pratique:_renderInfosPratique, cagnotte:_renderInfosCagnotte, personnes:_renderInfosPersonnes};
+  let html = '';
+  blocs.forEach(id => {
+    if (!renders[id]) return;
+    const dragAttrs = canEdit
+      ? `draggable="true" ondragstart="infoBlocDragStart(event,'${id}')" ondragover="infoBlocDragOver(event,'${id}')" ondrop="infoBlocDrop(event,'${id}')" ondragend="infoBlocDragEnd(event)"`
+      : '';
+    const handle = canEdit
+      ? `<div class="infos-bloc-drag-handle"><span></span><span></span><span></span></div>` : '';
+    const editBtn = canEdit && id !== 'personnes'
+      ? `<button class="btn btn-ghost" style="padding:4px 10px;font-size:0.78rem" onclick="openInfosModal('${id}')">✏️</button>` : '';
+    html += `<div class="infos-bloc" id="ib-${id}" ${dragAttrs}>
+      <div class="infos-bloc-header">${handle}<span class="infos-bloc-title">${titles[id]}</span>${editBtn}</div>
+      <div class="infos-bloc-body">${renders[id]()}</div>
+    </div>`;
+  });
+  container.innerHTML = html;
+};
+
+function _renderInfosLieu() {
+  const d = DATA.infosLieu || {};
+  const addr = (d.adresse || '').trim() || '<span style="color:var(--muted)">Adresse non renseignée</span>';
+  const maps = d.mapsUrl ? `<button class="btn btn-ghost" onclick="window.open('${d.mapsUrl}','_blank')">🗺 Google Maps</button>` : '';
+  const waze = d.wazeUrl ? `<button class="btn btn-ghost" onclick="window.open('${d.wazeUrl}','_blank')">🚗 Waze</button>` : '';
+  return `<p class="infos-lieu-addr">${(d.adresse||'').replace(/\n/g,'<br>') || '<span style="color:var(--muted)">Adresse non renseignée</span>'}</p><div class="infos-lieu-btns">${maps}${waze}</div>`;
+}
+
+function _renderInfosPratique() {
+  const d = DATA.infosPratique || {};
+  const cards = [{label:'WiFi',val:d.wifi||'—'},{label:'Mot de passe',val:d.wifiPass||'—'},{label:'Arrivée',val:d.arrivee||'—'},{label:'Départ',val:d.depart||'—'}];
+  return `<div class="infos-pratique-grid">${cards.map(c=>`<div class="infos-pratique-card"><div class="infos-pratique-label">${c.label}</div><div class="infos-pratique-val">${c.val}</div></div>`).join('')}</div>`;
+}
+
+function _renderInfosCagnotte() {
+  const d = DATA.infosCagnotte || {};
+  const link = d.url
+    ? `<span class="infos-cagnotte-link" onclick="window.open('${d.url}','_blank')">${d.url}</span>`
+    : '<span style="color:var(--muted)">Aucun lien configuré.</span>';
+  const texte = d.texte ? `<p class="infos-cagnotte-texte">${d.texte}</p>` : '';
+  return `<div>${link}</div>${texte}`;
+}
+
+function _renderInfosPersonnes() {
+  const cats = (DATA.infosPersonnesCats||[]).slice().sort((a,b)=>(a.order||0)-(b.order||0));
+  const pers = DATA.infosPersonnes||[];
+  const canEdit = _canDo('infos','edit');
+  let html = '';
+  cats.forEach(cat => {
+    const cp = pers.filter(p=>p.catId===cat.id).sort((a,b)=>(a.order||0)-(b.order||0));
+    const drag = canEdit
+      ? `draggable="true" ondragstart="infosCatDragStart(event,'${cat.id}')" ondragover="infosCatDragOver(event,'${cat.id}')" ondrop="infosCatDrop(event,'${cat.id}')" ondragend="infosCatDragEnd(event)"` : '';
+    const handle = canEdit ? `<div class="infos-pers-cat-drag"><span></span><span></span><span></span></div>` : '';
+    const delBtn = canEdit ? `<button class="infos-pers-cat-del" onclick="deleteInfosCat('${cat.id}')" title="Supprimer">✕</button>` : '';
+    html += `<div class="infos-pers-cat" id="ipc-${cat.id}" ${drag}>
+      <div class="infos-pers-cat-header">${handle}<span class="infos-pers-cat-label">${cat.label}</span>${delBtn}</div>
+      <div class="infos-pers-list">`;
+    cp.forEach(p => {
+      const col = avatarColor(p.name||'?');
+      const initls = (p.name||'?').split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
+      const eb = canEdit ? `<button class="infos-person-btn" onclick="openEditInfosPersonne('${p.id}')">✏️</button>` : '';
+      const db = canEdit ? `<button class="infos-person-btn" onclick="deleteInfosPersonne('${p.id}')">✕</button>` : '';
+      html += `<div class="infos-person-card">
+        <div class="infos-avatar" style="background:${col}">${initls}</div>
+        <div class="infos-person-name">${p.name}</div>
+        ${p.phone?`<div class="infos-person-phone">${p.phone}</div>`:''}
+        <div class="infos-person-actions">${eb}${db}</div>
+      </div>`;
+    });
+    if (canEdit) html += `<button class="infos-add-pers-btn" onclick="openAddInfosPersonne('${cat.id}')" title="Ajouter une personne">＋</button>`;
+    html += `</div></div>`;
+  });
+  if (canEdit) html += `<button class="infos-add-cat-btn" onclick="openInfosCatPersModal()">＋ Ajouter une catégorie</button>`;
+  return html || '<div style="color:var(--muted);font-size:0.85rem">Aucune catégorie.</div>';
+}
+
+// ── Drag & drop blocs ──────────────────────────────────────────
+window.infoBlocDragStart = function(event, id) {
+  _infoBlocDragId = id;
+  event.dataTransfer.effectAllowed = 'move';
+  setTimeout(() => { const el = document.getElementById('ib-'+id); if(el) el.classList.add('infos-dragging'); }, 0);
+};
+window.infoBlocDragOver = function(event, id) {
+  if (!_infoBlocDragId || id === _infoBlocDragId) return;
+  event.preventDefault(); event.stopPropagation();
+  event.dataTransfer.dropEffect = 'move';
+  document.querySelectorAll('.infos-drag-above,.infos-drag-below').forEach(el=>el.classList.remove('infos-drag-above','infos-drag-below'));
+  const el = document.getElementById('ib-'+id); if (!el) return;
+  const rect = el.getBoundingClientRect();
+  el.classList.add(event.clientY < rect.top+rect.height/2 ? 'infos-drag-above' : 'infos-drag-below');
+};
+window.infoBlocDragEnd = function() {
+  _infoBlocDragId = null;
+  document.querySelectorAll('.infos-bloc').forEach(el=>el.classList.remove('infos-dragging','infos-drag-above','infos-drag-below'));
+};
+window.infoBlocDrop = function(event, targetId) {
+  event.preventDefault();
+  const el = document.getElementById('ib-'+targetId);
+  if (el) el.classList.remove('infos-drag-above','infos-drag-below');
+  if (!_infoBlocDragId || _infoBlocDragId === targetId) return;
+  const rect = el ? el.getBoundingClientRect() : null;
+  const before = rect && event.clientY < rect.top+rect.height/2;
+  const arr = DATA.infosBlocs;
+  const fi = arr.indexOf(_infoBlocDragId), ti = arr.indexOf(targetId);
+  if (fi===-1||ti===-1) return;
+  const [moved] = arr.splice(fi,1);
+  arr.splice(Math.max(0, before ? (ti>fi?ti-1:ti) : (ti>fi?ti:ti+1)), 0, moved);
+  pushData(); renderInfos();
+};
+
+// ── Drag & drop catégories personnes ──────────────────────────
+window.infosCatDragStart = function(event, id) {
+  _infosCatDragId = id;
+  event.dataTransfer.effectAllowed = 'move';
+  setTimeout(() => { const el = document.getElementById('ipc-'+id); if(el) el.classList.add('infos-cat-dragging'); }, 0);
+};
+window.infosCatDragOver = function(event, id) {
+  if (!_infosCatDragId || id === _infosCatDragId) return;
+  event.preventDefault(); event.stopPropagation();
+  event.dataTransfer.dropEffect = 'move';
+  document.querySelectorAll('.infos-cat-above,.infos-cat-below').forEach(el=>el.classList.remove('infos-cat-above','infos-cat-below'));
+  const el = document.getElementById('ipc-'+id); if (!el) return;
+  const rect = el.getBoundingClientRect();
+  el.classList.add(event.clientY < rect.top+rect.height/2 ? 'infos-cat-above' : 'infos-cat-below');
+};
+window.infosCatDragEnd = function() {
+  _infosCatDragId = null;
+  document.querySelectorAll('.infos-pers-cat').forEach(el=>el.classList.remove('infos-cat-dragging','infos-cat-above','infos-cat-below'));
+};
+window.infosCatDrop = function(event, targetId) {
+  event.preventDefault();
+  const el = document.getElementById('ipc-'+targetId);
+  if (el) el.classList.remove('infos-cat-above','infos-cat-below');
+  if (!_infosCatDragId || _infosCatDragId === targetId) return;
+  const rect = el ? el.getBoundingClientRect() : null;
+  const before = rect && event.clientY < rect.top+rect.height/2;
+  const arr = (DATA.infosPersonnesCats||[]).slice().sort((a,b)=>(a.order||0)-(b.order||0));
+  const fi = arr.findIndex(c=>c.id===_infosCatDragId), ti = arr.findIndex(c=>c.id===targetId);
+  if (fi===-1||ti===-1) return;
+  const [moved] = arr.splice(fi,1);
+  arr.splice(Math.max(0, before ? (ti>fi?ti-1:ti) : (ti>fi?ti:ti+1)), 0, moved);
+  arr.forEach((c,i) => { c.order=i; });
+  DATA.infosPersonnesCats = arr;
+  pushData(); renderInfos();
+};
+
+// ── Modals ─────────────────────────────────────────────────────
+window.openInfosModal = function(blocId) {
+  if (blocId==='lieu')     { const d=DATA.infosLieu||{}; document.getElementById('infos-lieu-addr-input').value=d.adresse||''; document.getElementById('infos-lieu-maps').value=d.mapsUrl||''; document.getElementById('infos-lieu-waze').value=d.wazeUrl||''; openModal('modal-infos-lieu'); }
+  else if (blocId==='pratique') { const d=DATA.infosPratique||{}; document.getElementById('infos-pratique-wifi').value=d.wifi||''; document.getElementById('infos-pratique-wifipass').value=d.wifiPass||''; document.getElementById('infos-pratique-arrivee').value=d.arrivee||''; document.getElementById('infos-pratique-depart').value=d.depart||''; openModal('modal-infos-pratique'); }
+  else if (blocId==='cagnotte') { const d=DATA.infosCagnotte||{}; document.getElementById('infos-cagnotte-url').value=d.url||''; document.getElementById('infos-cagnotte-texte-input').value=d.texte||''; openModal('modal-infos-cagnotte'); }
+};
+window.saveInfosLieu = function() {
+  DATA.infosLieu = {adresse:document.getElementById('infos-lieu-addr-input').value.trim(), mapsUrl:document.getElementById('infos-lieu-maps').value.trim(), wazeUrl:document.getElementById('infos-lieu-waze').value.trim()};
+  closeModal('modal-infos-lieu'); pushData(); renderInfos();
+};
+window.saveInfosPratique = function() {
+  DATA.infosPratique = {wifi:document.getElementById('infos-pratique-wifi').value.trim(), wifiPass:document.getElementById('infos-pratique-wifipass').value.trim(), arrivee:document.getElementById('infos-pratique-arrivee').value.trim(), depart:document.getElementById('infos-pratique-depart').value.trim()};
+  closeModal('modal-infos-pratique'); pushData(); renderInfos();
+};
+window.saveInfosCagnotte = function() {
+  DATA.infosCagnotte = {url:document.getElementById('infos-cagnotte-url').value.trim(), texte:document.getElementById('infos-cagnotte-texte-input').value.trim()};
+  closeModal('modal-infos-cagnotte'); pushData(); renderInfos();
+};
+
+// ── Personnes ──────────────────────────────────────────────────
+window.openAddInfosPersonne = function(catId) {
+  _editInfosPersId = null;
+  document.getElementById('modal-infos-pers-title').textContent = 'Ajouter une personne';
+  document.getElementById('modal-infos-pers-save').textContent  = 'Ajouter';
+  document.getElementById('infos-pers-name').value  = '';
+  document.getElementById('infos-pers-phone').value = '';
+  _fillInfosPersCatSel(catId);
+  openModal('modal-infos-personne');
+};
+window.openEditInfosPersonne = function(id) {
+  const p = (DATA.infosPersonnes||[]).find(x=>x.id===id); if (!p) return;
+  _editInfosPersId = id;
+  document.getElementById('modal-infos-pers-title').textContent = 'Modifier la personne';
+  document.getElementById('modal-infos-pers-save').textContent  = 'Enregistrer';
+  document.getElementById('infos-pers-name').value  = p.name||'';
+  document.getElementById('infos-pers-phone').value = p.phone||'';
+  _fillInfosPersCatSel(p.catId);
+  openModal('modal-infos-personne');
+};
+function _fillInfosPersCatSel(selectedId) {
+  const sel = document.getElementById('infos-pers-cat'); if (!sel) return;
+  const cats = (DATA.infosPersonnesCats||[]).slice().sort((a,b)=>(a.order||0)-(b.order||0));
+  sel.innerHTML = cats.map(c=>`<option value="${c.id}" ${c.id===selectedId?'selected':''}>${c.label}</option>`).join('');
+}
+window.saveInfosPersonne = function() {
+  const name = document.getElementById('infos-pers-name').value.trim();
+  if (!name) { toast('Nom requis'); return; }
+  const catId = document.getElementById('infos-pers-cat').value;
+  const phone = document.getElementById('infos-pers-phone').value.trim();
+  DATA.infosPersonnes = DATA.infosPersonnes||[];
+  if (_editInfosPersId) {
+    const p = DATA.infosPersonnes.find(x=>x.id===_editInfosPersId);
+    if (p) { p.name=name; p.phone=phone; p.catId=catId; }
+  } else {
+    DATA.infosPersonnes.push({id:'IP'+Date.now(), catId, name, phone, order:DATA.infosPersonnes.length});
+  }
+  closeModal('modal-infos-personne'); pushData(); renderInfos(); _editInfosPersId=null;
+};
+window.deleteInfosPersonne = function(id) {
+  openConfirm('Supprimer cette personne ?', 'Cette action est irréversible.', () => {
+    DATA.infosPersonnes = (DATA.infosPersonnes||[]).filter(p=>p.id!==id);
+    pushData(); renderInfos();
+  });
+};
+
+// ── Catégories personnes ───────────────────────────────────────
+window.openInfosCatPersModal = function() {
+  document.getElementById('infos-catpers-label').value=''; openModal('modal-infos-catpers');
+};
+window.saveInfosCatPersonne = function() {
+  const label = document.getElementById('infos-catpers-label').value.trim();
+  if (!label) { toast('Nom requis'); return; }
+  DATA.infosPersonnesCats = DATA.infosPersonnesCats||[];
+  DATA.infosPersonnesCats.push({id:'IPC'+Date.now(), label, order:DATA.infosPersonnesCats.length});
+  closeModal('modal-infos-catpers'); pushData(); renderInfos();
+};
+window.deleteInfosCat = function(id) {
+  const cat = (DATA.infosPersonnesCats||[]).find(c=>c.id===id); if (!cat) return;
+  const count = (DATA.infosPersonnes||[]).filter(p=>p.catId===id).length;
+  const msg = count>0 ? `⚠️ ${count} personne${count>1?'s seront supprimées':' sera supprimée'}.` : 'Cette action est irréversible.';
+  openConfirm(`Supprimer "${cat.label}" ?`, msg, () => {
+    DATA.infosPersonnesCats = (DATA.infosPersonnesCats||[]).filter(c=>c.id!==id);
+    DATA.infosPersonnes     = (DATA.infosPersonnes    ||[]).filter(p=>p.catId!==id);
+    pushData(); renderInfos();
   });
 };
 
