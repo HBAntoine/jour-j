@@ -3127,7 +3127,7 @@ async function initFirebase(cfg) {
         migrateDates();
         // Appliquer les droits de façon synchrone après le rendu — pas de setTimeout
         applyPermissions();
-        switchTab(_getFirstVisibleTab());
+        if (!_firstTabSwitchDone) { _firstTabSwitchDone = true; switchTab(_getFirstVisibleTab()); }
         _checkPendingRequests();
         if (!_isAdmin()) checkMyChangeRequest();
         setSyncStatus('connected', 'Synchronisé ✓');
@@ -7599,6 +7599,7 @@ const ADMIN_IDS  = ['Le Marié', 'La Mariée']; // rôles admin
 // ================================================================
 let CURRENT_USER = null;
 let _identityInitialized = false;
+let _firstTabSwitchDone = false;
 
 // Splash screen
 function _hideSplash() {
@@ -8377,6 +8378,7 @@ function applyPermissions() {
   _progDayManual = false;
   _menuDateManual = false;
   _taskDateManual = false;
+  _firstTabSwitchDone = false;
 
   // Badge identité
   _renderUserBadge();
