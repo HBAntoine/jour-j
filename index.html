@@ -510,6 +510,11 @@ textarea{resize:vertical;min-height:60px;}
 .infos-pratique-card{background:var(--g1);border:1px solid var(--border);border-radius:10px;padding:10px 12px;}
 .infos-pratique-label{font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;}
 .infos-pratique-val{font-family:'Nunito',sans-serif;font-size:0.9rem;font-weight:700;color:var(--text);word-break:break-all;}
+.infos-notes-section{margin-top:12px;border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.infos-note-item{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border-bottom:1px solid var(--g2);font-size:0.85rem;line-height:1.5;}
+.infos-note-text{flex:1;color:var(--text);}
+.infos-add-note-btn{display:flex;width:100%;padding:9px 12px;background:none;border:none;cursor:pointer;color:var(--acc);font-family:'Nunito',sans-serif;font-size:0.82rem;font-weight:600;text-align:left;}
+.infos-add-note-btn:hover{background:var(--g1);}
 .infos-cagnotte-link{display:inline-block;font-family:'Nunito',sans-serif;font-size:0.9rem;font-weight:700;color:var(--acc);word-break:break-all;text-decoration:underline;cursor:pointer;margin-bottom:6px;}
 .infos-cagnotte-texte{font-size:0.8rem;color:var(--muted);line-height:1.5;margin:0;}
 .infos-pers-cat{margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--g2);position:relative;}
@@ -2257,6 +2262,20 @@ input, select, textarea { font-family: 'Fredoka', sans-serif !important; font-we
   </div>
 </div>
 
+<div id="modal-infos-note" class="modal-overlay">
+  <div class="modal">
+    <h3 id="modal-infos-note-title">Ajouter une info</h3>
+    <div class="form-group">
+      <label>Contenu</label>
+      <textarea id="infos-note-texte" rows="3" placeholder="Ex : La piscine est accessible de 9h à 20h. Pensez à votre maillot !"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-infos-note')">Annuler</button>
+      <button class="btn btn-acc" id="modal-infos-note-save" onclick="saveInfosNote()">Ajouter</button>
+    </div>
+  </div>
+</div>
+
 <!-- INFOS -->
 <div id="tab-infos" class="tab-panel">
   <div class="section-header">
@@ -2584,21 +2603,34 @@ input, select, textarea { font-family: 'Fredoka', sans-serif !important; font-we
     </div>
     <div class="form-group">
       <label>Période de présence</label>
-      <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">
-        <div style="flex:1;min-width:120px">
-          <div style="font-size:0.68rem;color:var(--muted);margin-bottom:3px">Du</div>
-          <button type="button" class="date-pick-btn" style="font-size:0.78rem;padding:5px 8px" onclick="openDatePicker(d=>{document.getElementById('new-guest-from-date').value=d;document.getElementById('guest-from-display').textContent=dateLabel(d);document.getElementById('guest-from-display').className='dp-val';_renderGuestDaysPicker();}, document.getElementById('new-guest-from-date').value)">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div>
+          <div style="font-size:0.68rem;color:var(--muted);margin-bottom:3px">Date d'arrivée</div>
+          <button type="button" class="date-pick-btn" style="font-size:0.78rem;padding:5px 8px;width:100%" onclick="openDatePicker(d=>{document.getElementById('new-guest-from-date').value=d;document.getElementById('guest-from-display').textContent=dateLabel(d);document.getElementById('guest-from-display').className='dp-val';_renderGuestDaysPicker();}, document.getElementById('new-guest-from-date').value)">
             <span id="guest-from-display" class="dp-placeholder" style="font-size:0.78rem">Arrivée…</span>
           </button>
           <input type="hidden" id="new-guest-from-date" value="">
         </div>
-        <div style="color:var(--muted);padding-bottom:10px">→</div>
-        <div style="flex:1;min-width:120px">
-          <div style="font-size:0.68rem;color:var(--muted);margin-bottom:3px">Au</div>
-          <button type="button" class="date-pick-btn" style="font-size:0.78rem;padding:5px 8px" onclick="openDatePicker(d=>{document.getElementById('new-guest-to-date').value=d;document.getElementById('guest-to-display').textContent=dateLabel(d);document.getElementById('guest-to-display').className='dp-val';_renderGuestDaysPicker();}, document.getElementById('new-guest-to-date').value)">
+        <div>
+          <div style="font-size:0.68rem;color:var(--muted);margin-bottom:3px">Heure d'arrivée</div>
+          <button type="button" class="date-pick-btn" style="font-size:0.78rem;padding:5px 8px;width:100%" onclick="openTimePickerCb(v=>{document.getElementById('new-guest-from-heure').value=v;document.getElementById('guest-from-heure-display').textContent=v;document.getElementById('guest-from-heure-display').className='dp-val';}, document.getElementById('new-guest-from-heure').value)">
+            <span id="guest-from-heure-display" class="dp-placeholder" style="font-size:0.78rem">Heure…</span>
+          </button>
+          <input type="hidden" id="new-guest-from-heure" value="">
+        </div>
+        <div>
+          <div style="font-size:0.68rem;color:var(--muted);margin-bottom:3px">Date de départ</div>
+          <button type="button" class="date-pick-btn" style="font-size:0.78rem;padding:5px 8px;width:100%" onclick="openDatePicker(d=>{document.getElementById('new-guest-to-date').value=d;document.getElementById('guest-to-display').textContent=dateLabel(d);document.getElementById('guest-to-display').className='dp-val';_renderGuestDaysPicker();}, document.getElementById('new-guest-to-date').value)">
             <span id="guest-to-display" class="dp-placeholder" style="font-size:0.78rem">Départ…</span>
           </button>
           <input type="hidden" id="new-guest-to-date" value="">
+        </div>
+        <div>
+          <div style="font-size:0.68rem;color:var(--muted);margin-bottom:3px">Heure de départ</div>
+          <button type="button" class="date-pick-btn" style="font-size:0.78rem;padding:5px 8px;width:100%" onclick="openTimePickerCb(v=>{document.getElementById('new-guest-to-heure').value=v;document.getElementById('guest-to-heure-display').textContent=v;document.getElementById('guest-to-heure-display').className='dp-val';}, document.getElementById('new-guest-to-heure').value)">
+            <span id="guest-to-heure-display" class="dp-placeholder" style="font-size:0.78rem">Heure…</span>
+          </button>
+          <input type="hidden" id="new-guest-to-heure" value="">
         </div>
       </div>
     </div>
@@ -2951,6 +2983,7 @@ const DEFAULT_DATA = {
   infosPratique:{wifi:'',wifiPass:'',arriveeDate:'',arriveeHeure:'',departDate:'',departHeure:''},
   infosCagnotte:{url:'',texte:''},
   infosPersonnesCats:[], infosPersonnes:[],
+  infosPratiqueNotes:[],
   tabOrder:[]
 };
 
@@ -3069,6 +3102,7 @@ async function initFirebase(cfg) {
         DATA.infosPersonnesCats = Object.values(DATA.infosPersonnesCats || {});
         DATA.infosPersonnes     = Object.values(DATA.infosPersonnes     || {});
         DATA.infosBlocs = DATA.infosBlocs ? Object.values(DATA.infosBlocs) : [];
+        DATA.infosPratiqueNotes = Array.isArray(DATA.infosPratiqueNotes) ? DATA.infosPratiqueNotes : Object.values(DATA.infosPratiqueNotes || {});
         DATA.tabOrder   = Array.isArray(DATA.tabOrder) ? DATA.tabOrder : (DATA.tabOrder ? Object.values(DATA.tabOrder) : []);
         if (!DATA.infosLieu)     DATA.infosLieu     = {nom:'',adresse:''};
         if (!DATA.infosPratique) DATA.infosPratique = {wifi:'',wifiPass:'',arriveeDate:'',arriveeHeure:'',departDate:'',departHeure:''};
@@ -6226,6 +6260,12 @@ window.openAddGuestModal = function() {
   const toDisp   = document.getElementById('guest-to-display');
   if (fromDisp) { fromDisp.textContent = 'Arrivée…'; fromDisp.className = 'dp-placeholder'; }
   if (toDisp)   { toDisp.textContent   = 'Départ…';  toDisp.className   = 'dp-placeholder'; }
+  document.getElementById('new-guest-from-heure').value = '';
+  document.getElementById('new-guest-to-heure').value = '';
+  const fromHDisp = document.getElementById('guest-from-heure-display');
+  const toHDisp   = document.getElementById('guest-to-heure-display');
+  if (fromHDisp) { fromHDisp.textContent = 'Heure…'; fromHDisp.className = 'dp-placeholder'; }
+  if (toHDisp)   { toHDisp.textContent   = 'Heure…'; toHDisp.className   = 'dp-placeholder'; }
   document.getElementById('new-guest-rsvp').value = 'wait';
   _guestRolesSelected = [];
   _guestDaysSelected = [];
@@ -6251,6 +6291,12 @@ window.editGuest = function(id) {
   const toDisp   = document.getElementById('guest-to-display');
   if (fromDisp) { fromDisp.textContent = g.fromDate ? dateLabel(g.fromDate) : 'Arrivée…'; fromDisp.className = g.fromDate ? 'dp-val' : 'dp-placeholder'; }
   if (toDisp)   { toDisp.textContent   = g.toDate   ? dateLabel(g.toDate)   : 'Départ…';  toDisp.className   = g.toDate   ? 'dp-val' : 'dp-placeholder'; }
+  document.getElementById('new-guest-from-heure').value = g.fromHeure || '';
+  document.getElementById('new-guest-to-heure').value   = g.toHeure   || '';
+  const fromHDisp = document.getElementById('guest-from-heure-display');
+  const toHDisp   = document.getElementById('guest-to-heure-display');
+  if (fromHDisp) { fromHDisp.textContent = g.fromHeure || 'Heure…'; fromHDisp.className = g.fromHeure ? 'dp-val' : 'dp-placeholder'; }
+  if (toHDisp)   { toHDisp.textContent   = g.toHeure   || 'Heure…'; toHDisp.className   = g.toHeure   ? 'dp-val' : 'dp-placeholder'; }
   _guestRolesSelected = [...(g.roles||[])];
   _guestDaysSelected = [...(g.days||[])];
   setGuestAge(g.age || 'Adulte');
@@ -6266,16 +6312,18 @@ window.saveGuestModal = function() {
   const editId = document.getElementById('edit-guest-id').value;
   const rsvp   = document.getElementById('new-guest-rsvp').value;
   const roles  = [..._guestRolesSelected];
-  const fromDate = document.getElementById('new-guest-from-date').value;
-  const toDate   = document.getElementById('new-guest-to-date').value;
+  const fromDate  = document.getElementById('new-guest-from-date').value;
+  const toDate    = document.getElementById('new-guest-to-date').value;
+  const fromHeure = document.getElementById('new-guest-from-heure').value;
+  const toHeure   = document.getElementById('new-guest-to-heure').value;
   const days = [..._guestDaysSelected];
   const age = document.getElementById('new-guest-age').value || 'Adulte';
   if (editId) {
     const g = DATA.guests.find(x=>x.id===editId);
-    if (g) { g.fname=fname; g.lname=lname; g.rsvp=rsvp; g.roles=roles; g.role=roles[0]||''; g.fromDate=fromDate; g.toDate=toDate; g.days=days; g.age=age; }
+    if (g) { g.fname=fname; g.lname=lname; g.rsvp=rsvp; g.roles=roles; g.role=roles[0]||''; g.fromDate=fromDate; g.toDate=toDate; g.fromHeure=fromHeure; g.toHeure=toHeure; g.days=days; g.age=age; }
     toast('✏️ Invité mis à jour');
   } else {
-    DATA.guests.push({ id:'G'+uid(), fname, lname, rsvp, roles, role:roles[0]||'', fromDate, toDate, days, age });
+    DATA.guests.push({ id:'G'+uid(), fname, lname, rsvp, roles, role:roles[0]||'', fromDate, toDate, fromHeure, toHeure, days, age });
     toast('👥 Invité ajouté');
   }
   closeModal('modal-addguest');
@@ -9316,6 +9364,7 @@ function _ensureInfosDefaults() {
   if (!DATA.infosPersonnesCats || !DATA.infosPersonnesCats.length)
     DATA.infosPersonnesCats = DEFAULT_INFOS_CATS.map((label, i) => ({id:'IPC'+i, label, order:i}));
   if (!DATA.infosPersonnes) DATA.infosPersonnes = [];
+  if (!DATA.infosPratiqueNotes) DATA.infosPratiqueNotes = [];
 }
 
 window.renderInfos = function() {
@@ -9362,17 +9411,39 @@ function _renderInfosPratique() {
   function _fmtDateHeure(date, heure) {
     if (!date && !heure) return '—';
     const parts = [];
-    if (date) { const lbl = dateLabel(date); parts.push(lbl.replace(/^📅 |^🏡 |^💍 |^🥂 |^👋 /,'')); }
+    if (date) { const lbl = dateLabel(normalizeDate(date)); parts.push(lbl.replace(/^📅 |^🏡 |^💍 |^🥂 |^👋 /,'')); }
     if (heure) parts.push(heure);
     return parts.join(' à ');
   }
+  let arriveeVal, departVal;
+  if (!_isAdmin() && CURRENT_USER?.id) {
+    const g = (DATA.guests||[]).find(x => x.id === CURRENT_USER.id);
+    if (g) {
+      arriveeVal = _fmtDateHeure(g.fromDate, g.fromHeure);
+      departVal  = _fmtDateHeure(g.toDate,   g.toHeure);
+    }
+  }
+  if (!arriveeVal) arriveeVal = _fmtDateHeure(d.arriveeDate, d.arriveeHeure);
+  if (!departVal)  departVal  = _fmtDateHeure(d.departDate,  d.departHeure);
   const cards = [
-    {label:'WiFi',      val:d.wifi||'—'},
+    {label:'WiFi',         val:d.wifi||'—'},
     {label:'Mot de passe', val:d.wifiPass||'—'},
-    {label:'Arrivée',   val:_fmtDateHeure(d.arriveeDate, d.arriveeHeure)},
-    {label:'Départ',    val:_fmtDateHeure(d.departDate,  d.departHeure)},
+    {label:'Arrivée',      val:arriveeVal},
+    {label:'Départ',       val:departVal},
   ];
-  return `<div class="infos-pratique-grid">${cards.map(c=>`<div class="infos-pratique-card"><div class="infos-pratique-label">${c.label}</div><div class="infos-pratique-val">${c.val}</div></div>`).join('')}</div>`;
+  const canEdit = _canDo('infos','edit');
+  const notes = DATA.infosPratiqueNotes || [];
+  let notesHtml = '';
+  if (notes.length || canEdit) {
+    const items = notes.map(n => {
+      const editBtn = canEdit ? `<button class="infos-person-btn" onclick="openEditInfosNote('${n.id}')" title="Modifier">✏️</button>` : '';
+      const delBtn  = canEdit ? `<button class="infos-person-btn" onclick="deleteInfosNote('${n.id}')" title="Supprimer">✕</button>` : '';
+      return `<div class="infos-note-item"><span class="infos-note-text">${n.texte}</span><div style="display:flex;gap:2px">${editBtn}${delBtn}</div></div>`;
+    }).join('');
+    const addBtn = canEdit ? `<button class="infos-add-note-btn" onclick="openAddInfosNote()">＋ Ajouter une info</button>` : '';
+    notesHtml = `<div class="infos-notes-section">${items}${addBtn}</div>`;
+  }
+  return `<div class="infos-pratique-grid">${cards.map(c=>`<div class="infos-pratique-card"><div class="infos-pratique-label">${c.label}</div><div class="infos-pratique-val">${c.val}</div></div>`).join('')}</div>${notesHtml}`;
 }
 
 function _renderInfosCagnotte() {
@@ -9651,6 +9722,47 @@ window.deleteInfosCat = function(id) {
   openConfirm(`Supprimer "${cat.label}" ?`, msg, () => {
     DATA.infosPersonnesCats = (DATA.infosPersonnesCats||[]).filter(c=>c.id!==id);
     DATA.infosPersonnes     = (DATA.infosPersonnes    ||[]).filter(p=>p.catId!==id);
+    pushData(); renderInfos();
+  });
+};
+
+// ── Notes libres infos pratiques ──────────────────────────────
+let _editInfosNoteId = null;
+window.openAddInfosNote = function() {
+  _editInfosNoteId = null;
+  document.getElementById('modal-infos-note-title').textContent = 'Ajouter une info';
+  document.getElementById('infos-note-texte').value = '';
+  document.getElementById('modal-infos-note-save').textContent = 'Ajouter';
+  openModal('modal-infos-note');
+};
+window.openEditInfosNote = function(id) {
+  const n = (DATA.infosPratiqueNotes||[]).find(x=>x.id===id);
+  if (!n) return;
+  _editInfosNoteId = id;
+  document.getElementById('modal-infos-note-title').textContent = "Modifier l'info";
+  document.getElementById('infos-note-texte').value = n.texte || '';
+  document.getElementById('modal-infos-note-save').textContent = 'Sauver';
+  openModal('modal-infos-note');
+};
+window.saveInfosNote = function() {
+  const texte = document.getElementById('infos-note-texte').value.trim();
+  if (!texte) { toast('⚠️ Contenu requis', 'var(--red)'); return; }
+  DATA.infosPratiqueNotes = DATA.infosPratiqueNotes || [];
+  if (_editInfosNoteId) {
+    const n = DATA.infosPratiqueNotes.find(x=>x.id===_editInfosNoteId);
+    if (n) n.texte = texte;
+    toast('✏️ Info mise à jour');
+  } else {
+    DATA.infosPratiqueNotes.push({id:'IPN'+Date.now(), texte});
+    toast('➕ Info ajoutée');
+  }
+  closeModal('modal-infos-note');
+  _editInfosNoteId = null;
+  pushData(); renderInfos();
+};
+window.deleteInfosNote = function(id) {
+  openConfirm('Supprimer cette info ?', 'Cette action est irréversible.', () => {
+    DATA.infosPratiqueNotes = (DATA.infosPratiqueNotes||[]).filter(x=>x.id!==id);
     pushData(); renderInfos();
   });
 };
