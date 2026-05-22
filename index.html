@@ -2015,12 +2015,12 @@ input, select, textarea { font-family: 'Fredoka', sans-serif !important; font-we
 
     <div class="form-group">
       <label>Date</label>
-      <select id="menu-date">
-        <option value="11">Vendredi 11 juillet</option>
-        <option value="12">Samedi 12 juillet</option>
-        <option value="13">Dimanche 13 juillet</option>
-        <option value="14">Lundi 14 juillet</option>
-      </select>
+      <button type="button" class="date-pick-btn" onclick="openDatePicker(d=>{document.getElementById('menu-date').value=d;document.getElementById('menu-date-display').textContent=dateLabel(d);document.getElementById('menu-date-display').className='dp-val';}, document.getElementById('menu-date').value)">
+        <span>📅</span>
+        <span id="menu-date-display" class="dp-placeholder">Choisir une date…</span>
+        <span style="color:var(--muted);font-size:0.75rem">▼</span>
+      </button>
+      <input type="hidden" id="menu-date" value="">
     </div>
 
     <div class="form-group">
@@ -2671,8 +2671,8 @@ input, select, textarea { font-family: 'Fredoka', sans-serif !important; font-we
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
       <button type="button" onclick="dpNavMonth(-1)" style="background:none;border:none;font-size:1.2rem;cursor:pointer;padding:4px 8px;border-radius:6px">‹</button>
       <div style="display:flex;gap:6px">
-        <select id="dp-month" onchange="dpRender()" style="font-size:0.82rem;font-weight:700;border:none;background:transparent;cursor:pointer;color:var(--acc)"></select>
-        <select id="dp-year"  onchange="dpRender()" style="font-size:0.82rem;font-weight:700;border:none;background:transparent;cursor:pointer;color:var(--acc)"></select>
+        <select id="dp-month" onchange="dpSelectChange()" style="font-size:0.82rem;font-weight:700;border:none;background:transparent;cursor:pointer;color:var(--acc)"></select>
+        <select id="dp-year"  onchange="dpSelectChange()" style="font-size:0.82rem;font-weight:700;border:none;background:transparent;cursor:pointer;color:var(--acc)"></select>
       </div>
       <button type="button" onclick="dpNavMonth(1)"  style="background:none;border:none;font-size:1.2rem;cursor:pointer;padding:4px 8px;border-radius:6px">›</button>
     </div>
@@ -3379,6 +3379,14 @@ window.dpNavMonth = function(dir) {
   dpRender();
 };
 
+window.dpSelectChange = function() {
+  const mSel = document.getElementById('dp-month');
+  const ySel = document.getElementById('dp-year');
+  if (mSel) _dpMonth = parseInt(mSel.value);
+  if (ySel) _dpYear  = parseInt(ySel.value);
+  dpRender();
+};
+
 window.dpRender = function() {
   // Sync les selects
   const mSel = document.getElementById('dp-month');
@@ -3423,13 +3431,6 @@ window.dpPickDay = function(iso) {
 window.dpSelectAmont = function() {
   if (_dpCallback) _dpCallback('amont');
   closeModal('modal-datepicker');
-};
-
-window.dpNavMonth = function(dir) {
-  _dpMonth += dir;
-  if (_dpMonth > 11) { _dpMonth=0; _dpYear++; }
-  if (_dpMonth < 0)  { _dpMonth=11; _dpYear--; }
-  dpRender();
 };
 
 // Helper : rendu d'un bouton date cliquable
@@ -9095,7 +9096,9 @@ window.openAddMenuModal = function() {
   _editMenuId = null;
   document.getElementById('modal-addmenu-title').textContent = 'Ajouter au menu';
   document.getElementById('modal-addmenu-save').textContent  = 'Ajouter';
-  document.getElementById('menu-date').value    = '12';
+  document.getElementById('menu-date').value = '2026-07-12';
+  document.getElementById('menu-date-display').textContent = dateLabel('2026-07-12');
+  document.getElementById('menu-date-display').className = 'dp-val';
   document.getElementById('menu-time').value    = '';
   document.getElementById('menu-time-display').textContent = 'Non défini';
   document.getElementById('menu-name').value    = '';
@@ -9110,7 +9113,10 @@ window.openEditMenuModal = function(id) {
   _editMenuId = id;
   document.getElementById('modal-addmenu-title').textContent = 'Modifier le plat';
   document.getElementById('modal-addmenu-save').textContent  = 'Modifier';
-  document.getElementById('menu-date').value    = item.date    || '12';
+  const _mDateIso = normalizeDate(item.date || '2026-07-12');
+  document.getElementById('menu-date').value = _mDateIso;
+  document.getElementById('menu-date-display').textContent = dateLabel(_mDateIso);
+  document.getElementById('menu-date-display').className = 'dp-val';
   document.getElementById('menu-time').value    = item.time    || '';
   document.getElementById('menu-time-display').textContent = item.time || 'Non défini';
   document.getElementById('menu-name').value    = item.name    || '';
