@@ -640,6 +640,10 @@ textarea{resize:vertical;min-height:60px;}
 }
 
 /* HIDE DONE SWITCH */
+.tab-order-row{transition:opacity 0.15s;}
+.tab-order-row.tab-dragging{opacity:0.45;}
+.tab-order-row.drag-above{box-shadow:0 -3px 0 0 var(--acc);}
+.tab-order-row.drag-below{box-shadow:0 3px 0 0 var(--acc);}
 .toggle-switch {
   width: 36px; height: 20px; border-radius: 50px;
   background: rgba(255,255,255,0.1); border: 1px solid var(--border);
@@ -2946,7 +2950,8 @@ const DEFAULT_DATA = {
   infosBlocs:[], infosLieu:{nom:'',adresse:''},
   infosPratique:{wifi:'',wifiPass:'',arriveeDate:'',arriveeHeure:'',departDate:'',departHeure:''},
   infosCagnotte:{url:'',texte:''},
-  infosPersonnesCats:[], infosPersonnes:[]
+  infosPersonnesCats:[], infosPersonnes:[],
+  tabOrder:[]
 };
 
 // ================================================================
@@ -3064,6 +3069,7 @@ async function initFirebase(cfg) {
         DATA.infosPersonnesCats = Object.values(DATA.infosPersonnesCats || {});
         DATA.infosPersonnes     = Object.values(DATA.infosPersonnes     || {});
         DATA.infosBlocs = DATA.infosBlocs ? Object.values(DATA.infosBlocs) : [];
+        DATA.tabOrder   = Array.isArray(DATA.tabOrder) ? DATA.tabOrder : (DATA.tabOrder ? Object.values(DATA.tabOrder) : []);
         if (!DATA.infosLieu)     DATA.infosLieu     = {nom:'',adresse:''};
         if (!DATA.infosPratique) DATA.infosPratique = {wifi:'',wifiPass:'',arriveeDate:'',arriveeHeure:'',departDate:'',departHeure:''};
         if (!DATA.infosCagnotte) DATA.infosCagnotte = {url:'',texte:''};
@@ -7758,6 +7764,47 @@ window.switchSettingsTab = function(tab) {
   renderSettings();
 };
 
+// ── Ordre des onglets ──────────────────────────────────────────
+function getTabOrder() {
+  const defaultOrder = APP_MODULES.map(m => m.id);
+  const stored = (DATA.tabOrder || []).filter(id => defaultOrder.includes(id));
+  defaultOrder.forEach(id => { if (!stored.includes(id)) stored.push(id); });
+  return stored;
+}
+
+let _tabOrderDragId = null;
+window.tabOrderDragStart = function(e, modId) {
+  _tabOrderDragId = modId;
+  e.dataTransfer.effectAllowed = 'move';
+  const el = document.getElementById('tor-' + modId);
+  if (el) el.classList.add('tab-dragging');
+};
+window.tabOrderDragOver = function(e, modId) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  document.querySelectorAll('.tab-order-row').forEach(r => r.classList.remove('drag-above','drag-below'));
+  const el = document.getElementById('tor-' + modId);
+  if (el && _tabOrderDragId !== modId) el.classList.add('drag-above');
+};
+window.tabOrderDrop = function(e, modId) {
+  e.preventDefault();
+  if (!_tabOrderDragId || _tabOrderDragId === modId) return;
+  const order = getTabOrder();
+  const from = order.indexOf(_tabOrderDragId);
+  const to   = order.indexOf(modId);
+  if (from === -1 || to === -1) return;
+  order.splice(from, 1);
+  order.splice(to, 0, _tabOrderDragId);
+  DATA.tabOrder = order;
+  pushData();
+  applyPermissions();
+  renderSettings();
+};
+window.tabOrderDragEnd = function() {
+  _tabOrderDragId = null;
+  document.querySelectorAll('.tab-order-row').forEach(r => r.classList.remove('drag-above','drag-below','tab-dragging'));
+};
+
 function renderSettings() {
   const c = document.getElementById('settings-content');
   if (!c) return;
@@ -7842,10 +7889,17 @@ function renderSettingsRights(c) {
       <div style="font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">👁️ Visibilité des onglets</div>
       <p style="font-size:0.78rem;color:var(--muted);margin-bottom:16px">Un onglet masqué est totalement inaccessible aux invités.</p>`;
 
-  APP_MODULES.forEach(mod => {
+  getTabOrder().forEach(modId => {
+    const mod = APP_MODULES.find(m => m.id === modId); if (!mod) return;
     const isVisible = GUEST_PERMISSIONS.tabs.includes(mod.id);
-    html += `<div style="display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid var(--border)">
-      <span style="font-size:1.1rem;width:28px;text-align:center">${mod.icon}</span>
+    html += `<div class="tab-order-row" id="tor-${mod.id}" draggable="true"
+      ondragstart="tabOrderDragStart(event,'${mod.id}')"
+      ondragover="tabOrderDragOver(event,'${mod.id}')"
+      ondrop="tabOrderDrop(event,'${mod.id}')"
+      ondragend="tabOrderDragEnd()"
+      style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+      <div class="menu-drag-handle" style="opacity:0.35;cursor:grab"><span></span><span></span><span></span></div>
+      <span style="font-size:1.1rem;width:28px;text-align:center;flex-shrink:0">${mod.icon}</span>
       <span style="flex:1;font-weight:600;font-size:0.88rem">${mod.label}</span>
       <span style="font-size:0.72rem;color:${isVisible?'#059669':'var(--muted)'};margin-right:8px">${isVisible?'Accessible':'Masqué'}</span>
       <div class="toggle-switch${isVisible?' on':''}" id="tab-vis-${mod.id}" onclick="toggleTabVisibility('${mod.id}')"><div class="toggle-knob"></div></div>
@@ -7856,7 +7910,7 @@ function renderSettingsRights(c) {
       <div style="font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">🔐 Droits des invités</div>
       <p style="font-size:0.78rem;color:var(--muted);margin-bottom:16px">Uniquement pour les onglets accessibles.</p>`;
 
-  APP_MODULES.forEach(mod => {
+  getTabOrder().map(id => APP_MODULES.find(m => m.id === id)).filter(Boolean).forEach(mod => {
     if (!GUEST_PERMISSIONS.tabs.includes(mod.id)) return;
     html += `<div style="margin-bottom:16px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span>${mod.icon}</span><span style="font-weight:800;font-size:0.88rem">${mod.label}</span></div>`;
     mod.actions.forEach(action => {
@@ -8229,6 +8283,16 @@ function applyPermissions() {
     btn.classList.toggle('nav-hidden', !canSee);
     if (!canSee && btn.classList.contains('active')) switchTab('tasks');
   });
+
+  // Réordonner les boutons nav selon DATA.tabOrder
+  const _nav = document.querySelector('nav');
+  if (_nav) {
+    const _order = getTabOrder().concat(['settings']);
+    _order.forEach(tabId => {
+      const btn = _nav.querySelector(`button[data-tab="${tabId}"]`);
+      if (btn) _nav.appendChild(btn);
+    });
+  }
 
   // Toggle masquer faites — admin seulement, toujours caché pour les invités
   const hideDoneLabel = document.getElementById('hide-done-label');
