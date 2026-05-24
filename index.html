@@ -416,12 +416,14 @@ textarea{resize:vertical;min-height:60px;}
 #menu-filter-dates .date-pill{width:68px;height:72px;border-radius:14px !important;background:#fdf9f4;border:1.5px solid #e8ddd0;border-top:3px solid #1E4DB7;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0 !important;min-width:unset !important;transition:all 0.15s;}
 #menu-filter-dates .date-pill.active{background:#1E4DB7;border-color:#1E4DB7;border-top-color:#fff;}
 #menu-filter-dates .date-pill:hover:not(.active){background:#f4f0ea;}
-#menu-filter-dates .date-pill .dp-day{font-size:1.1rem;line-height:1;}
-#menu-filter-dates .date-pill .dp-num{font-size:1.3rem;font-weight:900;color:#1E4DB7;line-height:1.1;font-family:sans-serif;}
-#menu-filter-dates .date-pill .dp-mois{font-size:0.48rem;text-transform:uppercase;letter-spacing:0.1em;color:#9a8878;line-height:1.2;}
+#menu-filter-dates .date-pill .dp-emoji{font-size:1.1rem;line-height:1;}
+#menu-filter-dates .date-pill .dp-num{font-size:1.3rem;font-weight:900;color:#1E4DB7;line-height:1;font-family:sans-serif;}
+#menu-filter-dates .date-pill .dp-month{font-size:0.46rem;text-transform:uppercase;letter-spacing:0.1em;color:#9a8878;font-family:sans-serif;}
+#menu-filter-dates .date-pill .dp-tous{font-size:0.68rem;font-weight:800;color:#1E4DB7;font-family:sans-serif;}
 #menu-filter-dates .date-pill.active .dp-num,
-#menu-filter-dates .date-pill.active .dp-mois,
-#menu-filter-dates .date-pill.active .dp-day{color:#fff !important;}
+#menu-filter-dates .date-pill.active .dp-month,
+#menu-filter-dates .date-pill.active .dp-emoji{color:#fff !important;}
+#menu-filter-dates .date-pill.active .dp-tous{color:#fff !important;}
 
 /* Carte englobante par jour */
 .menu-day-card{background:#fdf9f4;border:1px solid #e8ddd0;border-radius:16px;padding:24px 20px;margin-bottom:20px;position:relative;overflow:hidden;text-align:center;}
@@ -466,7 +468,7 @@ textarea{resize:vertical;min-height:60px;}
 
 /* Mobile */
 @media(max-width:768px){
-  #menu-filter-dates .date-pill{width:54px;height:54px;border-radius:12px;}
+  #menu-filter-dates .date-pill{width:58px;height:62px;border-radius:12px;}
   #menu-filter-dates{min-height:62px;}
   .menu-day-card{padding:16px 12px;}
   .menu-service-title{font-size:0.6rem;}
@@ -596,7 +598,6 @@ textarea{resize:vertical;min-height:60px;}
 @media(max-width:768px){
   .infos-pratique-grid{grid-template-columns:1fr;}
   .infos-lieu-btns{flex-direction:column;}
-  #menu-filter-dates .date-pill{width:58px;height:62px;}
 }
 
 /* TIME PICKER */
@@ -1829,17 +1830,13 @@ input, select, textarea { font-family: 'Fredoka', sans-serif !important; font-we
   #mobile-filter-sheet, #mobile-filter-overlay { display: none !important; }
   #fab-container { display: none !important; }
 
-  /* ── INFOS — carton horizontal ──────────────────────────── */
-  .infos-carton-inner{display:flex;gap:20px;align-items:flex-start;text-align:left;}
-  .infos-carton-col-left{flex:1;}
-  .infos-carton-col-mid{display:flex;gap:24px;flex-shrink:0;}
-  .infos-carton-col-right{flex:1;text-align:right;}
-  .infos-carton-dates{justify-content:flex-start;}
-  /* ── INFOS — blocs en grille 2 colonnes ─────────────────── */
-  .infos-blocs-container{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-  #ib-personnes{grid-column:1/-1;}
-  /* ── MENU — day-cards en grille 2 colonnes ──────────────── */
-  #menu-list{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  /* ── INFOS — carton desktop ─────────────────────────────── */
+  .infos-carton{padding:32px 48px;}
+  .infos-carton-names{font-size:1.8rem;}
+  .infos-carton-dates{gap:48px;}
+  .infos-carton-date-num{font-size:2rem;}
+  .infos-carton-date-day{font-size:0.85rem;}
+  .infos-carton-date-mois{font-size:0.72rem;}
   /* ── MENU — pills taille desktop ────────────────────────── */
   #menu-filter-dates .date-pill{width:68px;height:72px;}
 }
@@ -9123,17 +9120,16 @@ function _renderMenuDatePills() {
   if (!dates.length) { bar.innerHTML = ''; return; }
   const allActive = menuDateFilter === 'all';
   let html = `<button class="date-pill ${allActive?'active':''}" data-date="all" onclick="setMenuDateFilter('all')">
-    <span class="dp-day">✿</span>
-    <span class="dp-num">Tous</span>
-    <span class="dp-mois">dates</span>
+    <span class="dp-emoji">✿</span>
+    <span class="dp-tous">Tous</span>
   </button>`;
   for (const d of dates) {
     const cal = dateLabelCalendar(d);
     const active = menuDateFilter === d;
     const weddingCls = cal.isWedding ? ' wedding' : '';
-    const daySpan = cal.emoji
-      ? `<span class="dp-day">${cal.emoji}</span>`
-      : `<span class="dp-day">${cal.day}</span>`;
+    const emojiSpan = cal.emoji
+      ? `<span class="dp-emoji">${cal.emoji}</span>`
+      : `<span class="dp-emoji">${cal.day}</span>`;
     let moisStr = '';
     if (d !== 'amont') {
       try {
@@ -9142,9 +9138,9 @@ function _renderMenuDatePills() {
       } catch(e) {}
     }
     html += `<button class="date-pill${weddingCls} ${active?'active':''}" data-date="${d}" onclick="setMenuDateFilter('${d}')">
-      ${daySpan}
+      ${emojiSpan}
       <span class="dp-num">${cal.num}</span>
-      ${moisStr ? `<span class="dp-mois">${moisStr}</span>` : ''}
+      ${moisStr ? `<span class="dp-month">${moisStr}</span>` : ''}
     </button>`;
   }
   bar.innerHTML = html;
@@ -9548,28 +9544,7 @@ function _renderInfosPratique() {
     <div class="infos-pratique-card"><div class="infos-pratique-label">Mot de passe</div><div class="infos-pratique-val">${d.wifiPass||'—'}</div></div>
   </div>`;
 
-  if (!_isAdmin() && CURRENT_USER?.id) {
-    const g = (DATA.guests||[]).find(x => x.id === CURRENT_USER.id);
-    if (g && (g.fromDate || g.toDate || g.fromHeure || g.toHeure)) {
-      const from = _fmtDH(g.fromDate, g.fromHeure);
-      const to   = _fmtDH(g.toDate,   g.toHeure);
-      const sentence = `<div style="margin-top:10px;padding:12px 14px;background:var(--g1);border:1px solid var(--border);border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.92rem;color:var(--text);line-height:1.5">
-        Vous êtes invité(e) du <strong>${from}</strong> au <strong>${to}</strong>
-      </div>`;
-      return `${wifiGrid}${sentence}${notesHtml}`;
-    }
-  }
-
-  // Admin ou invité sans dates perso → grille complète
-  const arriveeVal = _fmtDH(d.arriveeDate, d.arriveeHeure);
-  const departVal  = _fmtDH(d.departDate,  d.departHeure);
-  const fullGrid = `<div class="infos-pratique-grid">
-    <div class="infos-pratique-card"><div class="infos-pratique-label">WiFi</div><div class="infos-pratique-val">${d.wifi||'—'}</div></div>
-    <div class="infos-pratique-card"><div class="infos-pratique-label">Mot de passe</div><div class="infos-pratique-val">${d.wifiPass||'—'}</div></div>
-    <div class="infos-pratique-card"><div class="infos-pratique-label">Arrivée</div><div class="infos-pratique-val">${arriveeVal}</div></div>
-    <div class="infos-pratique-card"><div class="infos-pratique-label">Départ</div><div class="infos-pratique-val">${departVal}</div></div>
-  </div>`;
-  return `${fullGrid}${notesHtml}`;
+  return `${wifiGrid}${notesHtml}`;
 }
 
 function _renderInfosCagnotte() {
