@@ -378,6 +378,14 @@ textarea{resize:vertical;min-height:60px;}
 .settings-tab-btn{display:flex;align-items:center;gap:8px;width:100%;padding:10px 16px;border:none;background:none;font-family:'Nunito',sans-serif;font-size:0.82rem;font-weight:600;color:var(--muted);cursor:pointer;text-align:left;transition:all 0.15s;border-left:3px solid transparent;}
 .settings-tab-btn:hover{background:rgba(30,77,183,0.05);color:var(--text);}
 .settings-tab-btn.active{background:rgba(30,77,183,0.07);color:var(--acc);border-left-color:var(--acc);font-weight:700;}
+/* Sessions utilisateurs */
+.user-session-row{display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer;border-radius:10px;transition:background 0.15s;}
+.user-session-row:hover{background:var(--g1);}
+.user-session-meta{font-size:0.72rem;color:var(--muted);margin-top:2px;font-family:sans-serif;}
+.user-history{display:flex;flex-direction:column;gap:4px;padding:8px 14px 12px 60px;background:var(--g1);border-radius:0 0 10px 10px;}
+.user-history.hidden{display:none;}
+.user-history-item{font-size:0.72rem;color:var(--muted);font-family:sans-serif;padding:4px 0;border-bottom:1px solid var(--border);}
+.user-history-item:last-child{border-bottom:none;}
 
 /* ROOMS */
 .rooms-zone-btn{padding:5px 12px;border-radius:50px;border:1.5px solid var(--border);background:#fff;font-family:'Nunito',sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.15s;white-space:nowrap;}
@@ -3037,7 +3045,9 @@ const DEFAULT_DATA = {
   infosCagnotte:{url:'',texte:''},
   infosPersonnesCats:[], infosPersonnes:[],
   infosPratiqueNotes:[],
-  tabOrder:[]
+  tabOrder:[],
+  userSessions:{},
+  devices:{}
 };
 
 // ================================================================
@@ -3160,6 +3170,8 @@ async function initFirebase(cfg) {
         if (!DATA.infosLieu)     DATA.infosLieu     = {nom:'',adresse:''};
         if (!DATA.infosPratique) DATA.infosPratique = {wifi:'',wifiPass:'',arriveeDate:'',arriveeHeure:'',departDate:'',departHeure:''};
         if (!DATA.infosCagnotte) DATA.infosCagnotte = {url:'',texte:''};
+        DATA.userSessions = (DATA.userSessions && typeof DATA.userSessions === 'object' && !Array.isArray(DATA.userSessions)) ? DATA.userSessions : {};
+        DATA.devices      = (DATA.devices      && typeof DATA.devices      === 'object' && !Array.isArray(DATA.devices))      ? DATA.devices      : {};
 
         // Appliquer les permissions Firebase avant le rendu
         if (DATA.permissions) _applyFirebasePermissions(DATA.permissions);
@@ -3183,6 +3195,7 @@ async function initFirebase(cfg) {
         if (!_firstTabSwitchDone) { _firstTabSwitchDone = true; switchTab(_getFirstVisibleTab()); }
         _checkPendingRequests();
         if (!_isAdmin()) checkMyChangeRequest();
+        if (CURRENT_USER) checkDeviceReset();
         setSyncStatus('connected', 'Synchronisé ✓');
 
         // Cacher le splash une fois les données prêtes
@@ -3190,6 +3203,7 @@ async function initFirebase(cfg) {
 
         if (!_identityInitialized) {
           _identityInitialized = true;
+          if (CURRENT_USER) setTimeout(_cleanOldSessions, 2000);
           // Si pas d'identité → montrer l'écran de sélection
           if (!CURRENT_USER) setTimeout(showIdentityModal, 300);
         }
@@ -7942,29 +7956,45 @@ function renderSettingsUsers(c) {
     html += `</div>`;
   }
 
-  // Liste des appareils connectés
-  html += `<div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:16px">
-    <div style="font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px">📱 Appareils connectés</div>`;
-
-  const devList = Object.entries(devices);
-  if (!devList.length) {
-    html += `<div style="color:var(--muted);font-size:0.82rem">Aucun appareil enregistré.</div>`;
+  // Liste des utilisateurs connectés (une ligne par utilisateur)
+  const sessions = Object.values(DATA.userSessions || {}).sort((a,b) => (b.lastSeen||0) - (a.lastSeen||0));
+  const myUserId = CURRENT_USER?.id;
+  html += `<div style="background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px">
+    <div style="font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;padding:14px 20px 10px">👥 Utilisateurs connectés</div>`;
+  if (!sessions.length) {
+    html += `<div style="color:var(--muted);font-size:0.82rem;padding:0 20px 14px">Aucune session enregistrée.</div>`;
   } else {
-    devList.forEach(([devId, dev]) => {
-      const g = DATA.guests?.find(x => x.id === dev.userId);
-      const isMe = devId === getDeviceId();
+    sessions.forEach(sess => {
+      const uid = sess.userId;
+      const g = DATA.guests?.find(x => x.id === uid);
+      const isMe = uid === myUserId;
       const col = g ? avatarColor(g.fname) : '#7A90B8';
-      const ini = g ? (g.fname[0]||'')+(g.lname?.[0]||'') : '?';
-      const deviceLabel = dev.deviceLabel || '💻 Appareil';
-      html += `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:32px;height:32px;border-radius:50%;background:${col};display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;color:#fff;flex-shrink:0">${ini.toUpperCase()}</div>
-        <div style="flex:1;min-width:0">
-          <div style="font-weight:700;font-size:0.85rem">${g?g.fname+' '+(g.lname||''):'Inconnu'} ${isMe?'<span style="font-size:0.6rem;background:var(--acc);color:#fff;padding:1px 6px;border-radius:50px">Moi</span>':''}</div>
-          <div style="font-size:0.68rem;color:var(--muted)">${deviceLabel}</div>
-          <div style="font-size:0.65rem;color:var(--muted)">${dev.lastSeen?'Vu le '+new Date(dev.lastSeen).toLocaleDateString('fr-FR'):''}</div>
+      const name = sess.userName || (g ? g.fname+' '+(g.lname||'') : 'Inconnu');
+      const ini = name.split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
+      // Dernier appareil connu depuis les devices
+      const lastDev = Object.values(DATA.devices||{}).find(d=>d.userId===uid);
+      const devLabel = lastDev?.deviceLabel || (sess.loginHistory?.[0]?.deviceLabel) || '';
+      const seenStr = _fmtLastSeen(sess.lastSeen);
+      const metaParts = [];
+      if (seenStr) metaParts.push('Vu le ' + seenStr);
+      if (devLabel) metaParts.push(devLabel.replace(/^[^\s]+ /, ''));
+      const meBadge = isMe ? `<span style="font-size:0.6rem;background:var(--acc);color:#fff;padding:1px 6px;border-radius:50px;flex-shrink:0">Moi</span>` : '';
+      const delBtn = !isMe
+        ? `<button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteUserSession('${uid}')" title="Déconnecter">🗑</button>`
+        : '';
+      const histItems = (sess.loginHistory || []).map(h =>
+        `<div class="user-history-item">${_fmtLastSeen(h.ts)} · ${h.deviceLabel||'?'}</div>`
+      ).join('');
+      html += `<div style="border-top:1px solid var(--g2)">
+        <div class="user-session-row" onclick="toggleUserHistory('${uid}')">
+          <div style="width:36px;height:36px;border-radius:50%;background:${col};display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:800;color:#fff;flex-shrink:0">${ini}</div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:6px;font-weight:700;font-size:0.85rem">${name}${meBadge}</div>
+            <div class="user-session-meta">${metaParts.join(' · ')}</div>
+          </div>
+          ${delBtn}
         </div>
-        <button class="btn btn-ghost btn-sm" onclick="resetDevice('${devId}')" title="Forcer re-sélection">⇄</button>
-        ${!isMe ? `<button class="btn btn-danger btn-sm" onclick="deleteDevice('${devId}')" title="Supprimer">🗑</button>` : ''}
+        ${histItems ? `<div class="user-history hidden" id="uh-${uid}">${histItems}</div>` : ''}
       </div>`;
     });
   }
@@ -8157,15 +8187,25 @@ function _detectDeviceType() {
 
 function registerDevice() {
   try {
-    const devId = getDeviceId();
+    const devId  = getDeviceId();
     const { label } = _detectDeviceType();
+    const userId = CURRENT_USER?.id || null;
+    const userName = CURRENT_USER ? CURRENT_USER.fname + ' ' + (CURRENT_USER.lname || '') : 'Inconnu';
+    const now = Date.now();
+
     if (!DATA.devices) DATA.devices = {};
-    DATA.devices[devId] = {
-      userId: CURRENT_USER?.id || null,
-      userName: CURRENT_USER ? CURRENT_USER.fname+' '+(CURRENT_USER.lname||'') : 'Inconnu',
-      deviceLabel: label,
-      lastSeen: Date.now()
-    };
+    DATA.devices[devId] = { userId, userName, deviceLabel: label, lastSeen: now };
+
+    if (userId) {
+      if (!DATA.userSessions) DATA.userSessions = {};
+      const sess = DATA.userSessions[userId] || {};
+      const history = Array.isArray(sess.loginHistory) ? sess.loginHistory : [];
+      history.unshift({ ts: now, deviceLabel: label });
+      DATA.userSessions[userId] = {
+        userId, userName, lastSeen: now,
+        loginHistory: history.slice(0, 20)
+      };
+    }
     pushData();
   } catch(e) { console.warn('registerDevice:', e); }
 }
@@ -8174,6 +8214,13 @@ function checkDeviceReset() {
   try {
     const devId = getDeviceId();
     const dev = DATA.devices?.[devId];
+    // Kicked → déconnexion immédiate
+    if (dev?.kicked) {
+      localStorage.removeItem('mariage_user');
+      CURRENT_USER = null;
+      showIdentityModal();
+      return;
+    }
     // Appareil supprimé → re-identification
     if (!dev && DATA.devices !== undefined) {
       localStorage.removeItem('mariage_user');
@@ -8191,6 +8238,69 @@ function checkDeviceReset() {
     }
   } catch(e) { console.warn('checkDeviceReset:', e); }
 }
+
+function _cleanOldSessions() {
+  const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+  const myId    = CURRENT_USER?.id;
+  const myDevId = getDeviceId();
+  let dirty = false;
+  if (DATA.userSessions) {
+    Object.keys(DATA.userSessions).forEach(uid => {
+      if (uid !== myId && (DATA.userSessions[uid].lastSeen || 0) < cutoff) {
+        delete DATA.userSessions[uid]; dirty = true;
+      }
+    });
+  }
+  if (DATA.devices) {
+    Object.keys(DATA.devices).forEach(devId => {
+      if (devId !== myDevId && (DATA.devices[devId].lastSeen || 0) < cutoff) {
+        delete DATA.devices[devId]; dirty = true;
+      }
+    });
+  }
+  if (dirty) pushData();
+}
+
+function _fmtLastSeen(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  const JOURS = ['dim.','lun.','mar.','mer.','jeu.','ven.','sam.'];
+  const MOIS  = ['jan.','fév.','mar.','avr.','mai','juin','juil.','août','sep.','oct.','nov.','déc.'];
+  const h = d.getHours(), m = d.getMinutes();
+  return `${JOURS[d.getDay()]} ${d.getDate()} ${MOIS[d.getMonth()]} à ${h}h${m ? String(m).padStart(2,'0') : ''}`;
+}
+
+window.toggleUserHistory = function(userId) {
+  const el = document.getElementById('uh-' + userId);
+  if (el) el.classList.toggle('hidden');
+};
+
+window.deleteUserSession = function(userId) {
+  const sess = DATA.userSessions?.[userId];
+  const name = sess?.userName || 'cet utilisateur';
+  openConfirm(
+    'Déconnecter ' + name + ' ?',
+    'L\'appareil sera éjecté immédiatement et devra se réidentifier.',
+    () => {
+      if (!DATA.devices) DATA.devices = {};
+      Object.keys(DATA.devices).forEach(devId => {
+        if (DATA.devices[devId].userId === userId) DATA.devices[devId].kicked = true;
+      });
+      pushData().then(() => {
+        setTimeout(() => {
+          if (DATA.userSessions) delete DATA.userSessions[userId];
+          Object.keys(DATA.devices || {}).forEach(devId => {
+            if (DATA.devices[devId]?.userId === userId) delete DATA.devices[devId];
+          });
+          pushData();
+          renderSettings();
+          toast('🗑 Utilisateur déconnecté');
+        }, 800);
+      });
+    },
+    { emoji:'🗑', okLabel:'Déconnecter', okClass:'btn-danger' }
+  );
+};
 
 function _updateMobileTasksMeBtn() {
   const btn = document.getElementById('mobile-tasks-me-btn');
