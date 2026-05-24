@@ -409,14 +409,19 @@ textarea{resize:vertical;min-height:60px;}
 
 /* MENU — style carte restaurant botanique */
 #tab-menu{background:#f0f4ff;}
+#tab-infos{background:#f0f4ff;}
 
-/* Pills de filtre date — carrées dans l'onglet Menu */
-#menu-filter-dates{min-height:72px;}
-#menu-filter-dates .date-pill{width:64px;height:64px;border-radius:14px;background:#fff;border:1.5px solid #e0e6f5;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0;min-width:unset;}
-#menu-filter-dates .date-pill.active{background:#1E4DB7;border-color:#1E4DB7;}
+/* Pills de filtre date — variante D */
+#menu-filter-dates{min-height:80px;}
+#menu-filter-dates .date-pill{width:68px;height:72px;border-radius:14px !important;background:#fdf9f4;border:1.5px solid #e8ddd0;border-top:3px solid #1E4DB7;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0 !important;min-width:unset !important;transition:all 0.15s;}
+#menu-filter-dates .date-pill.active{background:#1E4DB7;border-color:#1E4DB7;border-top-color:#fff;}
+#menu-filter-dates .date-pill:hover:not(.active){background:#f4f0ea;}
 #menu-filter-dates .date-pill .dp-day{font-size:1.1rem;line-height:1;}
-#menu-filter-dates .date-pill .dp-num{font-size:0.88rem;font-weight:800;line-height:1;}
-#menu-filter-dates .date-pill .dp-lbl{font-size:0.68rem;font-weight:700;}
+#menu-filter-dates .date-pill .dp-num{font-size:1.3rem;font-weight:900;color:#1E4DB7;line-height:1.1;font-family:sans-serif;}
+#menu-filter-dates .date-pill .dp-mois{font-size:0.48rem;text-transform:uppercase;letter-spacing:0.1em;color:#9a8878;line-height:1.2;}
+#menu-filter-dates .date-pill.active .dp-num,
+#menu-filter-dates .date-pill.active .dp-mois,
+#menu-filter-dates .date-pill.active .dp-day{color:#fff !important;}
 
 /* Carte englobante par jour */
 .menu-day-card{background:#fdf9f4;border:1px solid #e8ddd0;border-radius:16px;padding:24px 20px;margin-bottom:20px;position:relative;overflow:hidden;text-align:center;}
@@ -494,32 +499,65 @@ textarea{resize:vertical;min-height:60px;}
 .courses-cat-del{background:none;border:none;cursor:pointer;padding:3px 7px;border-radius:7px;font-size:0.78rem;color:var(--muted);transition:all 0.15s;}
 .courses-cat-del:hover{background:rgba(220,60,60,0.08);color:#dc3c3c;}
 
-/* INFOS */
+/* INFOS — botanical theme */
+/* Carton d'invitation */
+.infos-carton{background:#fdf9f4;border:1px solid #e8ddd0;border-radius:16px;padding:20px 18px 18px;margin-bottom:18px;position:relative;overflow:hidden;text-align:center;}
+.infos-carton::before,.infos-carton::after{content:'🌿';position:absolute;font-size:3rem;opacity:0.08;pointer-events:none;}
+.infos-carton::before{top:-6px;left:6px;transform:rotate(-30deg);}
+.infos-carton::after{bottom:-6px;right:6px;transform:rotate(150deg);}
+.infos-carton-eyebrow{font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#9a8878;margin-bottom:6px;}
+.infos-carton-names{font-family:'Playfair Display','Georgia',serif;font-size:1.4rem;font-weight:700;color:#2d2520;line-height:1.2;margin-bottom:4px;}
+.infos-carton-ornament{color:#c4a882;font-size:1rem;margin-bottom:10px;}
+.infos-carton-sep{width:60px;height:1px;background:#e8ddd0;margin:0 auto 14px;}
+.infos-carton-dates{display:flex;gap:16px;justify-content:center;margin-bottom:14px;}
+.infos-carton-date-blk{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.infos-carton-date-lbl{font-size:0.55rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#9a8878;}
+.infos-carton-date-day{font-size:0.72rem;color:#6b5d54;}
+.infos-carton-date-num{font-family:'Nunito',sans-serif;font-size:1.6rem;font-weight:900;color:#1E4DB7;line-height:1;}
+.infos-carton-date-mois{font-size:0.62rem;text-transform:uppercase;letter-spacing:.08em;color:#9a8878;}
+.infos-carton-date-heure{font-size:0.72rem;font-weight:700;color:#6b5d54;margin-top:2px;}
+.infos-carton-lieu{font-size:0.72rem;color:#9a8878;line-height:1.5;}
+.infos-carton-lieu strong{font-family:'Nunito',sans-serif;font-size:0.8rem;font-weight:800;color:#2d2520;display:block;}
+/* Blocs infos */
 .infos-blocs-container{display:flex;flex-direction:column;gap:14px;}
-.infos-bloc{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;position:relative;}
+.infos-bloc{background:#fdf9f4;border:1px solid #e8ddd0;border-radius:16px;overflow:hidden;position:relative;}
+.infos-bloc::before,.infos-bloc::after{content:'🌿';position:absolute;font-size:2.5rem;opacity:0.07;pointer-events:none;z-index:0;}
+.infos-bloc::before{top:-4px;right:8px;transform:rotate(20deg);}
+.infos-bloc::after{bottom:-4px;left:8px;transform:rotate(-160deg);}
 .infos-bloc.infos-dragging{opacity:0.45;}
 .infos-bloc.infos-drag-above{box-shadow:0 -3px 0 0 var(--acc);}
 .infos-bloc.infos-drag-below{box-shadow:0 3px 0 0 var(--acc);}
-.infos-bloc-header{display:flex;align-items:center;gap:8px;padding:12px 14px 10px;border-bottom:1px solid var(--g2);}
+.infos-bloc-header{display:flex;align-items:center;gap:8px;padding:12px 14px 10px;border-bottom:1px solid #e8ddd0;position:relative;z-index:1;}
 .infos-bloc-drag-handle{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:3px;cursor:grab;padding:4px;opacity:0.25;transition:opacity 0.15s;flex-shrink:0;touch-action:none;}
 .infos-bloc-drag-handle:hover{opacity:0.7;}
 .infos-bloc-drag-handle span{display:block;width:14px;height:1.5px;background:var(--muted);border-radius:2px;}
-.infos-bloc-title{flex:1;font-family:'Nunito',sans-serif;font-size:0.92rem;font-weight:800;color:var(--text);}
-.infos-bloc-body{padding:14px 16px;}
+.infos-bloc-title{flex:1;display:flex;align-items:center;gap:0;font-family:'Nunito',sans-serif;font-size:0.88rem;font-weight:800;color:#2d2520;text-transform:uppercase;letter-spacing:.06em;}
+.infos-bloc-title::before,.infos-bloc-title::after{content:'';flex:1;height:1px;background:#e8ddd0;}
+.infos-bloc-title::before{margin-right:10px;}
+.infos-bloc-title::after{margin-left:10px;}
+.infos-bloc-body{padding:14px 16px;position:relative;z-index:1;}
+.infos-bloc-body::before{content:'✿';position:absolute;top:8px;right:14px;font-size:0.9rem;color:#c4a882;opacity:0.5;pointer-events:none;}
+/* Lieu */
 .infos-lieu-addr{font-family:'Nunito',sans-serif;font-size:0.88rem;color:var(--text);user-select:all;-webkit-user-select:all;margin-bottom:12px;line-height:1.6;}
 .infos-lieu-btns{display:flex;gap:8px;flex-wrap:wrap;}
+/* Infos pratiques */
 .infos-pratique-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.infos-pratique-card{background:var(--g1);border:1px solid var(--border);border-radius:10px;padding:10px 12px;}
-.infos-pratique-label{font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;}
+.infos-pratique-card{background:rgba(255,255,255,0.7);border:1px solid #e8ddd0;border-radius:10px;padding:10px 12px;}
+.infos-pratique-label{font-size:0.62rem;font-weight:700;color:#9a8878;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;}
 .infos-pratique-val{font-family:'Nunito',sans-serif;font-size:0.9rem;font-weight:700;color:var(--text);word-break:break-all;}
-.infos-notes-section{margin-top:12px;border:1px solid var(--border);border-radius:10px;overflow:hidden;}
-.infos-note-item{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border-bottom:1px solid var(--g2);font-size:0.85rem;line-height:1.5;}
+.infos-notes-section{margin-top:12px;border:1px solid #e8ddd0;border-radius:10px;overflow:hidden;background:rgba(255,255,255,0.5);}
+.infos-note-item{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border-bottom:1px solid rgba(232,221,208,0.6);font-size:0.85rem;line-height:1.5;}
 .infos-note-text{flex:1;color:var(--text);}
 .infos-add-note-btn{display:flex;width:100%;padding:9px 12px;background:none;border:none;cursor:pointer;color:var(--acc);font-family:'Nunito',sans-serif;font-size:0.82rem;font-weight:600;text-align:left;}
-.infos-add-note-btn:hover{background:var(--g1);}
-.infos-cagnotte-link{display:inline-block;font-family:'Nunito',sans-serif;font-size:0.9rem;font-weight:700;color:var(--acc);word-break:break-all;text-decoration:underline;cursor:pointer;margin-bottom:6px;}
-.infos-cagnotte-texte{font-size:0.8rem;color:var(--muted);line-height:1.5;margin:0;}
-.infos-pers-cat{margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--g2);position:relative;}
+.infos-add-note-btn:hover{background:rgba(255,255,255,0.6);}
+/* Cagnotte */
+.infos-cagnotte-wrapper{display:flex;flex-direction:column;gap:10px;}
+.infos-cagnotte-link-row{display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,255,255,0.7);border:1px solid #e8ddd0;border-radius:10px;}
+.infos-cagnotte-icon{font-size:1.2rem;flex-shrink:0;}
+.infos-cagnotte-link{font-family:'Nunito',sans-serif;font-size:0.88rem;font-weight:700;color:var(--acc);word-break:break-all;text-decoration:underline;cursor:pointer;flex:1;}
+.infos-cagnotte-texte{font-size:0.82rem;color:#6b5d54;line-height:1.6;margin:0;padding:10px 14px;background:rgba(255,255,255,0.5);border:1px solid #e8ddd0;border-radius:10px;}
+/* Personnes */
+.infos-pers-cat{margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid rgba(232,221,208,0.6);position:relative;}
 .infos-pers-cat:last-of-type{border-bottom:none;}
 .infos-pers-cat.infos-cat-dragging{opacity:0.4;}
 .infos-pers-cat.infos-cat-above{box-shadow:0 -2px 0 0 var(--acc);}
@@ -528,24 +566,37 @@ textarea{resize:vertical;min-height:60px;}
 .infos-pers-cat-drag{display:flex;flex-direction:column;gap:3px;cursor:grab;padding:4px 3px;opacity:0.25;transition:opacity 0.15s;touch-action:none;flex-shrink:0;}
 .infos-pers-cat-drag:hover{opacity:0.7;}
 .infos-pers-cat-drag span{display:block;width:10px;height:1.5px;background:var(--muted);border-radius:2px;}
-.infos-pers-cat-label{flex:1;font-family:'Nunito',sans-serif;font-size:0.72rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
+.infos-pers-cat-label{flex:1;font-family:'Nunito',sans-serif;font-size:0.72rem;font-weight:800;color:#9a8878;text-transform:uppercase;letter-spacing:.08em;}
 .infos-pers-cat-del{background:none;border:none;cursor:pointer;padding:3px 6px;border-radius:6px;font-size:0.78rem;color:var(--muted);transition:all 0.15s;}
 .infos-pers-cat-del:hover{background:rgba(220,60,60,0.08);color:#dc3c3c;}
 .infos-pers-list{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;}
-.infos-person-card{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 10px;background:var(--g1);border:1px solid var(--border);border-radius:10px;min-width:78px;}
+.infos-person-card{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 10px;background:rgba(255,255,255,0.7);border:1px solid #e8ddd0;border-radius:10px;min-width:78px;}
 .infos-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;font-size:0.78rem;font-weight:800;color:#fff;flex-shrink:0;}
 .infos-person-name{font-family:'Nunito',sans-serif;font-size:0.72rem;font-weight:700;color:var(--text);text-align:center;}
 .infos-person-phone{font-size:0.65rem;color:var(--muted);text-align:center;}
 .infos-person-actions{display:flex;gap:2px;}
 .infos-person-btn{background:none;border:none;cursor:pointer;padding:2px 5px;border-radius:5px;font-size:0.72rem;color:var(--muted);transition:all 0.15s;}
-.infos-person-btn:hover{background:var(--g2);color:var(--text);}
-.infos-add-cat-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:50px;border:1.5px dashed var(--border);background:transparent;font-family:'Nunito',sans-serif;font-size:0.78rem;font-weight:600;color:var(--muted);cursor:pointer;transition:all 0.15s;margin-top:6px;}
+.infos-person-btn:hover{background:rgba(232,221,208,0.5);color:var(--text);}
+.infos-add-cat-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:50px;border:1.5px dashed #e8ddd0;background:transparent;font-family:'Nunito',sans-serif;font-size:0.78rem;font-weight:600;color:#9a8878;cursor:pointer;transition:all 0.15s;margin-top:6px;}
 .infos-add-cat-btn:hover{border-color:var(--acc);color:var(--acc);}
-.infos-add-pers-btn{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;border:1.5px dashed var(--border);background:transparent;font-size:1rem;color:var(--muted);cursor:pointer;transition:all 0.15s;flex-shrink:0;}
+.infos-add-pers-btn{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;border:1.5px dashed #e8ddd0;background:transparent;font-size:1rem;color:#9a8878;cursor:pointer;transition:all 0.15s;flex-shrink:0;}
 .infos-add-pers-btn:hover{border-color:var(--acc);color:var(--acc);}
+/* Modals botaniques */
+#modal-infos-lieu .modal-box,#modal-infos-pratique .modal-box,#modal-infos-cagnotte .modal-box,#modal-addmenu .modal-box{background:#fdf9f4;border:1px solid #e8ddd0;position:relative;overflow:hidden;}
+#modal-infos-lieu .modal-box::before,#modal-infos-pratique .modal-box::before,#modal-infos-cagnotte .modal-box::before,#modal-addmenu .modal-box::before{content:'🌿';position:absolute;top:-8px;right:10px;font-size:2.5rem;opacity:0.08;pointer-events:none;transform:rotate(20deg);}
+#modal-infos-lieu .modal-box h3,#modal-infos-pratique .modal-box h3,#modal-infos-cagnotte .modal-box h3,#modal-addmenu .modal-box h3{display:flex;align-items:center;gap:0;font-family:'Nunito',sans-serif;font-size:0.88rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#2d2520;}
+#modal-infos-lieu .modal-box h3::before,#modal-infos-pratique .modal-box h3::before,#modal-infos-cagnotte .modal-box h3::before,#modal-addmenu .modal-box h3::before,
+#modal-infos-lieu .modal-box h3::after,#modal-infos-pratique .modal-box h3::after,#modal-infos-cagnotte .modal-box h3::after,#modal-addmenu .modal-box h3::after{content:'';flex:1;height:1px;background:#e8ddd0;}
+#modal-infos-lieu .modal-box h3::before,#modal-infos-pratique .modal-box h3::before,#modal-infos-cagnotte .modal-box h3::before,#modal-addmenu .modal-box h3::before{margin-right:10px;}
+#modal-infos-lieu .modal-box h3::after,#modal-infos-pratique .modal-box h3::after,#modal-infos-cagnotte .modal-box h3::after,#modal-addmenu .modal-box h3::after{margin-left:10px;}
+#modal-infos-lieu .modal-box input,#modal-infos-lieu .modal-box textarea,
+#modal-infos-pratique .modal-box input,#modal-infos-pratique .modal-box textarea,
+#modal-infos-cagnotte .modal-box input,#modal-infos-cagnotte .modal-box textarea,
+#modal-addmenu .modal-box input,#modal-addmenu .modal-box textarea{background:rgba(255,255,255,0.7);border-color:#e8ddd0;}
 @media(max-width:768px){
   .infos-pratique-grid{grid-template-columns:1fr;}
   .infos-lieu-btns{flex-direction:column;}
+  #menu-filter-dates .date-pill{width:58px;height:62px;}
 }
 
 /* TIME PICKER */
@@ -1777,6 +1828,20 @@ input, select, textarea { font-family: 'Fredoka', sans-serif !important; font-we
   /* ── MASQUER MOBILE-ONLY ─────────────────────────────────── */
   #mobile-filter-sheet, #mobile-filter-overlay { display: none !important; }
   #fab-container { display: none !important; }
+
+  /* ── INFOS — carton horizontal ──────────────────────────── */
+  .infos-carton-inner{display:flex;gap:20px;align-items:flex-start;text-align:left;}
+  .infos-carton-col-left{flex:1;}
+  .infos-carton-col-mid{display:flex;gap:24px;flex-shrink:0;}
+  .infos-carton-col-right{flex:1;text-align:right;}
+  .infos-carton-dates{justify-content:flex-start;}
+  /* ── INFOS — blocs en grille 2 colonnes ─────────────────── */
+  .infos-blocs-container{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  #ib-personnes{grid-column:1/-1;}
+  /* ── MENU — day-cards en grille 2 colonnes ──────────────── */
+  #menu-list{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  /* ── MENU — pills taille desktop ────────────────────────── */
+  #menu-filter-dates .date-pill{width:68px;height:72px;}
 }
 </style>
 </head>
@@ -2272,6 +2337,7 @@ input, select, textarea { font-family: 'Fredoka', sans-serif !important; font-we
   <div class="section-header">
     <span class="section-title" style="color:var(--sky)">ℹ️ Infos</span>
   </div>
+  <div id="infos-carton-wrap"></div>
   <div id="infos-blocs-container" class="infos-blocs-container"></div>
 </div>
 
@@ -9055,27 +9121,30 @@ function _renderMenuDatePills() {
   const _allowed = _getGuestAllowedMenuDates();
   const dates = getMenuUniqueDates().filter(d => !_allowed || _allowed.has(d));
   if (!dates.length) { bar.innerHTML = ''; return; }
-  const allDates = ['all', ...dates];
-  const pills = bar.querySelectorAll('.date-pill');
-  if (pills.length === allDates.length) { bar.innerHTML = ''; }
-  const bgColors = { 'amont':'var(--gold)', '2026-07-11':'var(--acc)', '2026-07-12':'var(--acc2)', '2026-07-13':'#7FBFB0', '2026-07-14':'#9a9a9a' };
-  let html = `<button class="date-pill ${menuDateFilter==='all'?'active':''}" data-date="all" onclick="setMenuDateFilter('all')"
-    style="${menuDateFilter==='all'?'background:var(--muted);border-color:transparent;':''}">
-    <span class="dp-lbl" style="${menuDateFilter==='all'?'color:#fff':''}">Tous</span>
+  const allActive = menuDateFilter === 'all';
+  let html = `<button class="date-pill ${allActive?'active':''}" data-date="all" onclick="setMenuDateFilter('all')">
+    <span class="dp-day">✿</span>
+    <span class="dp-num">Tous</span>
+    <span class="dp-mois">dates</span>
   </button>`;
   for (const d of dates) {
     const cal = dateLabelCalendar(d);
     const active = menuDateFilter === d;
-    const bg = active ? (bgColors[d] || 'var(--muted)') : '';
-    const inlineStyle = active ? `background:${bg};border-color:transparent;` : '';
-    const textColor = active ? 'color:#fff' : '';
-    const emojiHtml = cal.emoji
-      ? `<span class="dp-day" style="${textColor}">${cal.emoji}</span>`
-      : `<span class="dp-day" style="${textColor}">${cal.day}</span>`;
     const weddingCls = cal.isWedding ? ' wedding' : '';
-    html += `<button class="date-pill${weddingCls} ${active?'active':''}" data-date="${d}"
-      style="${inlineStyle}" onclick="setMenuDateFilter('${d}')">
-      ${emojiHtml}<span class="dp-num" style="${textColor}">${cal.num}</span>
+    const daySpan = cal.emoji
+      ? `<span class="dp-day">${cal.emoji}</span>`
+      : `<span class="dp-day">${cal.day}</span>`;
+    let moisStr = '';
+    if (d !== 'amont') {
+      try {
+        const dt = new Date(normalizeDate(d) + 'T00:00:00');
+        moisStr = MOIS_LABELS[dt.getMonth()].slice(0,4);
+      } catch(e) {}
+    }
+    html += `<button class="date-pill${weddingCls} ${active?'active':''}" data-date="${d}" onclick="setMenuDateFilter('${d}')">
+      ${daySpan}
+      <span class="dp-num">${cal.num}</span>
+      ${moisStr ? `<span class="dp-mois">${moisStr}</span>` : ''}
     </button>`;
   }
   bar.innerHTML = html;
@@ -9353,6 +9422,61 @@ window.renderInfos = function() {
   _ensureInfosDefaults();
   const container = document.getElementById('infos-blocs-container');
   if (!container) return;
+
+  // Carton d'invitation
+  const cartonWrap = document.getElementById('infos-carton-wrap');
+  if (cartonWrap) {
+    function _cFmtH(h) {
+      if (!h) return '';
+      if (!/^\d+:\d+$/.test(h)) return h;
+      const [hh, mm] = h.split(':').map(Number);
+      return mm === 0 ? `${hh}h` : `${hh}h${String(mm).padStart(2,'0')}`;
+    }
+    function _cDateBlk(dateStr, heureStr, label) {
+      if (!dateStr) return '';
+      const norm = normalizeDate(dateStr);
+      let dayTxt = '', numTxt = '', moisTxt = '';
+      try {
+        const dt = new Date(norm + 'T00:00:00');
+        const JOURS = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+        dayTxt = JOURS[dt.getDay()];
+        numTxt = String(dt.getDate());
+        moisTxt = MOIS_LABELS[dt.getMonth()].slice(0,4);
+      } catch(e) {}
+      const hStr = _cFmtH(heureStr);
+      return `<div class="infos-carton-date-blk">
+        <div class="infos-carton-date-lbl">${label}</div>
+        <div class="infos-carton-date-day">${dayTxt}</div>
+        <div class="infos-carton-date-num">${numTxt}</div>
+        <div class="infos-carton-date-mois">${moisTxt}</div>
+        ${hStr ? `<div class="infos-carton-date-heure">${hStr}</div>` : ''}
+      </div>`;
+    }
+    const p = DATA.infosPratique || {};
+    const l = DATA.infosLieu || {};
+    let arrDate = p.arriveeDate, arrH = p.arriveeHeure, depDate = p.departDate, depH = p.departHeure;
+    if (!_isAdmin() && CURRENT_USER?.id) {
+      const g = (DATA.guests||[]).find(x => x.id === CURRENT_USER.id);
+      if (g && (g.fromDate || g.toDate)) {
+        arrDate = g.fromDate || arrDate; arrH = g.fromHeure || arrH;
+        depDate = g.toDate   || depDate; depH = g.toHeure   || depH;
+      }
+    }
+    const arrBlk = _cDateBlk(arrDate, arrH, 'Arrivée');
+    const depBlk = _cDateBlk(depDate, depH, 'Départ');
+    const lieuHtml = l.nom
+      ? `<div class="infos-carton-lieu"><strong>${l.nom}</strong>${l.adresse ? l.adresse.split('\n')[0] : ''}</div>`
+      : '';
+    cartonWrap.innerHTML = `<div class="infos-carton">
+      <div class="infos-carton-eyebrow">Votre séjour au Gîte du Bonheur</div>
+      <div class="infos-carton-names">Sarah &amp; Antoine</div>
+      <div class="infos-carton-ornament">✿</div>
+      <div class="infos-carton-sep"></div>
+      <div class="infos-carton-dates">${arrBlk}${depBlk}</div>
+      ${lieuHtml}
+    </div>`;
+  }
+
   const canEdit = _canDo('infos','edit');
   const blocs = DATA.infosBlocs.length ? DATA.infosBlocs : DEFAULT_INFOS_BLOCS;
   const titles = {lieu:'📍 Lieu', pratique:'📋 Infos pratiques', cagnotte:'🎁 Cagnotte', personnes:'👥 Personnes référentes'};
@@ -9450,11 +9574,11 @@ function _renderInfosPratique() {
 
 function _renderInfosCagnotte() {
   const d = DATA.infosCagnotte || {};
-  const link = d.url
-    ? `<span class="infos-cagnotte-link" onclick="window.open('${d.url}','_blank')">${d.url}</span>`
-    : '<span style="color:var(--muted)">Aucun lien configuré.</span>';
+  const linkRow = d.url
+    ? `<div class="infos-cagnotte-link-row"><span class="infos-cagnotte-icon">🎁</span><span class="infos-cagnotte-link" onclick="window.open('${d.url}','_blank')">${d.url}</span></div>`
+    : `<div class="infos-cagnotte-link-row"><span class="infos-cagnotte-icon">🎁</span><span style="color:var(--muted);font-size:0.85rem">Aucun lien configuré.</span></div>`;
   const texte = d.texte ? `<p class="infos-cagnotte-texte">${d.texte}</p>` : '';
-  return `<div>${link}</div>${texte}`;
+  return `<div class="infos-cagnotte-wrapper">${linkRow}${texte}</div>`;
 }
 
 function _renderInfosPersonnes() {
