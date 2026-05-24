@@ -430,6 +430,9 @@ textarea{resize:vertical;min-height:60px;}
 /* Titre de service */
 .menu-service-title{display:flex;align-items:center;justify-content:center;gap:8px;font-size:0.65rem;letter-spacing:0.22em;color:#1E4DB7;font-weight:700;font-family:sans-serif;text-transform:uppercase;margin:12px 0 8px;}
 .menu-service-title::before,.menu-service-title::after{content:'';height:1px;width:30px;background:#1E4DB7;opacity:0.25;display:block;flex-shrink:0;}
+.menu-service-pill{font-family:'Nunito',sans-serif;font-size:0.8rem;font-weight:600;padding:5px 12px;border-radius:20px;border:1.5px solid var(--border);background:#fff;color:var(--text);cursor:pointer;transition:all 0.15s;}
+.menu-service-pill.active{background:var(--acc);color:#fff;border-color:var(--acc);}
+.menu-service-pill:hover:not(.active){background:rgba(30,77,183,0.06);border-color:rgba(30,77,183,0.3);}
 
 /* Séparateur entre services */
 .menu-sep{height:1px;background:#e8ddd0;margin:12px 32px;}
@@ -440,8 +443,7 @@ textarea{resize:vertical;min-height:60px;}
 .menu-card-body{flex:1;min-width:0;text-align:center;}
 .menu-card-name{font-family:Georgia,serif;font-size:0.9rem;font-weight:normal;color:#3d3530;}
 .menu-card-detail{font-style:italic;color:#9a8878;font-size:0.75rem;margin-top:2px;}
-.menu-card-details{font-style:italic;font-size:0.78rem;color:#9a8878;margin-top:5px;line-height:1.5;display:none;}
-.menu-card-details.open{display:block;}
+.menu-card-details{font-style:italic;font-size:0.78rem;color:#9a8878;margin-top:5px;line-height:1.5;}
 .menu-card-actions{display:flex;gap:4px;flex-shrink:0;align-items:flex-start;}
 .menu-card-btn{background:none;border:none;cursor:pointer;padding:4px 6px;border-radius:8px;font-size:0.78rem;color:var(--muted);transition:all 0.15s;}
 .menu-card-btn:hover{background:rgba(30,77,183,0.07);color:var(--text);}
@@ -979,7 +981,7 @@ textarea{resize:vertical;min-height:60px;}
     border-radius: 24px 24px 0 0 !important;
     max-width: 100% !important; width: 100% !important;
     max-height: 92vh; overflow-y: auto;
-    padding: 20px 16px 36px !important;
+    padding: 20px 16px 80px !important;
   }
   .modal::before { content:''; display:block; width:36px; height:4px; background:rgba(30,77,183,0.15); border-radius:2px; margin:-8px auto 14px; }
   .modal h3 { font-size: 1rem; margin-bottom: 14px; }
@@ -2042,17 +2044,6 @@ input, select, textarea { font-family: 'Fredoka', sans-serif !important; font-we
         <button type="button" class="menu-service-pill" data-service="cocktail"       onclick="selectMenuService('cocktail')">🍹 Cocktail</button>
       </div>
       <input type="hidden" id="menu-service" value="diner">
-    </div>
-
-    <div class="form-group">
-      <label>Horaire</label>
-      <button type="button" onclick="openTimePickerCb(v=>{document.getElementById('menu-time').value=v;document.getElementById('menu-time-display').textContent=v;},document.getElementById('menu-time').value)"
-        style="display:flex;align-items:center;gap:10px;width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;background:rgba(30,77,183,0.02);cursor:pointer;font-family:'Nunito',sans-serif;text-align:left">
-        <span style="font-size:1.3rem">🕐</span>
-        <span id="menu-time-display" style="font-size:1rem;font-weight:700;color:var(--acc);font-family:'Nunito',sans-serif">Non défini</span>
-        <span style="color:var(--muted);font-size:0.75rem;margin-left:auto">Cliquer pour changer</span>
-      </button>
-      <input type="hidden" id="menu-time" value="">
     </div>
 
     <div class="form-group">
@@ -8231,6 +8222,7 @@ window.selectIdentity = function(guestId) {
   localStorage.setItem('mariage_user', JSON.stringify(CURRENT_USER));
   registerDevice();
   closeModal('modal-identity');
+  _progDayManual = false; _menuDateManual = false; _taskDateManual = false;
   applyPermissions();
   switchTab(_getFirstVisibleTab());
   toast(`👋 Bienvenue ${g.fname} !`);
@@ -8312,6 +8304,7 @@ window.resetIdentity = function() {
   openConfirm('Changer d\'identité ?', 'Vous devrez vous re-sélectionner.', () => {
     localStorage.removeItem('mariage_user');
     CURRENT_USER = null;
+    _progDayManual = false; _menuDateManual = false; _taskDateManual = false;
     applyPermissions();
     showIdentityModal();
   });
@@ -8374,10 +8367,8 @@ function applyPermissions() {
   renderCourses();
   renderInfos();
 
-  // Reset la navigation pour que les bons jours s'affichent
-  _progDayManual = false;
-  _menuDateManual = false;
-  _taskDateManual = false;
+  // Les resets de date (_progDayManual, _menuDateManual, _taskDateManual)
+  // se font uniquement au changement d'identité (selectIdentity / resetIdentity)
 
   // Badge identité
   _renderUserBadge();
@@ -9167,10 +9158,6 @@ window.renderMenu = function() {
         const handleHtml = canMove
           ? `<div class="menu-drag-handle"><span></span><span></span><span></span></div>`
           : `<div style="width:18px"></div>`;
-        const timeStr = item.time ? `🕐 ${item.time}` : '';
-        const detailsChevron = item.details
-          ? `<button class="menu-card-btn" onclick="toggleMenuDetails('${item.id}')" title="Détails">▾</button>`
-          : '';
         const editBtn = canEdit
           ? `<button class="menu-card-btn" onclick="openEditMenuModal('${item.id}')" title="Modifier">✏️</button>`
           : '';
@@ -9185,11 +9172,10 @@ window.renderMenu = function() {
           ${handleHtml}
           <div class="menu-card-body">
             <div class="menu-card-name">${item.name || '(sans nom)'}</div>
-            ${timeStr ? `<div class="menu-card-detail">${timeStr}</div>` : ''}
             ${detailsHtml}
           </div>
           <div class="menu-card-actions">
-            ${detailsChevron}${editBtn}${deleteBtn}
+            ${editBtn}${deleteBtn}
           </div>
         </div>`;
       });
@@ -9280,8 +9266,6 @@ window.openAddMenuModal = function() {
   document.getElementById('menu-date').value = '2026-07-12';
   document.getElementById('menu-date-display').textContent = dateLabel('2026-07-12');
   document.getElementById('menu-date-display').className = 'dp-val';
-  document.getElementById('menu-time').value    = '';
-  document.getElementById('menu-time-display').textContent = 'Non défini';
   document.getElementById('menu-name').value    = '';
   document.getElementById('menu-details').value = '';
   selectMenuService('diner');
@@ -9298,8 +9282,6 @@ window.openEditMenuModal = function(id) {
   document.getElementById('menu-date').value = _mDateIso;
   document.getElementById('menu-date-display').textContent = dateLabel(_mDateIso);
   document.getElementById('menu-date-display').className = 'dp-val';
-  document.getElementById('menu-time').value    = item.time    || '';
-  document.getElementById('menu-time-display').textContent = item.time || 'Non défini';
   document.getElementById('menu-name').value    = item.name    || '';
   document.getElementById('menu-details').value = item.details || '';
   selectMenuService(item.service || 'diner');
@@ -9309,7 +9291,6 @@ window.openEditMenuModal = function(id) {
 window.saveMenu = function() {
   const date    = document.getElementById('menu-date').value;
   const service = document.getElementById('menu-service').value;
-  const time    = document.getElementById('menu-time').value.trim();
   const name    = document.getElementById('menu-name').value.trim();
   const details = document.getElementById('menu-details').value.trim();
 
@@ -9322,12 +9303,12 @@ window.saveMenu = function() {
     const item = DATA.menu.find(i => i.id === _editMenuId);
     if (item) {
       item.date = date; item.service = service;
-      item.time = time || undefined; item.name = name; item.details = details || undefined;
+      item.name = name; item.details = details || undefined;
     }
     toast('✅ Plat modifié');
   } else {
     const maxOrder = DATA.menu.reduce((m, i) => Math.max(m, i.order || 0), -1);
-    DATA.menu.push({ id: uid(), date, service, time: time || undefined, name, details: details || undefined, order: maxOrder + 1 });
+    DATA.menu.push({ id: uid(), date, service, name, details: details || undefined, order: maxOrder + 1 });
     toast('✅ Plat ajouté');
   }
 
