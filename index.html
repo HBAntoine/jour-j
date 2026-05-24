@@ -413,16 +413,15 @@ textarea{resize:vertical;min-height:60px;}
 
 /* Pills de filtre date — variante D */
 #menu-filter-dates{min-height:80px;}
-#menu-filter-dates .date-pill{width:68px;height:72px;border-radius:14px !important;background:#fdf9f4;border:1.5px solid #e8ddd0;border-top:3px solid #1E4DB7;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0 !important;min-width:unset !important;transition:all 0.15s;}
-#menu-filter-dates .date-pill.active{background:#1E4DB7;border-color:#1E4DB7;border-top-color:#fff;}
-#menu-filter-dates .date-pill:hover:not(.active){background:#f4f0ea;}
-#menu-filter-dates .date-pill .dp-emoji{font-size:1.1rem;line-height:1;}
-#menu-filter-dates .date-pill .dp-num{font-size:1.3rem;font-weight:900;color:#1E4DB7;line-height:1;font-family:sans-serif;}
-#menu-filter-dates .date-pill .dp-month{font-size:0.46rem;text-transform:uppercase;letter-spacing:0.1em;color:#9a8878;font-family:sans-serif;}
-#menu-filter-dates .date-pill .dp-tous{font-size:0.68rem;font-weight:800;color:#1E4DB7;font-family:sans-serif;}
-#menu-filter-dates .date-pill.active .dp-num,
-#menu-filter-dates .date-pill.active .dp-month,
-#menu-filter-dates .date-pill.active .dp-emoji{color:#fff !important;}
+#menu-filter-dates .date-pill{display:flex !important;flex-direction:column !important;align-items:center !important;justify-content:center !important;width:68px !important;height:72px !important;border-radius:14px !important;background:#fdf9f4 !important;border:1.5px solid #e8ddd0 !important;border-top:3px solid #1E4DB7 !important;cursor:pointer !important;gap:1px !important;padding:0 !important;min-width:unset !important;white-space:normal !important;transition:all 0.15s !important;}
+#menu-filter-dates .date-pill.active{background:#1E4DB7 !important;border-color:#1E4DB7 !important;border-top-color:#fff !important;}
+#menu-filter-dates .date-pill:hover:not(.active){background:#f4f0ea !important;}
+#menu-filter-dates .date-pill .dp-em{font-size:16px;}
+#menu-filter-dates .date-pill .dp-num{font-size:1.3rem !important;font-weight:900 !important;color:#1E4DB7 !important;font-family:sans-serif !important;line-height:1 !important;}
+#menu-filter-dates .date-pill .dp-month{font-size:0.48rem !important;text-transform:uppercase !important;letter-spacing:0.1em !important;color:#9a8878 !important;font-family:sans-serif !important;}
+#menu-filter-dates .date-pill .dp-tous{font-size:0.7rem !important;font-weight:900 !important;color:#1E4DB7 !important;font-family:sans-serif !important;}
+#menu-filter-dates .date-pill.active .dp-num{color:#fff !important;}
+#menu-filter-dates .date-pill.active .dp-month{color:rgba(255,255,255,0.7) !important;}
 #menu-filter-dates .date-pill.active .dp-tous{color:#fff !important;}
 
 /* Carte englobante par jour */
@@ -468,7 +467,7 @@ textarea{resize:vertical;min-height:60px;}
 
 /* Mobile */
 @media(max-width:768px){
-  #menu-filter-dates .date-pill{width:58px;height:62px;border-radius:12px;}
+  #menu-filter-dates .date-pill{width:58px !important;height:62px !important;border-radius:12px !important;}
   #menu-filter-dates{min-height:62px;}
   .menu-day-card{padding:16px 12px;}
   .menu-service-title{font-size:0.6rem;}
@@ -9120,25 +9119,25 @@ function _renderMenuDatePills() {
   if (!dates.length) { bar.innerHTML = ''; return; }
   const allActive = menuDateFilter === 'all';
   let html = `<button class="date-pill ${allActive?'active':''}" data-date="all" onclick="setMenuDateFilter('all')">
-    <span class="dp-emoji">✿</span>
+    <span class="dp-em">✿</span>
     <span class="dp-tous">Tous</span>
   </button>`;
   for (const d of dates) {
     const cal = dateLabelCalendar(d);
     const active = menuDateFilter === d;
     const weddingCls = cal.isWedding ? ' wedding' : '';
-    const emojiSpan = cal.emoji
-      ? `<span class="dp-emoji">${cal.emoji}</span>`
-      : `<span class="dp-emoji">${cal.day}</span>`;
+    const emSpan = cal.emoji
+      ? `<span class="dp-em">${cal.emoji}</span>`
+      : `<span class="dp-em">${cal.day}</span>`;
     let moisStr = '';
     if (d !== 'amont') {
       try {
         const dt = new Date(normalizeDate(d) + 'T00:00:00');
-        moisStr = MOIS_LABELS[dt.getMonth()].slice(0,4);
+        moisStr = MOIS_LABELS[dt.getMonth()].slice(0,4).toUpperCase() + '.';
       } catch(e) {}
     }
     html += `<button class="date-pill${weddingCls} ${active?'active':''}" data-date="${d}" onclick="setMenuDateFilter('${d}')">
-      ${emojiSpan}
+      ${emSpan}
       <span class="dp-num">${cal.num}</span>
       ${moisStr ? `<span class="dp-month">${moisStr}</span>` : ''}
     </button>`;
