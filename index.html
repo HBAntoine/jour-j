@@ -3920,7 +3920,7 @@ function renderTasks() {
         html += '<button class="btn btn-danger btn-sm" onclick="deleteTask(\''+task.id+'\')">&times; Suppr.</button>';
         html += '</div></div>';
       }
-      html += '<button class="btn btn-ghost btn-sm add-sub-btn" onclick="openQuickSub(\''+cat.id+'\',\''+d+'\')">&plus; Ajouter une tache</button>';
+      if (_canDo('tasks','create')) html += '<button class="btn btn-ghost btn-sm add-sub-btn" onclick="openQuickSub(\''+cat.id+'\',\''+d+'\')">&plus; Ajouter une tache</button>';
       html += '</div>';
     }
     // Filet de sécurité : tâches orphelines (catégorie supprimée sans migration)
