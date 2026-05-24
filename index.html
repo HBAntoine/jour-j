@@ -378,6 +378,15 @@ textarea{resize:vertical;min-height:60px;}
 .settings-tab-btn{display:flex;align-items:center;gap:8px;width:100%;padding:10px 16px;border:none;background:none;font-family:'Nunito',sans-serif;font-size:0.82rem;font-weight:600;color:var(--muted);cursor:pointer;text-align:left;transition:all 0.15s;border-left:3px solid transparent;}
 .settings-tab-btn:hover{background:rgba(30,77,183,0.05);color:var(--text);}
 .settings-tab-btn.active{background:rgba(30,77,183,0.07);color:var(--acc);border-left-color:var(--acc);font-weight:700;}
+/* Sous-onglet Événement */
+.event-type-grid{display:flex;flex-wrap:wrap;gap:8px;}
+.event-type-pill{padding:7px 14px;border-radius:50px;border:1.5px solid var(--border);background:var(--g2);cursor:pointer;font-size:0.82rem;font-weight:600;transition:all 0.15s;font-family:'Nunito',sans-serif;}
+.event-type-pill.active{background:var(--acc);color:#fff;border-color:var(--acc);}
+.event-type-pill:hover:not(.active){background:rgba(30,77,183,0.08);border-color:rgba(30,77,183,0.3);}
+.event-date-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:rgba(30,77,183,0.08);color:var(--acc);border-radius:50px;font-size:0.78rem;font-weight:700;font-family:sans-serif;}
+.event-date-chip button{background:none;border:none;cursor:pointer;color:var(--acc);font-size:0.8rem;padding:0 2px;}
+.event-field-inline{width:100%;border:none;border-bottom:1.5px solid var(--border);background:transparent;font-family:inherit;font-size:0.95rem;font-weight:700;color:var(--text);padding:4px 0;outline:none;transition:border-color 0.15s;}
+.event-field-inline:focus{border-bottom-color:var(--acc);}
 /* Sessions utilisateurs */
 .user-session-row{display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer;border-radius:10px;transition:background 0.15s;}
 .user-session-row:hover{background:var(--g1);}
@@ -1875,8 +1884,8 @@ input, select, textarea { font-family: 'Fredoka', sans-serif !important; font-we
 
 
 <header style="position:relative">
-  <h1><span class="name-sarah">Sarah</span> <span class="name-amp">&amp;</span> <span class="name-main">Antoine</span></h1>
-  <div class="date-badge">💍 12 juillet 2026 · Gîte du Bonheur</div><br>
+  <h1 id="header-event-title"><span class="name-sarah">Sarah</span> <span class="name-amp">&amp;</span> <span class="name-main">Antoine</span></h1>
+  <div class="date-badge" id="header-event-subtitle">💍 12 juillet 2026 · Gîte du Bonheur</div><br>
   <div id="sync-indicator" class="sync-status offline">
     <div class="sync-dot"></div>
     <span id="sync-text">Connexion…</span>
@@ -2360,6 +2369,9 @@ input, select, textarea { font-family: 'Fredoka', sans-serif !important; font-we
         <button class="settings-tab-btn" data-stab="rights" onclick="switchSettingsTab('rights')">
           <span>🔐</span> Droits d'accès
         </button>
+        <button class="settings-tab-btn" data-stab="evenement" onclick="switchSettingsTab('evenement')">
+          <span>🎉</span> Événement
+        </button>
       </div>
     </div>
 
@@ -2429,7 +2441,7 @@ input, select, textarea { font-family: 'Fredoka', sans-serif !important; font-we
 <div id="modal-identity" class="modal-overlay" style="z-index:900;background:rgba(26,47,90,0.85)">
   <div class="modal" style="max-width:480px;text-align:center">
     <div style="font-size:2.5rem;margin-bottom:8px">💍</div>
-    <h2 style="font-size:1.4rem;color:var(--acc);margin-bottom:4px">Mariage de Sarah & Antoine</h2>
+    <h2 id="modal-identity-title" style="font-size:1.4rem;color:var(--acc);margin-bottom:4px">Mariage de Sarah & Antoine</h2>
     <p style="color:var(--muted);font-size:0.85rem;margin-bottom:20px">Bienvenue ! Qui êtes-vous ?</p>
     <!-- Recherche -->
     <input type="text" id="identity-search" placeholder="🔍 Chercher votre prénom…"
@@ -3047,7 +3059,14 @@ const DEFAULT_DATA = {
   infosPratiqueNotes:[],
   tabOrder:[],
   userSessions:{},
-  devices:{}
+  devices:{},
+  evenement:{
+    type:'Mariage', typeCustom:'',
+    titreCouple:'Sarah & Antoine',
+    sousTitre:'12 juillet 2026 · Gîte du Bonheur',
+    lieu:'Gîte du Bonheur',
+    dates:[], cartonVisible:true, cartonTexte:''
+  }
 };
 
 // ================================================================
@@ -3172,6 +3191,13 @@ async function initFirebase(cfg) {
         if (!DATA.infosCagnotte) DATA.infosCagnotte = {url:'',texte:''};
         DATA.userSessions = (DATA.userSessions && typeof DATA.userSessions === 'object' && !Array.isArray(DATA.userSessions)) ? DATA.userSessions : {};
         DATA.devices      = (DATA.devices      && typeof DATA.devices      === 'object' && !Array.isArray(DATA.devices))      ? DATA.devices      : {};
+        if (!DATA.evenement || typeof DATA.evenement !== 'object') DATA.evenement = {};
+        if (!DATA.evenement.titreCouple)  DATA.evenement.titreCouple  = 'Sarah & Antoine';
+        if (!DATA.evenement.sousTitre)    DATA.evenement.sousTitre    = '12 juillet 2026 · Gîte du Bonheur';
+        if (!DATA.evenement.lieu)         DATA.evenement.lieu         = 'Gîte du Bonheur';
+        if (!DATA.evenement.type)         DATA.evenement.type         = 'Mariage';
+        if (!Array.isArray(DATA.evenement.dates)) DATA.evenement.dates = [];
+        if (DATA.evenement.cartonVisible === undefined) DATA.evenement.cartonVisible = true;
 
         // Appliquer les permissions Firebase avant le rendu
         if (DATA.permissions) _applyFirebasePermissions(DATA.permissions);
@@ -3333,6 +3359,7 @@ function renderAll() {
   renderInfos();
   if (_isAdmin()) renderSettings();
   _renderUserBadge();
+  _renderEventHeader();
   // NE PAS appeler applyPermissions ici — appelé séparément après Firebase update
 }
 
@@ -3546,9 +3573,10 @@ window.dpRender = function() {
     const iso = `${_dpYear}-${String(_dpMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const dt = new Date(iso+'T00:00:00');
     const isToday = dt.getTime()===today.getTime();
-    const isEaster = !!DATE_EASTER[iso];
-    const title = isEaster ? DATE_EASTER[iso].label : '';
-    html += `<div class="dp-day${isToday?' dp-today':''}${isEaster?' dp-special':''}" 
+    const _evDates = DATA.evenement?.dates || [];
+    const isEaster = !!DATE_EASTER[iso] || _evDates.includes(iso);
+    const title = DATE_EASTER[iso] ? DATE_EASTER[iso].label : '';
+    html += `<div class="dp-day${isToday?' dp-today':''}${isEaster?' dp-special':''}"
       data-iso="${iso}" onclick="dpPickDay('${iso}')" title="${title}">${d}</div>`;
   }
   grid.innerHTML = html;
@@ -7926,6 +7954,7 @@ function renderSettings() {
   const c = document.getElementById('settings-content');
   if (!c) return;
   if (_settingsTab === 'users') renderSettingsUsers(c);
+  else if (_settingsTab === 'evenement') renderSettingsEvenement(c);
   else renderSettingsRights(c);
 }
 
@@ -8168,6 +8197,158 @@ window.savePermissions = function() {
   toast('✅ Droits sauvegardés — effectifs immédiatement');
 };
 
+
+// ── Événement ─────────────────────────────────────────────────
+function _renderEventHeader() {
+  const ev = DATA.evenement || {};
+  const titleEl = document.getElementById('header-event-title');
+  if (titleEl) titleEl.textContent = ev.titreCouple || 'Sarah & Antoine';
+  const subtitleEl = document.getElementById('header-event-subtitle');
+  if (subtitleEl) subtitleEl.textContent = '💍 ' + (ev.sousTitre || '12 juillet 2026 · Gîte du Bonheur');
+  const idTitle = document.getElementById('modal-identity-title');
+  if (idTitle) idTitle.textContent = (ev.type||'Mariage') + ' de ' + (ev.titreCouple||'Sarah & Antoine');
+}
+
+function _buildCartonPreviewHTML(ev) {
+  ev = ev || DATA.evenement || {};
+  const eyebrow = ev.lieu ? 'Votre séjour au ' + ev.lieu : (ev.sousTitre||'');
+  const names = (ev.titreCouple||'Sarah & Antoine').replace(/&/g,'&amp;');
+  const cartonTxt = ev.cartonTexte ? `<div class="infos-carton-lieu" style="margin-top:10px;font-style:italic">${ev.cartonTexte}</div>` : '';
+  const dateChips = (ev.dates||[]).map(d => {
+    try {
+      const dt = new Date(d+'T00:00:00');
+      const JOURS = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+      return `<div class="infos-carton-date-blk"><div class="infos-carton-date-day">${JOURS[dt.getDay()]}</div><div class="infos-carton-date-num">${dt.getDate()}</div><div class="infos-carton-date-mois">${MOIS_LABELS[dt.getMonth()].slice(0,4)}</div></div>`;
+    } catch(e) { return ''; }
+  }).join('');
+  const datesHtml = dateChips ? `<div class="infos-carton-dates" style="margin-bottom:6px">${dateChips}</div>` : '';
+  const lieuHtml = ev.lieu ? `<div class="infos-carton-lieu"><strong>${ev.lieu}</strong></div>` : '';
+  return `<div class="infos-carton" style="pointer-events:none">
+    <div class="infos-carton-eyebrow">${eyebrow}</div>
+    <div class="infos-carton-names">${names}</div>
+    <div class="infos-carton-ornament">✿</div>
+    <div class="infos-carton-sep"></div>
+    ${datesHtml}${lieuHtml}${cartonTxt}
+  </div>`;
+}
+
+function renderSettingsEvenement(c) {
+  const ev = DATA.evenement || {};
+  const TYPES = [
+    {id:'Mariage',emoji:'💍'},{id:'Anniversaire',emoji:'🎂'},{id:'EVG',emoji:'🥂'},
+    {id:'EVJF',emoji:'👠'},{id:'Baby Shower',emoji:'👶'},{id:'Fête',emoji:'🎉'},
+    {id:'Séminaire',emoji:'🏢'},{id:'PACS',emoji:'❤️'},{id:'Remise de diplôme',emoji:'🎓'},
+    {id:'Personnalisé',emoji:'✏️'}
+  ];
+  const typePills = TYPES.map(t =>
+    `<button class="event-type-pill${ev.type===t.id?' active':''}" onclick="setEvenementType('${t.id}')">${t.emoji} ${t.id}</button>`
+  ).join('');
+  const customInput = ev.type==='Personnalisé'
+    ? `<div style="margin-top:12px"><input class="event-field-inline" placeholder="Nom de l'événement" value="${(ev.typeCustom||'').replace(/"/g,'&quot;')}" onblur="saveEvenementField('typeCustom',this.value)"></div>`
+    : '';
+  const dateChips = (ev.dates||[]).map(d => {
+    let lbl = d;
+    try { const dt=new Date(d+'T00:00:00'); lbl=dt.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'long'}); } catch(e){}
+    return `<span class="event-date-chip">${lbl}<button onclick="removeEvenementDate('${d}')">✕</button></span>`;
+  }).join('');
+  const cartonVisible = ev.cartonVisible !== false;
+  const preview = _buildCartonPreviewHTML(ev);
+  const cartonTexteEsc = (ev.cartonTexte||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  const html = `<div style="max-width:560px">
+    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:16px">
+      <div style="font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px">🎭 Type d'événement</div>
+      <div class="event-type-grid">${typePills}</div>${customInput}
+    </div>
+    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:16px">
+      <div style="font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px">✏️ Titre &amp; identité</div>
+      <div style="margin-bottom:16px">
+        <div style="font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Titre du couple / événement</div>
+        <input class="event-field-inline" value="${(ev.titreCouple||'').replace(/"/g,'&quot;')}" onblur="saveEvenementField('titreCouple',this.value)">
+      </div>
+      <div style="margin-bottom:16px">
+        <div style="font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Sous-titre (date · lieu)</div>
+        <input class="event-field-inline" value="${(ev.sousTitre||'').replace(/"/g,'&quot;')}" onblur="saveEvenementField('sousTitre',this.value)">
+      </div>
+      <div>
+        <div style="font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Lieu</div>
+        <input class="event-field-inline" value="${(ev.lieu||'').replace(/"/g,'&quot;')}" onblur="saveEvenementField('lieu',this.value)">
+      </div>
+    </div>
+    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:16px">
+      <div style="font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px">📅 Dates de l'événement</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+        ${dateChips}
+        <button class="btn btn-ghost btn-sm" onclick="addEvenementDate()">＋ Ajouter une date</button>
+      </div>
+    </div>
+    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:16px">
+      <div style="font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px">🎴 Carton d'invitation</div>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.85rem;font-weight:600;margin-bottom:14px">
+        <input type="checkbox" ${cartonVisible?'checked':''} onchange="toggleCartonVisible(this.checked)">
+        Afficher dans l'onglet Infos
+      </label>
+      <div style="margin-bottom:10px">
+        <div style="font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Message personnalisé</div>
+        <textarea class="event-field-inline" style="resize:vertical;min-height:60px;border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:0.85rem;font-weight:normal" placeholder="Message affiché en bas du carton…" oninput="updateCartonPreview(this.value)" onblur="saveEvenementField('cartonTexte',this.value)">${cartonTexteEsc}</textarea>
+      </div>
+      <div id="carton-preview-wrap">${preview}</div>
+    </div>
+  </div>`;
+  smoothUpdate(c, html);
+}
+
+window.setEvenementType = function(type) {
+  if (!DATA.evenement) DATA.evenement = {};
+  DATA.evenement.type = type;
+  pushData();
+  renderSettings();
+};
+
+window.saveEvenementField = function(field, value) {
+  if (!DATA.evenement) DATA.evenement = {};
+  DATA.evenement[field] = value;
+  pushData();
+  if (['titreCouple','sousTitre','lieu'].includes(field)) {
+    _renderEventHeader();
+    renderInfos();
+  }
+};
+
+window.addEvenementDate = function() {
+  openDatePicker(iso => {
+    if (!iso || iso === 'amont') return;
+    if (!DATA.evenement) DATA.evenement = {};
+    if (!Array.isArray(DATA.evenement.dates)) DATA.evenement.dates = [];
+    if (!DATA.evenement.dates.includes(iso)) {
+      DATA.evenement.dates.push(iso);
+      DATA.evenement.dates.sort();
+      pushData();
+      renderSettings();
+    }
+  }, '2026-07-12');
+};
+
+window.removeEvenementDate = function(iso) {
+  if (!DATA.evenement?.dates) return;
+  DATA.evenement.dates = DATA.evenement.dates.filter(d => d !== iso);
+  pushData();
+  renderSettings();
+};
+
+window.toggleCartonVisible = function(visible) {
+  if (!DATA.evenement) DATA.evenement = {};
+  DATA.evenement.cartonVisible = !!visible;
+  pushData();
+  renderInfos();
+};
+
+window.updateCartonPreview = function(text) {
+  const wrap = document.getElementById('carton-preview-wrap');
+  if (!wrap) return;
+  const ev = Object.assign({}, DATA.evenement || {}, { cartonTexte: text });
+  wrap.innerHTML = _buildCartonPreviewHTML(ev);
+};
 
 // ── Gestion des appareils ─────────────────────────────────────
 function _detectDeviceType() {
@@ -9530,7 +9711,8 @@ window.renderInfos = function() {
 
   // Carton d'invitation
   const cartonWrap = document.getElementById('infos-carton-wrap');
-  if (cartonWrap) {
+  if (cartonWrap) cartonWrap.innerHTML = '';
+  if (cartonWrap && DATA.evenement?.cartonVisible !== false) {
     function _cFmtH(h) {
       if (!h) return '';
       if (!/^\d+:\d+$/.test(h)) return h;
@@ -9572,13 +9754,16 @@ window.renderInfos = function() {
     const lieuHtml = l.nom
       ? `<div class="infos-carton-lieu"><strong>${l.nom}</strong>${l.adresse ? l.adresse.split('\n')[0] : ''}</div>`
       : '';
+    const _ev = DATA.evenement || {};
+    const eyebrow = _ev.lieu ? 'Votre séjour au ' + _ev.lieu : (_ev.sousTitre || '');
+    const cartonTxt = _ev.cartonTexte ? `<div class="infos-carton-lieu" style="margin-top:10px;font-style:italic">${_ev.cartonTexte}</div>` : '';
     cartonWrap.innerHTML = `<div class="infos-carton">
-      <div class="infos-carton-eyebrow">Votre séjour au Gîte du Bonheur</div>
-      <div class="infos-carton-names">Sarah &amp; Antoine</div>
+      <div class="infos-carton-eyebrow">${eyebrow}</div>
+      <div class="infos-carton-names">${(_ev.titreCouple||'Sarah & Antoine').replace(/&/g,'&amp;')}</div>
       <div class="infos-carton-ornament">✿</div>
       <div class="infos-carton-sep"></div>
       <div class="infos-carton-dates">${arrBlk}${depBlk}</div>
-      ${lieuHtml}
+      ${lieuHtml}${cartonTxt}
     </div>`;
   }
 
