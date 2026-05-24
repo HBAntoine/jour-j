@@ -13,7 +13,7 @@
 <link rel="shortcut icon" href="icons/favicon.ico">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Jour J</title>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,700;1,400;1,700&family=DM+Mono:ital,wght@0,400;1,400&family=DM+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Fredoka:wght@300;400;500;600;700&family=Great+Vibes&family=Lora:ital,wght@0,400;0,700;1,400;1,700&family=Montserrat:ital,wght@0,400;0,700;1,400;1,700&family=Nunito:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
 <style>
 :root {
   --g1:#F0F6FF;        /* fond principal — blanc bleuté aéré */
@@ -395,6 +395,30 @@ textarea{resize:vertical;min-height:60px;}
 .user-history.hidden{display:none;}
 .user-history-item{font-size:0.72rem;color:var(--muted);font-family:sans-serif;padding:4px 0;border-bottom:1px solid var(--border);}
 .user-history-item:last-child{border-bottom:none;}
+
+/* ÉDITEUR VISUEL ÉVÉNEMENT */
+.rte-editor-wrap{border:1.5px solid var(--border);border-radius:10px;overflow:hidden;background:#fff;}
+.rte-toolbar{display:flex;flex-wrap:wrap;gap:4px;padding:6px 8px;background:var(--g2);border-bottom:1px solid var(--border);}
+.rte-toolbar button{padding:3px 8px;border:1px solid var(--border);border-radius:6px;background:#fff;font-size:0.78rem;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:600;transition:all 0.12s;line-height:1.4;}
+.rte-toolbar button:hover{background:var(--acc);color:#fff;border-color:var(--acc);}
+.rte-toolbar select{padding:3px 6px;border:1px solid var(--border);border-radius:6px;background:#fff;font-size:0.75rem;cursor:pointer;font-family:'Nunito',sans-serif;outline:none;max-width:120px;}
+.rte-field{min-height:40px;padding:10px 12px;font-size:1rem;outline:none;line-height:1.5;}
+.rte-field:empty::before{content:attr(data-placeholder);color:var(--muted);font-style:italic;pointer-events:none;}
+.cal-date-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:rgba(30,77,183,0.08);color:var(--acc);border-radius:50px;font-size:0.78rem;font-weight:700;}
+.cal-date-chip button{background:none;border:none;cursor:pointer;color:var(--acc);font-size:0.8rem;padding:0 2px;line-height:1;}
+.ev-radio{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border:1.5px solid var(--border);border-radius:50px;cursor:pointer;font-size:0.8rem;font-weight:600;font-family:'Nunito',sans-serif;background:var(--g2);transition:all 0.15s;line-height:1;}
+.ev-radio.active{background:var(--acc);color:#fff;border-color:var(--acc);}
+.ev-radio:hover:not(.active){border-color:rgba(30,77,183,0.3);background:rgba(30,77,183,0.06);}
+.ev-preview-right{display:flex;flex-direction:column;gap:12px;}
+@media(min-width:700px){.ev-preview-right{position:sticky;top:24px;}}
+.ev-editor-tabs{display:flex;gap:2px;background:var(--g2);border-radius:10px;padding:3px;margin-bottom:12px;}
+.ev-editor-tab{flex:1;padding:6px 10px;border:none;background:none;border-radius:8px;font-size:0.78rem;font-weight:700;font-family:'Nunito',sans-serif;cursor:pointer;color:var(--muted);transition:all 0.15s;text-align:center;}
+.ev-editor-tab.active{background:#fff;color:var(--acc);box-shadow:0 1px 4px rgba(0,0,0,0.1);}
+.ev-editor-panel{display:none;}
+.ev-editor-panel.active{display:block;}
+.ev-section{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:12px;}
+.ev-section-label{font-size:0.68rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;}
+.ev-field-label{font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;}
 
 /* ROOMS */
 .rooms-zone-btn{padding:5px 12px;border-radius:50px;border:1.5px solid var(--border);background:#fff;font-family:'Nunito',sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.15s;white-space:nowrap;}
@@ -3065,7 +3089,18 @@ const DEFAULT_DATA = {
     titreCouple:'Sarah & Antoine',
     sousTitre:'12 juillet 2026 · Gîte du Bonheur',
     lieu:'Gîte du Bonheur',
-    dates:[], cartonVisible:true, cartonTexte:''
+    titreHTML:'', sousTitreHTML:'',
+    titreCSSAlign:'center', sousTitreCSSAlign:'center',
+    calDates:[], cartonVisible:true,
+    cartonEyVisible:true, cartonEyHTML:'', cartonEyAlign:'center',
+    cartonTitreHTML:'', cartonTitreAlign:'center',
+    cartonMsg:'',
+    cartonMsgFont:'Nunito', cartonMsgSize:14, cartonMsgBold:false,
+    cartonMsgItalic:false, cartonMsgColor:'#6b7280', cartonMsgAlign:'center',
+    cartonDateMode:'guest',
+    cartonArrDate:'', cartonArrHeure:'', cartonDepDate:'', cartonDepHeure:'',
+    cartonAccentColor:'', cartonBg:'', cartonBorder:'',
+    cartonLeaves:true
   }
 };
 
@@ -3192,12 +3227,41 @@ async function initFirebase(cfg) {
         DATA.userSessions = (DATA.userSessions && typeof DATA.userSessions === 'object' && !Array.isArray(DATA.userSessions)) ? DATA.userSessions : {};
         DATA.devices      = (DATA.devices      && typeof DATA.devices      === 'object' && !Array.isArray(DATA.devices))      ? DATA.devices      : {};
         if (!DATA.evenement || typeof DATA.evenement !== 'object') DATA.evenement = {};
-        if (!DATA.evenement.titreCouple)  DATA.evenement.titreCouple  = 'Sarah & Antoine';
-        if (!DATA.evenement.sousTitre)    DATA.evenement.sousTitre    = '12 juillet 2026 · Gîte du Bonheur';
-        if (!DATA.evenement.lieu)         DATA.evenement.lieu         = 'Gîte du Bonheur';
-        if (!DATA.evenement.type)         DATA.evenement.type         = 'Mariage';
-        if (!Array.isArray(DATA.evenement.dates)) DATA.evenement.dates = [];
-        if (DATA.evenement.cartonVisible === undefined) DATA.evenement.cartonVisible = true;
+        {
+          const _evinit = DATA.evenement;
+          if (!_evinit.titreCouple)  _evinit.titreCouple  = 'Sarah & Antoine';
+          if (!_evinit.sousTitre)    _evinit.sousTitre    = '12 juillet 2026 · Gîte du Bonheur';
+          if (!_evinit.lieu)         _evinit.lieu         = 'Gîte du Bonheur';
+          if (!_evinit.type)         _evinit.type         = 'Mariage';
+          // Migration dates → calDates
+          if (!Array.isArray(_evinit.calDates)) _evinit.calDates = Array.isArray(_evinit.dates) ? [..._evinit.dates] : [];
+          if (_evinit.cartonVisible    === undefined) _evinit.cartonVisible    = true;
+          if (_evinit.titreHTML        === undefined) _evinit.titreHTML        = '';
+          if (_evinit.sousTitreHTML    === undefined) _evinit.sousTitreHTML    = '';
+          if (_evinit.titreCSSAlign    === undefined) _evinit.titreCSSAlign    = 'center';
+          if (_evinit.sousTitreCSSAlign=== undefined) _evinit.sousTitreCSSAlign= 'center';
+          if (_evinit.cartonEyVisible  === undefined) _evinit.cartonEyVisible  = true;
+          if (_evinit.cartonEyHTML     === undefined) _evinit.cartonEyHTML     = '';
+          if (_evinit.cartonEyAlign    === undefined) _evinit.cartonEyAlign    = 'center';
+          if (_evinit.cartonTitreHTML  === undefined) _evinit.cartonTitreHTML  = '';
+          if (_evinit.cartonTitreAlign === undefined) _evinit.cartonTitreAlign = 'center';
+          if (_evinit.cartonMsg        === undefined) _evinit.cartonMsg        = '';
+          if (_evinit.cartonMsgFont    === undefined) _evinit.cartonMsgFont    = 'Nunito';
+          if (_evinit.cartonMsgSize    === undefined) _evinit.cartonMsgSize    = 14;
+          if (_evinit.cartonMsgBold    === undefined) _evinit.cartonMsgBold    = false;
+          if (_evinit.cartonMsgItalic  === undefined) _evinit.cartonMsgItalic  = false;
+          if (_evinit.cartonMsgColor   === undefined) _evinit.cartonMsgColor   = '#6b7280';
+          if (_evinit.cartonMsgAlign   === undefined) _evinit.cartonMsgAlign   = 'center';
+          if (_evinit.cartonDateMode   === undefined) _evinit.cartonDateMode   = 'guest';
+          if (_evinit.cartonArrDate    === undefined) _evinit.cartonArrDate    = '';
+          if (_evinit.cartonArrHeure   === undefined) _evinit.cartonArrHeure   = '';
+          if (_evinit.cartonDepDate    === undefined) _evinit.cartonDepDate    = '';
+          if (_evinit.cartonDepHeure   === undefined) _evinit.cartonDepHeure   = '';
+          if (_evinit.cartonAccentColor=== undefined) _evinit.cartonAccentColor= '';
+          if (_evinit.cartonBg         === undefined) _evinit.cartonBg         = '';
+          if (_evinit.cartonBorder     === undefined) _evinit.cartonBorder     = '';
+          if (_evinit.cartonLeaves     === undefined) _evinit.cartonLeaves     = true;
+        }
 
         // Appliquer les permissions Firebase avant le rendu
         if (DATA.permissions) _applyFirebasePermissions(DATA.permissions);
@@ -3573,7 +3637,7 @@ window.dpRender = function() {
     const iso = `${_dpYear}-${String(_dpMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const dt = new Date(iso+'T00:00:00');
     const isToday = dt.getTime()===today.getTime();
-    const _evDates = DATA.evenement?.dates || [];
+    const _evDates = DATA.evenement?.calDates || [];
     const isEaster = !!DATE_EASTER[iso] || _evDates.includes(iso);
     const title = DATE_EASTER[iso] ? DATE_EASTER[iso].label : '';
     html += `<div class="dp-day${isToday?' dp-today':''}${isEaster?' dp-special':''}"
@@ -8199,36 +8263,169 @@ window.savePermissions = function() {
 
 
 // ── Événement ─────────────────────────────────────────────────
+function _cFmtH(h) {
+  if (!h) return '';
+  if (!/^\d+:\d+$/.test(h)) return h;
+  const [hh, mm] = h.split(':').map(Number);
+  return mm === 0 ? `${hh}h` : `${hh}h${String(mm).padStart(2,'0')}`;
+}
+
+function _cDateBlk(dateStr, heureStr, label) {
+  if (!dateStr) return '';
+  const norm = normalizeDate(dateStr);
+  let dayTxt = '', numTxt = '', moisTxt = '';
+  try {
+    const dt = new Date(norm + 'T00:00:00');
+    const JOURS = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+    dayTxt = JOURS[dt.getDay()];
+    numTxt = String(dt.getDate());
+    moisTxt = MOIS_LABELS[dt.getMonth()].slice(0,4);
+  } catch(e) {}
+  const hStr = _cFmtH(heureStr);
+  return `<div class="infos-carton-date-blk">
+    <div class="infos-carton-date-lbl">${label}</div>
+    <div class="infos-carton-date-day">${dayTxt}</div>
+    <div class="infos-carton-date-num">${numTxt}</div>
+    <div class="infos-carton-date-mois">${moisTxt}</div>
+    ${hStr ? `<div class="infos-carton-date-heure">${hStr}</div>` : ''}
+  </div>`;
+}
+
 function _renderEventHeader() {
   const ev = DATA.evenement || {};
   const titleEl = document.getElementById('header-event-title');
-  if (titleEl) titleEl.textContent = ev.titreCouple || 'Sarah & Antoine';
+  if (titleEl) {
+    if (ev.titreHTML) {
+      titleEl.innerHTML = ev.titreHTML;
+    } else {
+      const tc = ev.titreCouple || 'Sarah & Antoine';
+      const parts = tc.split('&');
+      titleEl.innerHTML = parts.length === 2
+        ? `<span class="name-sarah">${parts[0].trim()}</span> <span class="name-amp">&amp;</span> <span class="name-main">${parts[1].trim()}</span>`
+        : tc;
+    }
+    titleEl.style.textAlign = ev.titreCSSAlign || 'center';
+  }
   const subtitleEl = document.getElementById('header-event-subtitle');
-  if (subtitleEl) subtitleEl.textContent = '💍 ' + (ev.sousTitre || '12 juillet 2026 · Gîte du Bonheur');
+  if (subtitleEl) {
+    if (ev.sousTitreHTML) {
+      subtitleEl.innerHTML = ev.sousTitreHTML;
+    } else {
+      subtitleEl.textContent = '💍 ' + (ev.sousTitre || '12 juillet 2026 · Gîte du Bonheur');
+    }
+    subtitleEl.style.textAlign = ev.sousTitreCSSAlign || 'center';
+  }
   const idTitle = document.getElementById('modal-identity-title');
   if (idTitle) idTitle.textContent = (ev.type||'Mariage') + ' de ' + (ev.titreCouple||'Sarah & Antoine');
 }
 
-function _buildCartonPreviewHTML(ev) {
-  ev = ev || DATA.evenement || {};
-  const eyebrow = ev.lieu ? 'Votre séjour au ' + ev.lieu : (ev.sousTitre||'');
-  const names = (ev.titreCouple||'Sarah & Antoine').replace(/&/g,'&amp;');
-  const cartonTxt = ev.cartonTexte ? `<div class="infos-carton-lieu" style="margin-top:10px;font-style:italic">${ev.cartonTexte}</div>` : '';
-  const dateChips = (ev.dates||[]).map(d => {
-    try {
-      const dt = new Date(d+'T00:00:00');
-      const JOURS = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
-      return `<div class="infos-carton-date-blk"><div class="infos-carton-date-day">${JOURS[dt.getDay()]}</div><div class="infos-carton-date-num">${dt.getDate()}</div><div class="infos-carton-date-mois">${MOIS_LABELS[dt.getMonth()].slice(0,4)}</div></div>`;
-    } catch(e) { return ''; }
-  }).join('');
-  const datesHtml = dateChips ? `<div class="infos-carton-dates" style="margin-bottom:6px">${dateChips}</div>` : '';
-  const lieuHtml = ev.lieu ? `<div class="infos-carton-lieu"><strong>${ev.lieu}</strong></div>` : '';
-  return `<div class="infos-carton" style="pointer-events:none">
-    <div class="infos-carton-eyebrow">${eyebrow}</div>
-    <div class="infos-carton-names">${names}</div>
+function _buildCartonPreviewHTML(evOverride) {
+  const ev = Object.assign({}, DATA.evenement || {}, evOverride || {});
+  const accent = ev.cartonAccentColor || '';
+  const bg = ev.cartonBg || '';
+  const border = ev.cartonBorder || '';
+
+  let eyebrowHtml = '';
+  if (ev.cartonEyVisible !== false) {
+    const eyContent = ev.cartonEyHTML || (ev.lieu ? 'Votre séjour au ' + ev.lieu : (ev.sousTitre || ''));
+    eyebrowHtml = `<div class="infos-carton-eyebrow" style="text-align:${ev.cartonEyAlign||'center'}">${eyContent}</div>`;
+  }
+
+  const titreContent = ev.cartonTitreHTML || ev.titreHTML || (ev.titreCouple||'Sarah & Antoine').replace(/&/g,'&amp;');
+  const titreHtml = `<div class="infos-carton-names" style="text-align:${ev.cartonTitreAlign||'center'}">${titreContent}</div>`;
+
+  let datesHtml = '';
+  const dateMode = ev.cartonDateMode || 'guest';
+  if (dateMode !== 'aucune') {
+    let arrBlk = '', depBlk = '';
+    if (dateMode === 'fixe') {
+      arrBlk = _cDateBlk(ev.cartonArrDate, ev.cartonArrHeure, 'Arrivée');
+      depBlk = _cDateBlk(ev.cartonDepDate, ev.cartonDepHeure, 'Départ');
+    } else {
+      const p = DATA.infosPratique || {};
+      arrBlk = _cDateBlk(p.arriveeDate, p.arriveeHeure, 'Arrivée');
+      depBlk = _cDateBlk(p.departDate, p.departHeure, 'Départ');
+    }
+    if (arrBlk || depBlk) datesHtml = `<div class="infos-carton-dates">${arrBlk}${depBlk}</div>`;
+  }
+
+  const l = DATA.infosLieu || {};
+  const lieuHtml = l.nom ? `<div class="infos-carton-lieu"><strong>${l.nom}</strong>${l.adresse ? ' — ' + l.adresse.split('\n')[0] : ''}</div>` : '';
+
+  let msgHtml = '';
+  if (ev.cartonMsg) {
+    const ms = [
+      ev.cartonMsgFont   ? `font-family:'${ev.cartonMsgFont}',sans-serif` : '',
+      ev.cartonMsgSize   ? `font-size:${ev.cartonMsgSize}px` : '',
+      ev.cartonMsgBold   ? 'font-weight:700' : '',
+      ev.cartonMsgItalic ? 'font-style:italic' : '',
+      ev.cartonMsgColor  ? `color:${ev.cartonMsgColor}` : '',
+      ev.cartonMsgAlign  ? `text-align:${ev.cartonMsgAlign}` : ''
+    ].filter(Boolean).join(';');
+    msgHtml = `<div class="infos-carton-lieu" style="margin-top:10px;${ms}">${ev.cartonMsg}</div>`;
+  }
+
+  const cardStyle = [
+    accent ? `--carton-accent:${accent}` : '',
+    bg     ? `background:${bg}` : '',
+    border ? `border:1.5px solid ${border}` : ''
+  ].filter(Boolean).join(';');
+
+  return `<div class="infos-carton${ev.cartonLeaves === false ? ' no-leaves' : ''}"${cardStyle ? ` style="${cardStyle}"` : ''}>
+    ${eyebrowHtml}
+    ${titreHtml}
     <div class="infos-carton-ornament">✿</div>
     <div class="infos-carton-sep"></div>
-    ${datesHtml}${lieuHtml}${cartonTxt}
+    ${datesHtml}
+    ${lieuHtml}
+    ${msgHtml}
+  </div>`;
+}
+
+function _buildHeaderPreviewHTML() {
+  const ev = DATA.evenement || {};
+  let titreContent;
+  if (ev.titreHTML) {
+    titreContent = ev.titreHTML;
+  } else {
+    const tc = ev.titreCouple || 'Sarah & Antoine';
+    const parts = tc.split('&');
+    titreContent = parts.length === 2
+      ? `<span style="opacity:.85">${parts[0].trim()}</span> <span>&amp;</span> <span>${parts[1].trim()}</span>`
+      : tc;
+  }
+  const sousTitreContent = ev.sousTitreHTML || ('💍 ' + (ev.sousTitre || '12 juillet 2026 · Gîte du Bonheur'));
+  return `<div style="background:var(--acc);padding:12px 16px;border-radius:10px">
+    <div style="font-family:'Nunito',sans-serif;font-size:1.05rem;font-weight:800;color:#fff;text-align:${ev.titreCSSAlign||'center'}">${titreContent}</div>
+    <div style="font-size:0.78rem;color:rgba(255,255,255,0.85);margin-top:4px;text-align:${ev.sousTitreCSSAlign||'center'}">${sousTitreContent}</div>
+  </div>`;
+}
+
+function _refreshEvPreview() {
+  const cp = document.getElementById('ev-preview-carton');
+  if (cp) cp.innerHTML = _buildCartonPreviewHTML();
+  const hp = document.getElementById('ev-preview-header');
+  if (hp) hp.innerHTML = _buildHeaderPreviewHTML();
+}
+
+function _rteToolbarHTML(fieldId, opts) {
+  opts = opts || {};
+  const fonts = ['Nunito','DM Sans','Playfair Display','Cormorant Garamond','Great Vibes','Lora','Montserrat','DM Mono'];
+  const fontOpts = fonts.map(f => `<option value="${f}">${f}</option>`).join('');
+  const sizeOpts = [10,11,12,13,14,16,18,20,22,24,28,32,36,40,48].map(s => `<option value="${s}">${s}px</option>`).join('');
+  const alignBtns = opts.align === false ? '' : `
+    <button title="Gauche"  onmousedown="event.preventDefault();rteExec('${fieldId}','justifyLeft')">⟵</button>
+    <button title="Centre"  onmousedown="event.preventDefault();rteExec('${fieldId}','justifyCenter')">☰</button>
+    <button title="Droite"  onmousedown="event.preventDefault();rteExec('${fieldId}','justifyRight')">⟶</button>`;
+  const colorBtn = opts.color === false ? '' : `<input type="color" title="Couleur texte" style="width:26px;height:22px;padding:1px;border:1px solid var(--border);border-radius:4px;cursor:pointer;vertical-align:middle" onchange="rteExec('${fieldId}','foreColor',this.value)">`;
+  return `<div class="rte-toolbar">
+    <select title="Police" onchange="rteExec('${fieldId}','fontName',this.value)">${fontOpts}</select>
+    <select title="Taille" onchange="rteFontSize('${fieldId}',this.value)">${sizeOpts}</select>
+    <button title="Gras"      onmousedown="event.preventDefault();rteExec('${fieldId}','bold')"><b>G</b></button>
+    <button title="Italique"  onmousedown="event.preventDefault();rteExec('${fieldId}','italic')"><i>I</i></button>
+    ${alignBtns}
+    ${colorBtn}
+    <button title="Effacer formatage" onmousedown="event.preventDefault();rteExec('${fieldId}','removeFormat')" style="color:var(--muted)">✕</button>
   </div>`;
 }
 
@@ -8244,59 +8441,303 @@ function renderSettingsEvenement(c) {
     `<button class="event-type-pill${ev.type===t.id?' active':''}" onclick="setEvenementType('${t.id}')">${t.emoji} ${t.id}</button>`
   ).join('');
   const customInput = ev.type==='Personnalisé'
-    ? `<div style="margin-top:12px"><input class="event-field-inline" placeholder="Nom de l'événement" value="${(ev.typeCustom||'').replace(/"/g,'&quot;')}" onblur="saveEvenementField('typeCustom',this.value)"></div>`
+    ? `<div style="margin-top:10px"><input class="event-field-inline" placeholder="Nom de l'événement" value="${(ev.typeCustom||'').replace(/"/g,'&quot;')}" onblur="saveEvenementField('typeCustom',this.value)"></div>`
     : '';
-  const dateChips = (ev.dates||[]).map(d => {
+  const dateChips = (ev.calDates||[]).map(d => {
     let lbl = d;
     try { const dt=new Date(d+'T00:00:00'); lbl=dt.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'long'}); } catch(e){}
-    return `<span class="event-date-chip">${lbl}<button onclick="removeEvenementDate('${d}')">✕</button></span>`;
+    return `<span class="cal-date-chip">${lbl}<button onclick="removeEvenementDate('${d}')">✕</button></span>`;
   }).join('');
   const cartonVisible = ev.cartonVisible !== false;
-  const preview = _buildCartonPreviewHTML(ev);
-  const cartonTexteEsc = (ev.cartonTexte||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-
-  const html = `<div style="max-width:560px">
-    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:16px">
-      <div style="font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px">🎭 Type d'événement</div>
-      <div class="event-type-grid">${typePills}</div>${customInput}
-    </div>
-    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:16px">
-      <div style="font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px">✏️ Titre &amp; identité</div>
-      <div style="margin-bottom:16px">
-        <div style="font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Titre du couple / événement</div>
-        <input class="event-field-inline" value="${(ev.titreCouple||'').replace(/"/g,'&quot;')}" onblur="saveEvenementField('titreCouple',this.value)">
-      </div>
-      <div style="margin-bottom:16px">
-        <div style="font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Sous-titre (date · lieu)</div>
-        <input class="event-field-inline" value="${(ev.sousTitre||'').replace(/"/g,'&quot;')}" onblur="saveEvenementField('sousTitre',this.value)">
+  const eyVisible = ev.cartonEyVisible !== false;
+  const dm = ev.cartonDateMode || 'guest';
+  const fixedDateSection = dm === 'fixe' ? `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
+      <div>
+        <div class="ev-field-label">Arrivée — date</div>
+        <button class="btn btn-ghost btn-sm" onclick="evPickDate('cartonArrDate')" style="width:100%">${ev.cartonArrDate||'📅 Choisir'}</button>
       </div>
       <div>
-        <div style="font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Lieu</div>
+        <div class="ev-field-label">Arrivée — heure</div>
+        <button class="btn btn-ghost btn-sm" onclick="evPickTime('cartonArrHeure')" style="width:100%">${ev.cartonArrHeure||'⏰ Choisir'}</button>
+      </div>
+      <div>
+        <div class="ev-field-label">Départ — date</div>
+        <button class="btn btn-ghost btn-sm" onclick="evPickDate('cartonDepDate')" style="width:100%">${ev.cartonDepDate||'📅 Choisir'}</button>
+      </div>
+      <div>
+        <div class="ev-field-label">Départ — heure</div>
+        <button class="btn btn-ghost btn-sm" onclick="evPickTime('cartonDepHeure')" style="width:100%">${ev.cartonDepHeure||'⏰ Choisir'}</button>
+      </div>
+    </div>` : '';
+  const fontList = ['Nunito','DM Sans','Playfair Display','Cormorant Garamond','Great Vibes','Lora','Montserrat','DM Mono'];
+
+  const html = `<div style="display:flex;flex-wrap:wrap;gap:20px;align-items:start">
+  <div style="flex:0 0 300px;min-width:260px;max-width:360px">
+    <div class="ev-editor-tabs">
+      <button class="ev-editor-tab active" data-tab="app"    onclick="evTab('app')">App</button>
+      <button class="ev-editor-tab"        data-tab="carton" onclick="evTab('carton')">Carton</button>
+      <button class="ev-editor-tab"        data-tab="style"  onclick="evTab('style')">Style</button>
+    </div>
+
+    <div class="ev-editor-panel active" data-panel="app">
+      <div class="ev-section">
+        <div class="ev-section-label">🎭 Type d'événement</div>
+        <div class="event-type-grid">${typePills}</div>${customInput}
+      </div>
+      <div class="ev-section">
+        <div class="ev-section-label">✏️ Titre principal</div>
+        <div class="ev-field-label">Texte brut (fallback)</div>
+        <input class="event-field-inline" style="margin-bottom:12px" value="${(ev.titreCouple||'').replace(/"/g,'&quot;')}" onblur="saveEvenementField('titreCouple',this.value)">
+        <div class="ev-field-label">Titre enrichi (optionnel — prioritaire)</div>
+        <div class="rte-editor-wrap">
+          ${_rteToolbarHTML('titreHTML')}
+          <div id="rte-titreHTML" class="rte-field" contenteditable="true" data-placeholder="Laissez vide = texte brut" oninput="rteInput('titreHTML')" onblur="rteSave('titreHTML')"></div>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <button class="ev-radio${(ev.titreCSSAlign||'center')==='left'?' active':''}"   onclick="saveEvenementField('titreCSSAlign','left')">⟵</button>
+          <button class="ev-radio${(ev.titreCSSAlign||'center')==='center'?' active':''}" onclick="saveEvenementField('titreCSSAlign','center')">☰</button>
+          <button class="ev-radio${(ev.titreCSSAlign||'center')==='right'?' active':''}"  onclick="saveEvenementField('titreCSSAlign','right')">⟶</button>
+        </div>
+      </div>
+      <div class="ev-section">
+        <div class="ev-section-label">💬 Sous-titre</div>
+        <div class="ev-field-label">Texte brut</div>
+        <input class="event-field-inline" style="margin-bottom:12px" value="${(ev.sousTitre||'').replace(/"/g,'&quot;')}" onblur="saveEvenementField('sousTitre',this.value)">
+        <div class="ev-field-label">Sous-titre enrichi (optionnel)</div>
+        <div class="rte-editor-wrap">
+          ${_rteToolbarHTML('sousTitreHTML')}
+          <div id="rte-sousTitreHTML" class="rte-field" contenteditable="true" data-placeholder="Laissez vide = texte brut" oninput="rteInput('sousTitreHTML')" onblur="rteSave('sousTitreHTML')"></div>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <button class="ev-radio${(ev.sousTitreCSSAlign||'center')==='left'?' active':''}"   onclick="saveEvenementField('sousTitreCSSAlign','left')">⟵</button>
+          <button class="ev-radio${(ev.sousTitreCSSAlign||'center')==='center'?' active':''}" onclick="saveEvenementField('sousTitreCSSAlign','center')">☰</button>
+          <button class="ev-radio${(ev.sousTitreCSSAlign||'center')==='right'?' active':''}"  onclick="saveEvenementField('sousTitreCSSAlign','right')">⟶</button>
+        </div>
+      </div>
+      <div class="ev-section">
+        <div class="ev-section-label">📍 Lieu</div>
         <input class="event-field-inline" value="${(ev.lieu||'').replace(/"/g,'&quot;')}" onblur="saveEvenementField('lieu',this.value)">
       </div>
-    </div>
-    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:16px">
-      <div style="font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px">📅 Dates de l'événement</div>
-      <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
-        ${dateChips}
-        <button class="btn btn-ghost btn-sm" onclick="addEvenementDate()">＋ Ajouter une date</button>
+      <div class="ev-section">
+        <div class="ev-section-label">📅 Dates (surlignées dans le calendrier)</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+          ${dateChips}
+          <button class="btn btn-ghost btn-sm" onclick="addEvenementDate()">＋ Ajouter</button>
+        </div>
       </div>
     </div>
-    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:16px">
-      <div style="font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px">🎴 Carton d'invitation</div>
-      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.85rem;font-weight:600;margin-bottom:14px">
-        <input type="checkbox" ${cartonVisible?'checked':''} onchange="toggleCartonVisible(this.checked)">
-        Afficher dans l'onglet Infos
-      </label>
-      <div style="margin-bottom:10px">
-        <div style="font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Message personnalisé</div>
-        <textarea class="event-field-inline" style="resize:vertical;min-height:60px;border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:0.85rem;font-weight:normal" placeholder="Message affiché en bas du carton…" oninput="updateCartonPreview(this.value)" onblur="saveEvenementField('cartonTexte',this.value)">${cartonTexteEsc}</textarea>
+
+    <div class="ev-editor-panel" data-panel="carton">
+      <div class="ev-section">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.85rem;font-weight:600">
+          <input type="checkbox" ${cartonVisible?'checked':''} onchange="toggleCartonVisible(this.checked)">
+          Afficher le carton dans Infos
+        </label>
       </div>
-      <div id="carton-preview-wrap">${preview}</div>
+      <div class="ev-section">
+        <div class="ev-section-label">👁 Eyebrow</div>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.82rem;margin-bottom:10px">
+          <input type="checkbox" ${eyVisible?'checked':''} onchange="saveEvenementField('cartonEyVisible',this.checked)">
+          Afficher l'eyebrow
+        </label>
+        <div class="rte-editor-wrap">
+          ${_rteToolbarHTML('cartonEyHTML', {align:false, color:false})}
+          <div id="rte-cartonEyHTML" class="rte-field" contenteditable="true" data-placeholder="Ex : Votre séjour au Gîte du Bonheur" oninput="rteInput('cartonEyHTML')" onblur="rteSave('cartonEyHTML')"></div>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <button class="ev-radio${(ev.cartonEyAlign||'center')==='left'?' active':''}"   onclick="saveEvenementField('cartonEyAlign','left')">⟵</button>
+          <button class="ev-radio${(ev.cartonEyAlign||'center')==='center'?' active':''}" onclick="saveEvenementField('cartonEyAlign','center')">☰</button>
+          <button class="ev-radio${(ev.cartonEyAlign||'center')==='right'?' active':''}"  onclick="saveEvenementField('cartonEyAlign','right')">⟶</button>
+        </div>
+      </div>
+      <div class="ev-section">
+        <div class="ev-section-label">🎴 Titre du carton</div>
+        <div class="rte-editor-wrap">
+          ${_rteToolbarHTML('cartonTitreHTML')}
+          <div id="rte-cartonTitreHTML" class="rte-field" contenteditable="true" data-placeholder="Ex : Sarah &amp; Antoine (laissez vide = titre App)" oninput="rteInput('cartonTitreHTML')" onblur="rteSave('cartonTitreHTML')"></div>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <button class="ev-radio${(ev.cartonTitreAlign||'center')==='left'?' active':''}"   onclick="saveEvenementField('cartonTitreAlign','left')">⟵</button>
+          <button class="ev-radio${(ev.cartonTitreAlign||'center')==='center'?' active':''}" onclick="saveEvenementField('cartonTitreAlign','center')">☰</button>
+          <button class="ev-radio${(ev.cartonTitreAlign||'center')==='right'?' active':''}"  onclick="saveEvenementField('cartonTitreAlign','right')">⟶</button>
+        </div>
+      </div>
+      <div class="ev-section">
+        <div class="ev-section-label">💌 Message personnalisé</div>
+        <div class="rte-editor-wrap">
+          ${_rteToolbarHTML('cartonMsg')}
+          <div id="rte-cartonMsg" class="rte-field" contenteditable="true" data-placeholder="Message affiché en bas du carton…" style="min-height:64px" oninput="rteInput('cartonMsg')" onblur="rteSave('cartonMsg')"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
+          <div>
+            <div class="ev-field-label">Police (conteneur)</div>
+            <select style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:4px 6px;font-size:0.78rem;background:#fff" onchange="saveMsgStyle('cartonMsgFont',this.value)">
+              ${fontList.map(f=>`<option value="${f}"${ev.cartonMsgFont===f?' selected':''}>${f}</option>`).join('')}
+            </select>
+          </div>
+          <div>
+            <div class="ev-field-label">Taille</div>
+            <input type="number" style="width:70px;border:1.5px solid var(--border);border-radius:6px;padding:4px 6px;font-size:0.78rem" value="${ev.cartonMsgSize||14}" min="8" max="48" onchange="saveMsgStyle('cartonMsgSize',+this.value)">
+          </div>
+          <div>
+            <div class="ev-field-label">Couleur</div>
+            <input type="color" value="${ev.cartonMsgColor||'#6b7280'}" style="width:40px;height:28px;padding:0;border:1px solid var(--border);border-radius:6px;cursor:pointer" onchange="saveMsgStyle('cartonMsgColor',this.value)">
+          </div>
+          <div>
+            <div class="ev-field-label">Alignement</div>
+            <div style="display:flex;gap:4px">
+              <button class="ev-radio${(ev.cartonMsgAlign||'center')==='left'?' active':''}"   onclick="saveMsgStyle('cartonMsgAlign','left')">⟵</button>
+              <button class="ev-radio${(ev.cartonMsgAlign||'center')==='center'?' active':''}" onclick="saveMsgStyle('cartonMsgAlign','center')">☰</button>
+              <button class="ev-radio${(ev.cartonMsgAlign||'center')==='right'?' active':''}"  onclick="saveMsgStyle('cartonMsgAlign','right')">⟶</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="ev-section">
+        <div class="ev-section-label">📅 Dates sur le carton</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="ev-radio${dm==='guest'?' active':''}"  onclick="saveEvenementField('cartonDateMode','guest')">Par invité</button>
+          <button class="ev-radio${dm==='fixe'?' active':''}"   onclick="saveEvenementField('cartonDateMode','fixe')">Dates fixes</button>
+          <button class="ev-radio${dm==='aucune'?' active':''}" onclick="saveEvenementField('cartonDateMode','aucune')">Aucune</button>
+        </div>
+        ${fixedDateSection}
+      </div>
     </div>
-  </div>`;
+
+    <div class="ev-editor-panel" data-panel="style">
+      <div class="ev-section">
+        <div class="ev-section-label">🎨 Couleurs du carton</div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <span style="font-size:0.82rem;font-weight:600">Couleur accent</span>
+            <input type="color" value="${ev.cartonAccentColor||'#1e4db7'}" style="width:40px;height:28px;padding:0;border:1px solid var(--border);border-radius:6px;cursor:pointer" onchange="saveEvenementField('cartonAccentColor',this.value)">
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <span style="font-size:0.82rem;font-weight:600">Fond du carton</span>
+            <div style="display:flex;gap:6px;align-items:center">
+              <input type="color" value="${ev.cartonBg||'#fffff8'}" style="width:40px;height:28px;padding:0;border:1px solid var(--border);border-radius:6px;cursor:pointer" onchange="saveEvenementField('cartonBg',this.value)">
+              <button class="btn btn-ghost btn-sm" onclick="saveEvenementField('cartonBg','')">✕</button>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <span style="font-size:0.82rem;font-weight:600">Couleur bordure</span>
+            <div style="display:flex;gap:6px;align-items:center">
+              <input type="color" value="${ev.cartonBorder||'#c9a96e'}" style="width:40px;height:28px;padding:0;border:1px solid var(--border);border-radius:6px;cursor:pointer" onchange="saveEvenementField('cartonBorder',this.value)">
+              <button class="btn btn-ghost btn-sm" onclick="saveEvenementField('cartonBorder','')">✕</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="ev-section">
+        <div class="ev-section-label">🌿 Décoration</div>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.85rem;font-weight:600">
+          <input type="checkbox" ${ev.cartonLeaves!==false?'checked':''} onchange="saveEvenementField('cartonLeaves',this.checked)">
+          Afficher les feuilles décoratives
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="ev-preview-right">
+    <div class="ev-section">
+      <div class="ev-section-label">Aperçu Header</div>
+      <div id="ev-preview-header">${_buildHeaderPreviewHTML()}</div>
+    </div>
+    <div class="ev-section">
+      <div class="ev-section-label">Aperçu Carton</div>
+      <div id="ev-preview-carton">${_buildCartonPreviewHTML()}</div>
+    </div>
+  </div>
+</div>`;
+
   smoothUpdate(c, html);
+  setTimeout(() => {
+    ['titreHTML','sousTitreHTML','cartonEyHTML','cartonTitreHTML','cartonMsg'].forEach(f => {
+      const el = document.getElementById('rte-' + f);
+      if (el) el.innerHTML = ev[f] || '';
+    });
+    const msgEl = document.getElementById('rte-cartonMsg');
+    if (msgEl) {
+      if (ev.cartonMsgFont)   msgEl.style.fontFamily  = `'${ev.cartonMsgFont}',sans-serif`;
+      if (ev.cartonMsgSize)   msgEl.style.fontSize    = ev.cartonMsgSize + 'px';
+      msgEl.style.fontWeight  = ev.cartonMsgBold   ? '700'    : '';
+      msgEl.style.fontStyle   = ev.cartonMsgItalic ? 'italic' : '';
+      if (ev.cartonMsgColor)  msgEl.style.color       = ev.cartonMsgColor;
+      if (ev.cartonMsgAlign)  msgEl.style.textAlign   = ev.cartonMsgAlign;
+    }
+  }, 50);
 }
+
+window.evTab = function(tab) {
+  document.querySelectorAll('.ev-editor-tab').forEach(b  => b.classList.toggle('active', b.dataset.tab   === tab));
+  document.querySelectorAll('.ev-editor-panel').forEach(p => p.classList.toggle('active', p.dataset.panel === tab));
+};
+
+window.rteInput = function(field) {
+  const el = document.getElementById('rte-' + field);
+  if (!el || !DATA.evenement) return;
+  DATA.evenement[field] = el.innerHTML;
+  _refreshEvPreview();
+};
+
+window.rteSave = function(field) {
+  const el = document.getElementById('rte-' + field);
+  if (!el || !DATA.evenement) return;
+  DATA.evenement[field] = el.innerHTML;
+  pushData();
+  if (field === 'titreHTML' || field === 'sousTitreHTML') _renderEventHeader();
+  _refreshEvPreview();
+};
+
+window.rteExec = function(field, cmd, val) {
+  const el = document.getElementById('rte-' + field);
+  if (!el) return;
+  el.focus();
+  document.execCommand('styleWithCSS', false, true);
+  document.execCommand(cmd, false, val || null);
+  if (DATA.evenement) DATA.evenement[field] = el.innerHTML;
+  _refreshEvPreview();
+};
+
+window.rteFontSize = function(field, size) {
+  const el = document.getElementById('rte-' + field);
+  if (!el) return;
+  el.focus();
+  const sel = window.getSelection();
+  if (sel && sel.rangeCount && !sel.isCollapsed) {
+    const range = sel.getRangeAt(0);
+    const fragment = range.extractContents();
+    const span = document.createElement('span');
+    span.style.fontSize = size + 'px';
+    span.appendChild(fragment);
+    range.insertNode(span);
+    sel.removeAllRanges();
+    const nr = document.createRange();
+    nr.selectNodeContents(span);
+    sel.addRange(nr);
+  } else {
+    el.style.fontSize = size + 'px';
+  }
+  if (DATA.evenement) DATA.evenement[field] = el.innerHTML;
+  _refreshEvPreview();
+};
+
+window.saveMsgStyle = function(field, value) {
+  if (!DATA.evenement) DATA.evenement = {};
+  DATA.evenement[field] = value;
+  pushData();
+  const el = document.getElementById('rte-cartonMsg');
+  if (el) {
+    if (field === 'cartonMsgFont')   el.style.fontFamily  = `'${value}',sans-serif`;
+    if (field === 'cartonMsgSize')   el.style.fontSize    = value + 'px';
+    if (field === 'cartonMsgBold')   el.style.fontWeight  = value ? '700'    : '';
+    if (field === 'cartonMsgItalic') el.style.fontStyle   = value ? 'italic' : '';
+    if (field === 'cartonMsgColor')  el.style.color       = value;
+    if (field === 'cartonMsgAlign')  el.style.textAlign   = value;
+  }
+  _refreshEvPreview();
+};
 
 window.setEvenementType = function(type) {
   if (!DATA.evenement) DATA.evenement = {};
@@ -8309,20 +8750,21 @@ window.saveEvenementField = function(field, value) {
   if (!DATA.evenement) DATA.evenement = {};
   DATA.evenement[field] = value;
   pushData();
-  if (['titreCouple','sousTitre','lieu'].includes(field)) {
-    _renderEventHeader();
-    renderInfos();
-  }
+  const headerFields = ['titreCouple','sousTitre','lieu','titreHTML','sousTitreHTML','titreCSSAlign','sousTitreCSSAlign'];
+  if (headerFields.includes(field)) _renderEventHeader();
+  _refreshEvPreview();
+  if (field === 'cartonDateMode') renderSettings();
+  if (['cartonVisible','titreCouple','sousTitre','lieu','cartonEyVisible'].includes(field)) renderInfos();
 };
 
 window.addEvenementDate = function() {
   openDatePicker(iso => {
     if (!iso || iso === 'amont') return;
     if (!DATA.evenement) DATA.evenement = {};
-    if (!Array.isArray(DATA.evenement.dates)) DATA.evenement.dates = [];
-    if (!DATA.evenement.dates.includes(iso)) {
-      DATA.evenement.dates.push(iso);
-      DATA.evenement.dates.sort();
+    if (!Array.isArray(DATA.evenement.calDates)) DATA.evenement.calDates = [];
+    if (!DATA.evenement.calDates.includes(iso)) {
+      DATA.evenement.calDates.push(iso);
+      DATA.evenement.calDates.sort();
       pushData();
       renderSettings();
     }
@@ -8330,8 +8772,8 @@ window.addEvenementDate = function() {
 };
 
 window.removeEvenementDate = function(iso) {
-  if (!DATA.evenement?.dates) return;
-  DATA.evenement.dates = DATA.evenement.dates.filter(d => d !== iso);
+  if (!DATA.evenement?.calDates) return;
+  DATA.evenement.calDates = DATA.evenement.calDates.filter(d => d !== iso);
   pushData();
   renderSettings();
 };
@@ -8343,11 +8785,22 @@ window.toggleCartonVisible = function(visible) {
   renderInfos();
 };
 
-window.updateCartonPreview = function(text) {
-  const wrap = document.getElementById('carton-preview-wrap');
-  if (!wrap) return;
-  const ev = Object.assign({}, DATA.evenement || {}, { cartonTexte: text });
-  wrap.innerHTML = _buildCartonPreviewHTML(ev);
+window.evPickDate = function(field) {
+  openDatePicker(iso => {
+    if (!iso || iso === 'amont') return;
+    saveEvenementField(field, iso);
+    const btn = document.querySelector(`[onclick="evPickDate('${field}')"]`);
+    if (btn) btn.textContent = iso;
+  }, DATA.evenement?.[field] || '2026-07-12');
+};
+
+window.evPickTime = function(field) {
+  openTimePickerCb(time => {
+    if (!time) return;
+    saveEvenementField(field, time);
+    const btn = document.querySelector(`[onclick="evPickTime('${field}')"]`);
+    if (btn) btn.textContent = time;
+  }, DATA.evenement?.[field] || '');
 };
 
 // ── Gestion des appareils ─────────────────────────────────────
@@ -9713,57 +10166,71 @@ window.renderInfos = function() {
   const cartonWrap = document.getElementById('infos-carton-wrap');
   if (cartonWrap) cartonWrap.innerHTML = '';
   if (cartonWrap && DATA.evenement?.cartonVisible !== false) {
-    function _cFmtH(h) {
-      if (!h) return '';
-      if (!/^\d+:\d+$/.test(h)) return h;
-      const [hh, mm] = h.split(':').map(Number);
-      return mm === 0 ? `${hh}h` : `${hh}h${String(mm).padStart(2,'0')}`;
-    }
-    function _cDateBlk(dateStr, heureStr, label) {
-      if (!dateStr) return '';
-      const norm = normalizeDate(dateStr);
-      let dayTxt = '', numTxt = '', moisTxt = '';
-      try {
-        const dt = new Date(norm + 'T00:00:00');
-        const JOURS = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
-        dayTxt = JOURS[dt.getDay()];
-        numTxt = String(dt.getDate());
-        moisTxt = MOIS_LABELS[dt.getMonth()].slice(0,4);
-      } catch(e) {}
-      const hStr = _cFmtH(heureStr);
-      return `<div class="infos-carton-date-blk">
-        <div class="infos-carton-date-lbl">${label}</div>
-        <div class="infos-carton-date-day">${dayTxt}</div>
-        <div class="infos-carton-date-num">${numTxt}</div>
-        <div class="infos-carton-date-mois">${moisTxt}</div>
-        ${hStr ? `<div class="infos-carton-date-heure">${hStr}</div>` : ''}
-      </div>`;
-    }
+    const _ev = DATA.evenement || {};
     const p = DATA.infosPratique || {};
     const l = DATA.infosLieu || {};
-    let arrDate = p.arriveeDate, arrH = p.arriveeHeure, depDate = p.departDate, depH = p.departHeure;
-    if (!_isAdmin() && CURRENT_USER?.id) {
-      const g = (DATA.guests||[]).find(x => x.id === CURRENT_USER.id);
-      if (g && (g.fromDate || g.toDate)) {
-        arrDate = g.fromDate || arrDate; arrH = g.fromHeure || arrH;
-        depDate = g.toDate   || depDate; depH = g.toHeure   || depH;
-      }
+
+    let eyebrowHtml = '';
+    if (_ev.cartonEyVisible !== false) {
+      const eyContent = _ev.cartonEyHTML || (_ev.lieu ? 'Votre séjour au ' + _ev.lieu : (_ev.sousTitre || ''));
+      eyebrowHtml = `<div class="infos-carton-eyebrow" style="text-align:${_ev.cartonEyAlign||'center'}">${eyContent}</div>`;
     }
-    const arrBlk = _cDateBlk(arrDate, arrH, 'Arrivée');
-    const depBlk = _cDateBlk(depDate, depH, 'Départ');
-    const lieuHtml = l.nom
-      ? `<div class="infos-carton-lieu"><strong>${l.nom}</strong>${l.adresse ? l.adresse.split('\n')[0] : ''}</div>`
-      : '';
-    const _ev = DATA.evenement || {};
-    const eyebrow = _ev.lieu ? 'Votre séjour au ' + _ev.lieu : (_ev.sousTitre || '');
-    const cartonTxt = _ev.cartonTexte ? `<div class="infos-carton-lieu" style="margin-top:10px;font-style:italic">${_ev.cartonTexte}</div>` : '';
-    cartonWrap.innerHTML = `<div class="infos-carton">
-      <div class="infos-carton-eyebrow">${eyebrow}</div>
-      <div class="infos-carton-names">${(_ev.titreCouple||'Sarah & Antoine').replace(/&/g,'&amp;')}</div>
+
+    const titreContent = _ev.cartonTitreHTML || _ev.titreHTML || (_ev.titreCouple||'Sarah & Antoine').replace(/&/g,'&amp;');
+    const titreHtml = `<div class="infos-carton-names" style="text-align:${_ev.cartonTitreAlign||'center'}">${titreContent}</div>`;
+
+    let datesHtml = '';
+    const dateMode = _ev.cartonDateMode || 'guest';
+    if (dateMode !== 'aucune') {
+      let arrDate, arrH, depDate, depH;
+      if (dateMode === 'fixe') {
+        arrDate = _ev.cartonArrDate; arrH = _ev.cartonArrHeure;
+        depDate = _ev.cartonDepDate; depH = _ev.cartonDepHeure;
+      } else {
+        arrDate = p.arriveeDate; arrH = p.arriveeHeure;
+        depDate = p.departDate;  depH = p.departHeure;
+        if (!_isAdmin() && CURRENT_USER?.id) {
+          const g = (DATA.guests||[]).find(x => x.id === CURRENT_USER.id);
+          if (g && (g.fromDate || g.toDate)) {
+            arrDate = g.fromDate || arrDate; arrH = g.fromHeure || arrH;
+            depDate = g.toDate   || depDate; depH = g.toHeure   || depH;
+          }
+        }
+      }
+      const arrBlk = _cDateBlk(arrDate, arrH, 'Arrivée');
+      const depBlk = _cDateBlk(depDate, depH, 'Départ');
+      if (arrBlk || depBlk) datesHtml = `<div class="infos-carton-dates">${arrBlk}${depBlk}</div>`;
+    }
+
+    const lieuHtml = l.nom ? `<div class="infos-carton-lieu"><strong>${l.nom}</strong>${l.adresse ? ' — ' + l.adresse.split('\n')[0] : ''}</div>` : '';
+
+    let msgHtml = '';
+    if (_ev.cartonMsg) {
+      const ms = [
+        _ev.cartonMsgFont   ? `font-family:'${_ev.cartonMsgFont}',sans-serif` : '',
+        _ev.cartonMsgSize   ? `font-size:${_ev.cartonMsgSize}px` : '',
+        _ev.cartonMsgBold   ? 'font-weight:700' : '',
+        _ev.cartonMsgItalic ? 'font-style:italic' : '',
+        _ev.cartonMsgColor  ? `color:${_ev.cartonMsgColor}` : '',
+        _ev.cartonMsgAlign  ? `text-align:${_ev.cartonMsgAlign}` : ''
+      ].filter(Boolean).join(';');
+      msgHtml = `<div class="infos-carton-lieu" style="margin-top:10px;${ms}">${_ev.cartonMsg}</div>`;
+    }
+
+    const cardStyle = [
+      _ev.cartonAccentColor ? `--carton-accent:${_ev.cartonAccentColor}` : '',
+      _ev.cartonBg          ? `background:${_ev.cartonBg}` : '',
+      _ev.cartonBorder      ? `border:1.5px solid ${_ev.cartonBorder}` : ''
+    ].filter(Boolean).join(';');
+
+    cartonWrap.innerHTML = `<div class="infos-carton${_ev.cartonLeaves === false ? ' no-leaves' : ''}"${cardStyle ? ` style="${cardStyle}"` : ''}>
+      ${eyebrowHtml}
+      ${titreHtml}
       <div class="infos-carton-ornament">✿</div>
       <div class="infos-carton-sep"></div>
-      <div class="infos-carton-dates">${arrBlk}${depBlk}</div>
-      ${lieuHtml}${cartonTxt}
+      ${datesHtml}
+      ${lieuHtml}
+      ${msgHtml}
     </div>`;
   }
 
