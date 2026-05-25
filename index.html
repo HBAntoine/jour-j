@@ -401,6 +401,7 @@ textarea{resize:vertical;min-height:60px;}
 .rte-toolbar{display:flex;flex-wrap:wrap;gap:4px;padding:6px 8px;background:var(--g2);border-bottom:1px solid var(--border);}
 .rte-toolbar button{padding:3px 8px;border:1px solid var(--border);border-radius:6px;background:#fff;font-size:0.78rem;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:600;transition:all 0.12s;line-height:1.4;}
 .rte-toolbar button:hover{background:var(--acc);color:#fff;border-color:var(--acc);}
+.rte-toolbar button.rte-active{background:rgba(30,77,183,.1);border-color:var(--acc);color:var(--acc);}
 .rte-toolbar select{padding:3px 6px;border:1px solid var(--border);border-radius:6px;background:#fff;font-size:0.75rem;cursor:pointer;font-family:'Nunito',sans-serif;outline:none;max-width:120px;}
 .font-picker{position:relative;display:inline-block;}
 .font-picker-btn{padding:2px 7px;border:1px solid var(--border);border-radius:6px;background:#fff;font-size:0.78rem;cursor:pointer;display:inline-flex;align-items:center;gap:3px;white-space:nowrap;height:26px;font-family:inherit;}
@@ -8475,8 +8476,8 @@ function _rteToolbarHTML(fieldId, opts) {
   return `<div class="rte-toolbar">
     ${_fontPickerHTML('rte-fp-'+fieldId, null, 'pickRteFont', fieldId)}
     ${_rteSizeStepper(fieldId)}
-    <button title="Gras"      onmousedown="event.preventDefault();rteExec('${fieldId}','bold')"><b>G</b></button>
-    <button title="Italique"  onmousedown="event.preventDefault();rteExec('${fieldId}','italic')"><i>I</i></button>
+    <button id="rte-bold-${fieldId}"   title="Gras"     onmousedown="event.preventDefault();rteExec('${fieldId}','bold')"><b>G</b></button>
+    <button id="rte-italic-${fieldId}" title="Italique" onmousedown="event.preventDefault();rteExec('${fieldId}','italic')"><i>I</i></button>
     ${alignBtns}
     ${colorBtn}
     <button title="Effacer formatage" onmousedown="event.preventDefault();rteExec('${fieldId}','removeFormat')" style="color:var(--muted)">✕</button>
@@ -8830,11 +8831,45 @@ window.msgSizeStep = function(delta) {
   if (disp) disp.textContent = newSz+'px';
 };
 
+function _syncRteToolbar(fieldId) {
+  const sel = window.getSelection();
+  if (!sel || !sel.rangeCount) return;
+  let node = sel.getRangeAt(0).startContainer;
+  if (node.nodeType === 3) node = node.parentNode;
+  const field = document.getElementById('rte-'+fieldId);
+  if (!field || !field.contains(node)) return;
+  const cs = window.getComputedStyle(node);
+
+  // Font picker
+  const FONTS = ['Nunito','DM Sans','Playfair Display','Cormorant Garamond','Great Vibes','Lora','Montserrat','DM Mono'];
+  const rawFont = (cs.fontFamily||'').split(',')[0].replace(/['"]/g,'').trim();
+  const matchedFont = FONTS.find(f => f.toLowerCase() === rawFont.toLowerCase()) || rawFont;
+  const fpBtn = document.getElementById('rte-fp-'+fieldId+'-btn');
+  if (fpBtn) { const lbl = fpBtn.querySelector('.fp-label'); if (lbl) lbl.textContent = matchedFont; fpBtn.style.fontFamily = `'${matchedFont}',sans-serif`; }
+  const fpList = document.getElementById('rte-fp-'+fieldId+'-list');
+  if (fpList) fpList.querySelectorAll('.font-picker-item').forEach(el => el.classList.toggle('selected', el.textContent.trim().toLowerCase()===matchedFont.toLowerCase()));
+
+  // Size stepper
+  const sizePx = Math.round(parseFloat(cs.fontSize)) || 14;
+  _rteCurrentSizes[fieldId] = sizePx;
+  const szDisp = document.getElementById('rte-sz-'+fieldId);
+  if (szDisp) szDisp.textContent = sizePx+'px';
+
+  // Bold / Italic active state
+  const isBold = parseInt(cs.fontWeight) >= 700;
+  const isItalic = cs.fontStyle === 'italic' || cs.fontStyle === 'oblique';
+  const boldBtn = document.getElementById('rte-bold-'+fieldId);
+  if (boldBtn) boldBtn.classList.toggle('rte-active', isBold);
+  const italicBtn = document.getElementById('rte-italic-'+fieldId);
+  if (italicBtn) italicBtn.classList.toggle('rte-active', isItalic);
+}
+
 window.saveRteRange = function(fieldId) {
   const sel = window.getSelection();
   if (sel && sel.rangeCount) {
     try { _rteSavedRanges[fieldId] = sel.getRangeAt(0).cloneRange(); } catch(e) {}
   }
+  _syncRteToolbar(fieldId);
 };
 
 window.rteInput = function(field) {
