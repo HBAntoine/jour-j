@@ -427,6 +427,15 @@ textarea{resize:vertical;min-height:60px;}
 .ev-radio:hover:not(.active){border-color:rgba(30,77,183,0.3);background:rgba(30,77,183,0.06);}
 .ev-preview-right{display:flex;flex-direction:column;gap:12px;}
 @media(min-width:700px){.ev-preview-right{position:sticky;top:24px;}}
+/* 3-column layout for Événement settings */
+.ev-layout-3col{display:grid;grid-template-columns:100px minmax(300px,420px) 1fr;gap:0;align-items:start;}
+.ev-col-tabs{position:sticky;top:0;display:flex;flex-direction:column;gap:0;padding:0 12px 0 0;border-right:1px solid var(--border);}
+.ev-col-form{overflow-y:auto;max-height:calc(100vh - 155px);padding:0 16px;border-right:1px solid var(--border);}
+.ev-col-preview{position:sticky;top:0;padding:0 0 0 16px;overflow-y:auto;max-height:calc(100vh - 155px);}
+.ev-col-tabs .ev-editor-tabs{display:flex;flex-direction:column;gap:3px;background:none;padding:0;margin:0;border-radius:0;}
+.ev-col-tabs .ev-editor-tab{flex:none;width:100%;padding:9px 6px;font-size:0.73rem;border-radius:8px;text-align:center;background:var(--g2);color:var(--muted);}
+.ev-col-tabs .ev-editor-tab.active{background:var(--acc);color:#fff;box-shadow:0 2px 8px rgba(30,77,183,.22);}
+.ev-col-tabs-actions{display:flex;flex-direction:column;gap:5px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);}
 .ev-editor-tabs{display:flex;gap:2px;background:var(--g2);border-radius:10px;padding:3px;margin-bottom:12px;}
 .ev-editor-tab{flex:1;padding:6px 10px;border:none;background:none;border-radius:8px;font-size:0.78rem;font-weight:700;font-family:'Nunito',sans-serif;cursor:pointer;color:var(--muted);transition:all 0.15s;text-align:center;}
 .ev-editor-tab.active{background:#fff;color:var(--acc);box-shadow:0 1px 4px rgba(0,0,0,0.1);}
@@ -8564,6 +8573,20 @@ function _rteFieldHTML(fieldId, placeholder, extraStyle) {
     onkeyup="saveRteRange('${fieldId}')"></div>`;
 }
 
+function _buildEvTabsHTML(ev) {
+  const tabActive = (t) => t === _activeEvTab ? ' active' : '';
+  return `
+    <div class="ev-editor-tabs">
+      <button class="ev-editor-tab${tabActive('app')}"    data-tab="app"    onclick="evTab('app')">App</button>
+      <button class="ev-editor-tab${tabActive('carton')}" data-tab="carton" onclick="evTab('carton')">Carton</button>
+      <button class="ev-editor-tab${tabActive('style')}"  data-tab="style"  onclick="evTab('style')">Style</button>
+    </div>
+    <div class="ev-col-tabs-actions">
+      <button class="btn btn-acc" style="justify-content:center;font-size:0.78rem;font-weight:700;padding:8px 6px" onclick="applyEvChanges()">✓ Appliquer</button>
+      <button class="btn btn-ghost" style="justify-content:center;font-size:0.78rem;padding:7px 6px" onclick="cancelEvChanges()">✕ Annuler</button>
+    </div>`;
+}
+
 function _buildEvLeftHTML(ev) {
   const fontList = ['Nunito','DM Sans','Playfair Display','Cormorant Garamond','Great Vibes','Lora','Montserrat','DM Mono'];
   const TYPES = [
@@ -8627,12 +8650,6 @@ function _buildEvLeftHTML(ev) {
 
   const tabActive = (t) => t === _activeEvTab ? ' active' : '';
   return `
-    <div class="ev-editor-tabs">
-      <button class="ev-editor-tab${tabActive('app')}"    data-tab="app"    onclick="evTab('app')">App</button>
-      <button class="ev-editor-tab${tabActive('carton')}" data-tab="carton" onclick="evTab('carton')">Carton</button>
-      <button class="ev-editor-tab${tabActive('style')}"  data-tab="style"  onclick="evTab('style')">Style</button>
-    </div>
-
     <div class="ev-editor-panel${tabActive('app')}" data-panel="app">
       <div class="ev-section">
         <div class="ev-section-label">🎭 Type d'événement</div>
@@ -8806,11 +8823,6 @@ function _buildEvLeftHTML(ev) {
           Afficher le lieu sur le carton
         </label>
       </div>
-    </div>
-
-    <div style="display:flex;gap:8px;margin-top:16px;padding-top:12px;border-top:1px solid var(--border)">
-      <button class="btn btn-acc" style="flex:1;font-weight:700" onclick="applyEvChanges()">✓ Appliquer</button>
-      <button class="btn btn-ghost" onclick="cancelEvChanges()">✕ Annuler</button>
     </div>`;
 }
 
@@ -8840,6 +8852,8 @@ function _refreshEvSettings() {
     return;
   }
   const ev = _evDraft || DATA.evenement || {};
+  const tabsEl = document.getElementById('ev-tabs-col');
+  if (tabsEl) tabsEl.innerHTML = _buildEvTabsHTML(ev);
   leftEl.innerHTML = _buildEvLeftHTML(ev);
   setTimeout(() => _restoreRteAndTab(ev), 50);
 }
@@ -8882,11 +8896,14 @@ function renderSettingsEvenement(c) {
   if (!_evDraft) _evDraft = JSON.parse(JSON.stringify(DATA.evenement || {}));
   const ev = _evDraft;
 
-  const html = `<div style="display:flex;flex-wrap:wrap;gap:20px;align-items:start">
-  <div id="ev-left-col" style="flex:0 0 300px;min-width:260px;max-width:360px">
+  const html = `<div class="ev-layout-3col">
+  <div class="ev-col-tabs" id="ev-tabs-col">
+    ${_buildEvTabsHTML(ev)}
+  </div>
+  <div class="ev-col-form" id="ev-left-col">
     ${_buildEvLeftHTML(ev)}
   </div>
-  <div class="ev-preview-right">
+  <div class="ev-col-preview">
     <div class="ev-section">
       <div class="ev-section-label">Aperçu Header</div>
       <div id="ev-preview-header">${_buildHeaderPreviewHTML()}</div>
