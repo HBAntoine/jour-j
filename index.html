@@ -606,8 +606,8 @@ textarea{resize:vertical;min-height:60px;}
 .infos-bloc-body{padding:14px 16px;position:relative;z-index:1;}
 .infos-bloc-body::before{content:'✿';position:absolute;top:8px;right:14px;font-size:0.9rem;color:#c4a882;opacity:0.5;pointer-events:none;}
 /* Lieu */
-.infos-lieu-addr{font-family:'Nunito',sans-serif;font-size:0.88rem;color:var(--text);user-select:all;-webkit-user-select:all;margin-bottom:12px;line-height:1.6;}
-.infos-lieu-btns{display:flex;gap:8px;flex-wrap:wrap;}
+.infos-lieu-addr{font-family:'Nunito',sans-serif;font-size:0.88rem;color:var(--text);user-select:all;-webkit-user-select:all;margin-bottom:12px;line-height:1.6;text-align:center;}
+.infos-lieu-btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
 /* Infos pratiques */
 .infos-pratique-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 .infos-pratique-card{background:rgba(255,255,255,0.7);border:1px solid #e8ddd0;border-radius:10px;padding:10px 12px;}
@@ -10725,7 +10725,7 @@ window.renderInfos = function() {
 
 function _renderInfosLieu() {
   const d = DATA.infosLieu || {};
-  const nomHtml = d.nom ? `<div style="font-family:'Nunito',sans-serif;font-size:0.95rem;font-weight:800;color:var(--text);margin-bottom:4px">${d.nom}</div>` : '';
+  const nomHtml = d.nom ? `<div style="font-family:'Nunito',sans-serif;font-size:0.95rem;font-weight:800;color:var(--text);margin-bottom:4px;text-align:center">${d.nom}</div>` : '';
   const addrText = (d.adresse||'').trim();
   const addrHtml = addrText
     ? `<p class="infos-lieu-addr">${addrText.replace(/\n/g,'<br>')}</p>`
