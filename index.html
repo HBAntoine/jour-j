@@ -3085,7 +3085,7 @@ const DEFAULT_DATA = {
   userSessions:{},
   devices:{},
   evenement:{
-    type:'Mariage', typeCustom:'', titreEmojiVisible:true,
+    type:'Mariage', typeCustom:'', titreEmojiVisible:true, titreEmojiPosition:'left',
     titreCouple:'Sarah & Antoine',
     sousTitre:'12 juillet 2026 · Gîte du Bonheur',
     lieu:'Gîte du Bonheur',
@@ -3263,7 +3263,8 @@ async function initFirebase(cfg) {
           if (_evinit.cartonBorder     === undefined) _evinit.cartonBorder     = '';
           if (_evinit.cartonLeaves      === undefined) _evinit.cartonLeaves      = true;
           if (_evinit.cartonLieuVisible === undefined) _evinit.cartonLieuVisible = true;
-          if (_evinit.titreEmojiVisible === undefined) _evinit.titreEmojiVisible = true;
+          if (_evinit.titreEmojiVisible  === undefined) _evinit.titreEmojiVisible  = true;
+          if (_evinit.titreEmojiPosition === undefined) _evinit.titreEmojiPosition = 'left';
         }
 
         // Appliquer les permissions Firebase avant le rendu
@@ -8323,8 +8324,12 @@ function _renderEventHeader() {
     if (!_isHtmlEmpty(ev.sousTitreHTML)) {
       subtitleEl.innerHTML = ev.sousTitreHTML;
     } else {
-      const _em = ev.titreEmojiVisible !== false ? (EV_TYPE_EMOJI[ev.type] || '💍') + ' ' : '';
-      subtitleEl.textContent = _em + (ev.sousTitre || '12 juillet 2026 · Gîte du Bonheur');
+      const _ec = ev.titreEmojiVisible !== false ? (EV_TYPE_EMOJI[ev.type] || '💍') : null;
+      const _st = ev.sousTitre || '12 juillet 2026 · Gîte du Bonheur';
+      const _ep = ev.titreEmojiPosition || 'left';
+      subtitleEl.textContent = _ec
+        ? (_ep==='right' ? _st+' '+_ec : _ep==='both' ? _ec+' '+_st+' '+_ec : _ec+' '+_st)
+        : _st;
     }
     subtitleEl.style.textAlign = ev.sousTitreCSSAlign || 'center';
   }
@@ -8415,8 +8420,13 @@ function _buildHeaderPreviewHTML() {
       ? `<span style="opacity:.85">${parts[0].trim()}</span> <span>&amp;</span> <span>${parts[1].trim()}</span>`
       : tc;
   }
-  const _em2 = ev.titreEmojiVisible !== false ? (EV_TYPE_EMOJI[ev.type] || '💍') + ' ' : '';
-  const sousTitreContent = ev.sousTitreHTML || (_em2 + (ev.sousTitre || '12 juillet 2026 · Gîte du Bonheur'));
+  const _ec2 = ev.titreEmojiVisible !== false ? (EV_TYPE_EMOJI[ev.type] || '💍') : null;
+  const _st2 = ev.sousTitre || '12 juillet 2026 · Gîte du Bonheur';
+  const _ep2 = ev.titreEmojiPosition || 'left';
+  const _stFormatted = _ec2
+    ? (_ep2==='right' ? _st2+' '+_ec2 : _ep2==='both' ? _ec2+' '+_st2+' '+_ec2 : _ec2+' '+_st2)
+    : _st2;
+  const sousTitreContent = ev.sousTitreHTML || _stFormatted;
   return `<div style="background:var(--acc);padding:12px 16px;border-radius:10px">
     <div style="font-family:'Nunito',sans-serif;font-size:1.05rem;font-weight:800;color:#fff;text-align:${ev.titreCSSAlign||'center'}">${titreContent}</div>
     <div style="font-size:0.78rem;color:rgba(255,255,255,0.85);margin-top:4px;text-align:${ev.sousTitreCSSAlign||'center'}">${sousTitreContent}</div>
@@ -8475,13 +8485,22 @@ function _buildEvLeftHTML(ev) {
     ? `<div style="margin-top:10px"><input class="event-field-inline" placeholder="Nom de l'événement" value="${(ev.typeCustom||'').replace(/"/g,'&quot;')}" oninput="saveEvenementField('typeCustom',this.value)"></div>`
     : '';
   const currentEmoji = EV_TYPE_EMOJI[ev.type] || '✨';
-  const emojiRow = `<div style="display:flex;align-items:center;gap:10px;margin-top:10px;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:10px">
-    <span style="font-size:1.4rem;line-height:1">${currentEmoji}</span>
-    <span style="flex:1;font-size:0.8rem;color:var(--muted)">Émoji selon le type</span>
-    <label style="display:flex;align-items:center;gap:6px;font-size:0.82rem;cursor:pointer;white-space:nowrap">
-      <input type="checkbox" ${ev.titreEmojiVisible !== false ? 'checked' : ''} onchange="saveEvenementField('titreEmojiVisible',this.checked)">
-      Afficher
-    </label>
+  const emojiVisible = ev.titreEmojiVisible !== false;
+  const emojiPos = ev.titreEmojiPosition || 'left';
+  const emojiRow = `<div style="margin-top:10px;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:10px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:${emojiVisible?'8px':'0'}">
+      <span style="font-size:1.3rem;line-height:1">${currentEmoji}</span>
+      <span style="flex:1;font-size:0.8rem;color:var(--muted)">Émoji selon le type</span>
+      <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer;white-space:nowrap">
+        <input type="checkbox" ${emojiVisible?'checked':''} onchange="saveEvenementField('titreEmojiVisible',this.checked)">
+        Afficher
+      </label>
+    </div>
+    ${emojiVisible ? `<div style="display:flex;gap:5px">
+      <button class="ev-radio${emojiPos==='left'?' active':''}" style="flex:1;font-size:0.75rem;padding:4px 2px" onclick="saveEvenementField('titreEmojiPosition','left')">${currentEmoji} Gauche</button>
+      <button class="ev-radio${emojiPos==='right'?' active':''}" style="flex:1;font-size:0.75rem;padding:4px 2px" onclick="saveEvenementField('titreEmojiPosition','right')">Droite ${currentEmoji}</button>
+      <button class="ev-radio${emojiPos==='both'?' active':''}" style="flex:1;font-size:0.75rem;padding:4px 2px" onclick="saveEvenementField('titreEmojiPosition','both')">${currentEmoji} Les 2 ${currentEmoji}</button>
+    </div>` : ''}
   </div>`;
   const dateChips = (ev.calDates||[]).map(d => {
     let lbl = d;
@@ -8868,13 +8887,14 @@ window.setEvenementType = function(type) {
   if (!_evDraft) _evDraft = JSON.parse(JSON.stringify(DATA.evenement || {}));
   _evDraft.type = type;
   _refreshEvSettings();
+  _refreshEvPreview();
 };
 
 window.saveEvenementField = function(field, value) {
   if (!_evDraft) _evDraft = JSON.parse(JSON.stringify(DATA.evenement || {}));
   _evDraft[field] = value;
   _refreshEvPreview();
-  if (field === 'cartonDateMode') _refreshEvSettings();
+  if (['cartonDateMode','titreEmojiVisible','titreEmojiPosition'].includes(field)) _refreshEvSettings();
 };
 
 window.addEvenementDate = function() {
