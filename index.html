@@ -588,7 +588,8 @@ textarea{resize:vertical;min-height:60px;}
 
 /* ── Écran de bienvenue ── */
 #welcome-overlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto;background:rgba(0,0,0,.52);}
-#welcome-modal{width:100%;max-width:360px;padding:28px 22px 22px;text-align:center;font-family:Georgia,serif;position:relative;overflow:hidden;border-radius:18px;animation:welcomeFadeIn .4s ease;}
+#welcome-modal{width:100%;max-width:420px;padding:28px 22px 22px;text-align:center;font-family:Georgia,serif;position:relative;overflow:hidden;border-radius:18px;animation:welcomeFadeIn .4s ease;}
+@media(min-width:600px){#welcome-modal{max-width:540px;padding:36px 52px 32px;}#welcome-modal .infos-carton-names{font-size:1.7rem;}#welcome-modal .infos-carton-dates{gap:32px;}}
 @keyframes welcomeFadeIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
 #welcome-emoji{font-size:2rem;margin-bottom:6px;}
 #welcome-name{font-size:1.05rem;font-weight:700;margin-bottom:14px;font-family:'Nunito',sans-serif;}
@@ -2780,6 +2781,9 @@ input, select, textarea { font-family: 'Fredoka', sans-serif !important; font-we
     <div class="form-group">
       <label>Message personnel <span style="color:var(--muted);font-weight:400;font-size:0.7rem">— affiché à la 1ère connexion</span></label>
       <textarea id="new-guest-msg-perso" rows="3" placeholder="Un mot personnalisé affiché à la première connexion de cet invité…" style="resize:vertical"></textarea>
+      <div id="guest-welcome-reset-wrap" style="display:none;margin-top:6px;text-align:right">
+        <button type="button" class="btn btn-ghost btn-sm" onclick="resetGuestWelcome()">🔄 Réafficher le message à la prochaine connexion</button>
+      </div>
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('modal-addguest')">Annuler</button>
@@ -3390,8 +3394,9 @@ async function initFirebase(cfg) {
           if (CURRENT_USER) setTimeout(_cleanOldSessions, 2000);
           if (!CURRENT_USER) setTimeout(showIdentityModal, 300);
           // Écran de bienvenue — session existante (retour d'un invité déjà identifié)
-          if (CURRENT_USER && !CURRENT_USER.isAdmin && !localStorage.getItem('welcome_seen_' + CURRENT_USER.id)) {
-            setTimeout(showWelcomeScreen, 700);
+          if (CURRENT_USER && !CURRENT_USER.isAdmin) {
+            const _wg = DATA.guests?.find(x => x.id === CURRENT_USER.id);
+            if (!_wg?.welcomeSeen) setTimeout(showWelcomeScreen, 700);
           }
         }
         _suppressWrite = false;
@@ -6553,6 +6558,8 @@ window.editGuest = function(id) {
   setGuestAge(g.age || 'Adulte');
   const msgPersoEl = document.getElementById('new-guest-msg-perso');
   if (msgPersoEl) msgPersoEl.value = g.messagePerso || '';
+  const resetWrap = document.getElementById('guest-welcome-reset-wrap');
+  if (resetWrap) resetWrap.style.display = g.welcomeSeen ? 'block' : 'none';
   _renderGuestRolesPicker();
   _renderGuestDaysPicker();
   openModal('modal-addguest');
@@ -9468,7 +9475,22 @@ function _renderIdentityList(q) {
 window._closeWelcome = function() {
   const ov = document.getElementById('welcome-overlay');
   if (ov) ov.remove();
-  if (CURRENT_USER) localStorage.setItem('welcome_seen_' + CURRENT_USER.id, '1');
+  if (CURRENT_USER?.id) {
+    const g = DATA.guests?.find(x => x.id === CURRENT_USER.id);
+    if (g) { g.welcomeSeen = true; pushData(); }
+  }
+};
+
+window.resetGuestWelcome = function() {
+  const editId = document.getElementById('edit-guest-id').value;
+  if (!editId) return;
+  const g = DATA.guests.find(x => x.id === editId);
+  if (!g) return;
+  g.welcomeSeen = false;
+  pushData();
+  toast('🔄 Message de bienvenue réactivé pour ' + (g.fname || 'cet invité'));
+  const wrap = document.getElementById('guest-welcome-reset-wrap');
+  if (wrap) wrap.style.display = 'none';
 };
 
 function showWelcomeScreen() {
@@ -9595,7 +9617,7 @@ window.selectIdentity = function(guestId) {
   switchTab(_getFirstVisibleTab());
   toast(`👋 Bienvenue ${g.fname} !`);
   // Écran de bienvenue — nouvelle connexion
-  if (!isAdmin && !localStorage.getItem('welcome_seen_' + guestId)) {
+  if (!isAdmin && !g.welcomeSeen) {
     setTimeout(showWelcomeScreen, 600);
   }
 };
