@@ -3085,7 +3085,7 @@ const DEFAULT_DATA = {
   userSessions:{},
   devices:{},
   evenement:{
-    type:'Mariage', typeCustom:'',
+    type:'Mariage', typeCustom:'', titreEmojiVisible:true,
     titreCouple:'Sarah & Antoine',
     sousTitre:'12 juillet 2026 · Gîte du Bonheur',
     lieu:'Gîte du Bonheur',
@@ -3261,8 +3261,9 @@ async function initFirebase(cfg) {
           if (_evinit.cartonAccentColor=== undefined) _evinit.cartonAccentColor= '';
           if (_evinit.cartonBg         === undefined) _evinit.cartonBg         = '';
           if (_evinit.cartonBorder     === undefined) _evinit.cartonBorder     = '';
-          if (_evinit.cartonLeaves     === undefined) _evinit.cartonLeaves     = true;
-          if (_evinit.cartonLieuVisible=== undefined) _evinit.cartonLieuVisible= true;
+          if (_evinit.cartonLeaves      === undefined) _evinit.cartonLeaves      = true;
+          if (_evinit.cartonLieuVisible === undefined) _evinit.cartonLieuVisible = true;
+          if (_evinit.titreEmojiVisible === undefined) _evinit.titreEmojiVisible = true;
         }
 
         // Appliquer les permissions Firebase avant le rendu
@@ -8260,6 +8261,11 @@ window.savePermissions = function() {
 
 
 // ── Événement ─────────────────────────────────────────────────
+const EV_TYPE_EMOJI = {
+  'Mariage':'💍','Anniversaire':'🎂','EVG':'🥂','EVJF':'👠',
+  'Baby Shower':'👶','Fête':'🎉','Séminaire':'🏢','PACS':'❤️',
+  'Remise de diplôme':'🎓','Personnalisé':'✨'
+};
 let _evDraft = null;
 let _activeEvTab = 'app';
 let _evSettingsContainer = null;
@@ -8317,7 +8323,8 @@ function _renderEventHeader() {
     if (!_isHtmlEmpty(ev.sousTitreHTML)) {
       subtitleEl.innerHTML = ev.sousTitreHTML;
     } else {
-      subtitleEl.textContent = '💍 ' + (ev.sousTitre || '12 juillet 2026 · Gîte du Bonheur');
+      const _em = ev.titreEmojiVisible !== false ? (EV_TYPE_EMOJI[ev.type] || '💍') + ' ' : '';
+      subtitleEl.textContent = _em + (ev.sousTitre || '12 juillet 2026 · Gîte du Bonheur');
     }
     subtitleEl.style.textAlign = ev.sousTitreCSSAlign || 'center';
   }
@@ -8408,7 +8415,8 @@ function _buildHeaderPreviewHTML() {
       ? `<span style="opacity:.85">${parts[0].trim()}</span> <span>&amp;</span> <span>${parts[1].trim()}</span>`
       : tc;
   }
-  const sousTitreContent = ev.sousTitreHTML || ('💍 ' + (ev.sousTitre || '12 juillet 2026 · Gîte du Bonheur'));
+  const _em2 = ev.titreEmojiVisible !== false ? (EV_TYPE_EMOJI[ev.type] || '💍') + ' ' : '';
+  const sousTitreContent = ev.sousTitreHTML || (_em2 + (ev.sousTitre || '12 juillet 2026 · Gîte du Bonheur'));
   return `<div style="background:var(--acc);padding:12px 16px;border-radius:10px">
     <div style="font-family:'Nunito',sans-serif;font-size:1.05rem;font-weight:800;color:#fff;text-align:${ev.titreCSSAlign||'center'}">${titreContent}</div>
     <div style="font-size:0.78rem;color:rgba(255,255,255,0.85);margin-top:4px;text-align:${ev.sousTitreCSSAlign||'center'}">${sousTitreContent}</div>
@@ -8466,6 +8474,15 @@ function _buildEvLeftHTML(ev) {
   const customInput = ev.type==='Personnalisé'
     ? `<div style="margin-top:10px"><input class="event-field-inline" placeholder="Nom de l'événement" value="${(ev.typeCustom||'').replace(/"/g,'&quot;')}" oninput="saveEvenementField('typeCustom',this.value)"></div>`
     : '';
+  const currentEmoji = EV_TYPE_EMOJI[ev.type] || '✨';
+  const emojiRow = `<div style="display:flex;align-items:center;gap:10px;margin-top:10px;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:10px">
+    <span style="font-size:1.4rem;line-height:1">${currentEmoji}</span>
+    <span style="flex:1;font-size:0.8rem;color:var(--muted)">Émoji selon le type</span>
+    <label style="display:flex;align-items:center;gap:6px;font-size:0.82rem;cursor:pointer;white-space:nowrap">
+      <input type="checkbox" ${ev.titreEmojiVisible !== false ? 'checked' : ''} onchange="saveEvenementField('titreEmojiVisible',this.checked)">
+      Afficher
+    </label>
+  </div>`;
   const dateChips = (ev.calDates||[]).map(d => {
     let lbl = d;
     try { const dt=new Date(d+'T00:00:00'); lbl=dt.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'long'}); } catch(e){}
@@ -8506,7 +8523,7 @@ function _buildEvLeftHTML(ev) {
     <div class="ev-editor-panel${tabActive('app')}" data-panel="app">
       <div class="ev-section">
         <div class="ev-section-label">🎭 Type d'événement</div>
-        <div class="event-type-grid">${typePills}</div>${customInput}
+        <div class="event-type-grid">${typePills}</div>${customInput}${emojiRow}
       </div>
       <div class="ev-section">
         <div class="ev-section-label">✏️ Titre principal</div>
