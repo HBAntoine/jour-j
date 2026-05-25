@@ -8338,7 +8338,7 @@ function _buildCartonPreviewHTML(evOverride) {
     eyebrowHtml = `<div class="infos-carton-eyebrow" style="text-align:${ev.cartonEyAlign||'center'}">${eyContent}</div>`;
   }
 
-  const titreContent = ev.cartonTitreHTML || (!_isHtmlEmpty(ev.titreHTML) ? ev.titreHTML : null) || (ev.titreCouple||'Sarah & Antoine').replace(/&/g,'&amp;');
+  const titreContent = ev.cartonTitreHTML || (ev.titreCouple||'Sarah & Antoine').replace(/&/g,'&amp;');
   const titreHtml = `<div class="infos-carton-names" style="text-align:${ev.cartonTitreAlign||'center'}">${titreContent}</div>`;
 
   let datesHtml = '';
@@ -8578,7 +8578,7 @@ function _buildEvLeftHTML(ev) {
         <div class="ev-section-label">🎴 Titre du carton</div>
         <div class="rte-editor-wrap">
           ${_rteToolbarHTML('cartonTitreHTML')}
-          ${_rteFieldHTML('cartonTitreHTML','Ex : Sarah &amp; Antoine (vide = titre App)')}
+          ${_rteFieldHTML('cartonTitreHTML','Ex : Sarah &amp; Antoine (vide = noms bruts)')}
         </div>
         <div style="display:flex;gap:6px;margin-top:8px">
           <button class="ev-radio${(ev.cartonTitreAlign||'center')==='left'?' active':''}"   onclick="saveEvenementField('cartonTitreAlign','left')">⟵</button>
@@ -10274,7 +10274,7 @@ window.renderInfos = function() {
       eyebrowHtml = `<div class="infos-carton-eyebrow" style="text-align:${_ev.cartonEyAlign||'center'}">${eyContent}</div>`;
     }
 
-    const titreContent = _ev.cartonTitreHTML || _ev.titreHTML || (_ev.titreCouple||'Sarah & Antoine').replace(/&/g,'&amp;');
+    const titreContent = _ev.cartonTitreHTML || (_ev.titreCouple||'Sarah & Antoine').replace(/&/g,'&amp;');
     const titreHtml = `<div class="infos-carton-names" style="text-align:${_ev.cartonTitreAlign||'center'}">${titreContent}</div>`;
 
     let datesHtml = '';
