@@ -544,9 +544,9 @@ textarea{resize:vertical;min-height:60px;}
 /* INFOS — botanical theme */
 /* Carton d'invitation */
 .infos-carton{background:#fdf9f4;border:1px solid #e8ddd0;border-radius:16px;padding:20px 18px 18px;margin-bottom:18px;position:relative;overflow:hidden;text-align:center;}
-.infos-carton::before,.infos-carton::after{content:'🌿';position:absolute;font-size:3rem;opacity:0.08;pointer-events:none;}
-.infos-carton::before{top:-6px;left:6px;transform:rotate(-30deg);}
-.infos-carton::after{bottom:-6px;right:6px;transform:rotate(150deg);}
+.carton-leaf{position:absolute;font-size:3rem;opacity:0.08;pointer-events:none;user-select:none;}
+.carton-leaf-tl{top:-6px;left:6px;transform:rotate(-30deg);}
+.carton-leaf-br{bottom:-6px;right:6px;transform:rotate(150deg);}
 .infos-carton-eyebrow{font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#9a8878;margin-bottom:6px;}
 .infos-carton-names{font-family:'Playfair Display','Georgia',serif;font-size:1.4rem;font-weight:700;color:#2d2520;line-height:1.2;margin-bottom:4px;}
 .infos-carton-ornament{color:#c4a882;font-size:1rem;margin-bottom:10px;}
@@ -3100,7 +3100,8 @@ const DEFAULT_DATA = {
     cartonDateMode:'guest',
     cartonArrDate:'', cartonArrHeure:'', cartonDepDate:'', cartonDepHeure:'',
     cartonAccentColor:'', cartonBg:'', cartonBorder:'',
-    cartonLeaves:true
+    cartonLeaves:true,
+    cartonLieuVisible:true
   }
 };
 
@@ -3261,6 +3262,7 @@ async function initFirebase(cfg) {
           if (_evinit.cartonBg         === undefined) _evinit.cartonBg         = '';
           if (_evinit.cartonBorder     === undefined) _evinit.cartonBorder     = '';
           if (_evinit.cartonLeaves     === undefined) _evinit.cartonLeaves     = true;
+          if (_evinit.cartonLieuVisible=== undefined) _evinit.cartonLieuVisible= true;
         }
 
         // Appliquer les permissions Firebase avant le rendu
@@ -3440,13 +3442,8 @@ const MOIS_LABELS = ['janvier','février','mars','avril','mai','juin','juillet',
 const JOURS_LABELS = ['dim','lun','mar','mer','jeu','ven','sam'];
 const JOURS_LONG = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
 
-// Easter eggs pour les dates clés du mariage
-const DATE_EASTER = {
-  '2026-07-11': { emoji:'🏡', label:'Sam 11 juillet · Arrivée' },
-  '2026-07-12': { emoji:'💍', label:'Dim 12 juillet · Mariage' },
-  '2026-07-13': { emoji:'🥂', label:'Lun 13 juillet · Copains' },
-  '2026-07-14': { emoji:'👋', label:'Mar 14 juillet · Départ' },
-};
+// Dates spéciales (jours fériés, etc.) — les dates de l'événement sont dans DATA.evenement.calDates
+const DATE_EASTER = {};
 
 // Normalise n'importe quel format de date en 'YYYY-MM-DD' ou 'amont'
 function normalizeDate(d) {
@@ -8263,6 +8260,15 @@ window.savePermissions = function() {
 
 
 // ── Événement ─────────────────────────────────────────────────
+let _evDraft = null;
+let _activeEvTab = 'app';
+let _evSettingsContainer = null;
+const _rteSavedRanges = {};
+
+function _isHtmlEmpty(html) {
+  return !html || !html.replace(/<br\s*\/?>/gi,'').replace(/<[^>]+>/g,'').trim();
+}
+
 function _cFmtH(h) {
   if (!h) return '';
   if (!/^\d+:\d+$/.test(h)) return h;
@@ -8295,7 +8301,7 @@ function _renderEventHeader() {
   const ev = DATA.evenement || {};
   const titleEl = document.getElementById('header-event-title');
   if (titleEl) {
-    if (ev.titreHTML) {
+    if (!_isHtmlEmpty(ev.titreHTML)) {
       titleEl.innerHTML = ev.titreHTML;
     } else {
       const tc = ev.titreCouple || 'Sarah & Antoine';
@@ -8308,7 +8314,7 @@ function _renderEventHeader() {
   }
   const subtitleEl = document.getElementById('header-event-subtitle');
   if (subtitleEl) {
-    if (ev.sousTitreHTML) {
+    if (!_isHtmlEmpty(ev.sousTitreHTML)) {
       subtitleEl.innerHTML = ev.sousTitreHTML;
     } else {
       subtitleEl.textContent = '💍 ' + (ev.sousTitre || '12 juillet 2026 · Gîte du Bonheur');
@@ -8320,7 +8326,8 @@ function _renderEventHeader() {
 }
 
 function _buildCartonPreviewHTML(evOverride) {
-  const ev = Object.assign({}, DATA.evenement || {}, evOverride || {});
+  const base = _evDraft || DATA.evenement || {};
+  const ev = Object.assign({}, base, evOverride || {});
   const accent = ev.cartonAccentColor || '';
   const bg = ev.cartonBg || '';
   const border = ev.cartonBorder || '';
@@ -8331,7 +8338,7 @@ function _buildCartonPreviewHTML(evOverride) {
     eyebrowHtml = `<div class="infos-carton-eyebrow" style="text-align:${ev.cartonEyAlign||'center'}">${eyContent}</div>`;
   }
 
-  const titreContent = ev.cartonTitreHTML || ev.titreHTML || (ev.titreCouple||'Sarah & Antoine').replace(/&/g,'&amp;');
+  const titreContent = ev.cartonTitreHTML || (!_isHtmlEmpty(ev.titreHTML) ? ev.titreHTML : null) || (ev.titreCouple||'Sarah & Antoine').replace(/&/g,'&amp;');
   const titreHtml = `<div class="infos-carton-names" style="text-align:${ev.cartonTitreAlign||'center'}">${titreContent}</div>`;
 
   let datesHtml = '';
@@ -8350,7 +8357,9 @@ function _buildCartonPreviewHTML(evOverride) {
   }
 
   const l = DATA.infosLieu || {};
-  const lieuHtml = l.nom ? `<div class="infos-carton-lieu"><strong>${l.nom}</strong>${l.adresse ? ' — ' + l.adresse.split('\n')[0] : ''}</div>` : '';
+  const lieuHtml = (ev.cartonLieuVisible !== false) && l.nom
+    ? `<div class="infos-carton-lieu"><strong>${l.nom}</strong>${l.adresse ? ' — ' + l.adresse.split('\n')[0] : ''}</div>`
+    : '';
 
   let msgHtml = '';
   if (ev.cartonMsg) {
@@ -8371,7 +8380,12 @@ function _buildCartonPreviewHTML(evOverride) {
     border ? `border:1.5px solid ${border}` : ''
   ].filter(Boolean).join(';');
 
-  return `<div class="infos-carton${ev.cartonLeaves === false ? ' no-leaves' : ''}"${cardStyle ? ` style="${cardStyle}"` : ''}>
+  const leavesHtml = ev.cartonLeaves !== false
+    ? '<span class="carton-leaf carton-leaf-tl" aria-hidden="true">🌿</span><span class="carton-leaf carton-leaf-br" aria-hidden="true">🌿</span>'
+    : '';
+
+  return `<div class="infos-carton"${cardStyle ? ` style="${cardStyle}"` : ''}>
+    ${leavesHtml}
     ${eyebrowHtml}
     ${titreHtml}
     <div class="infos-carton-ornament">✿</div>
@@ -8383,9 +8397,9 @@ function _buildCartonPreviewHTML(evOverride) {
 }
 
 function _buildHeaderPreviewHTML() {
-  const ev = DATA.evenement || {};
+  const ev = _evDraft || DATA.evenement || {};
   let titreContent;
-  if (ev.titreHTML) {
+  if (!_isHtmlEmpty(ev.titreHTML)) {
     titreContent = ev.titreHTML;
   } else {
     const tc = ev.titreCouple || 'Sarah & Antoine';
@@ -8429,8 +8443,17 @@ function _rteToolbarHTML(fieldId, opts) {
   </div>`;
 }
 
-function renderSettingsEvenement(c) {
-  const ev = DATA.evenement || {};
+function _rteFieldHTML(fieldId, placeholder, extraStyle) {
+  const st = extraStyle ? ` style="${extraStyle}"` : '';
+  return `<div id="rte-${fieldId}" class="rte-field" contenteditable="true" data-placeholder="${placeholder}"${st}
+    oninput="rteInput('${fieldId}')"
+    onblur="rteSave('${fieldId}')"
+    onmouseup="saveRteRange('${fieldId}')"
+    onkeyup="saveRteRange('${fieldId}')"></div>`;
+}
+
+function _buildEvLeftHTML(ev) {
+  const fontList = ['Nunito','DM Sans','Playfair Display','Cormorant Garamond','Great Vibes','Lora','Montserrat','DM Mono'];
   const TYPES = [
     {id:'Mariage',emoji:'💍'},{id:'Anniversaire',emoji:'🎂'},{id:'EVG',emoji:'🥂'},
     {id:'EVJF',emoji:'👠'},{id:'Baby Shower',emoji:'👶'},{id:'Fête',emoji:'🎉'},
@@ -8441,16 +8464,17 @@ function renderSettingsEvenement(c) {
     `<button class="event-type-pill${ev.type===t.id?' active':''}" onclick="setEvenementType('${t.id}')">${t.emoji} ${t.id}</button>`
   ).join('');
   const customInput = ev.type==='Personnalisé'
-    ? `<div style="margin-top:10px"><input class="event-field-inline" placeholder="Nom de l'événement" value="${(ev.typeCustom||'').replace(/"/g,'&quot;')}" onblur="saveEvenementField('typeCustom',this.value)"></div>`
+    ? `<div style="margin-top:10px"><input class="event-field-inline" placeholder="Nom de l'événement" value="${(ev.typeCustom||'').replace(/"/g,'&quot;')}" oninput="saveEvenementField('typeCustom',this.value)"></div>`
     : '';
   const dateChips = (ev.calDates||[]).map(d => {
     let lbl = d;
     try { const dt=new Date(d+'T00:00:00'); lbl=dt.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'long'}); } catch(e){}
     return `<span class="cal-date-chip">${lbl}<button onclick="removeEvenementDate('${d}')">✕</button></span>`;
   }).join('');
-  const cartonVisible = ev.cartonVisible !== false;
-  const eyVisible = ev.cartonEyVisible !== false;
-  const dm = ev.cartonDateMode || 'guest';
+  const cartonVisible   = ev.cartonVisible !== false;
+  const eyVisible       = ev.cartonEyVisible !== false;
+  const lieuVisible     = ev.cartonLieuVisible !== false;
+  const dm              = ev.cartonDateMode || 'guest';
   const fixedDateSection = dm === 'fixe' ? `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
       <div>
@@ -8470,17 +8494,16 @@ function renderSettingsEvenement(c) {
         <button class="btn btn-ghost btn-sm" onclick="evPickTime('cartonDepHeure')" style="width:100%">${ev.cartonDepHeure||'⏰ Choisir'}</button>
       </div>
     </div>` : '';
-  const fontList = ['Nunito','DM Sans','Playfair Display','Cormorant Garamond','Great Vibes','Lora','Montserrat','DM Mono'];
 
-  const html = `<div style="display:flex;flex-wrap:wrap;gap:20px;align-items:start">
-  <div style="flex:0 0 300px;min-width:260px;max-width:360px">
+  const tabActive = (t) => t === _activeEvTab ? ' active' : '';
+  return `
     <div class="ev-editor-tabs">
-      <button class="ev-editor-tab active" data-tab="app"    onclick="evTab('app')">App</button>
-      <button class="ev-editor-tab"        data-tab="carton" onclick="evTab('carton')">Carton</button>
-      <button class="ev-editor-tab"        data-tab="style"  onclick="evTab('style')">Style</button>
+      <button class="ev-editor-tab${tabActive('app')}"    data-tab="app"    onclick="evTab('app')">App</button>
+      <button class="ev-editor-tab${tabActive('carton')}" data-tab="carton" onclick="evTab('carton')">Carton</button>
+      <button class="ev-editor-tab${tabActive('style')}"  data-tab="style"  onclick="evTab('style')">Style</button>
     </div>
 
-    <div class="ev-editor-panel active" data-panel="app">
+    <div class="ev-editor-panel${tabActive('app')}" data-panel="app">
       <div class="ev-section">
         <div class="ev-section-label">🎭 Type d'événement</div>
         <div class="event-type-grid">${typePills}</div>${customInput}
@@ -8488,11 +8511,11 @@ function renderSettingsEvenement(c) {
       <div class="ev-section">
         <div class="ev-section-label">✏️ Titre principal</div>
         <div class="ev-field-label">Texte brut (fallback)</div>
-        <input class="event-field-inline" style="margin-bottom:12px" value="${(ev.titreCouple||'').replace(/"/g,'&quot;')}" onblur="saveEvenementField('titreCouple',this.value)">
+        <input class="event-field-inline" style="margin-bottom:12px" value="${(ev.titreCouple||'').replace(/"/g,'&quot;')}" oninput="saveEvenementField('titreCouple',this.value)">
         <div class="ev-field-label">Titre enrichi (optionnel — prioritaire)</div>
         <div class="rte-editor-wrap">
           ${_rteToolbarHTML('titreHTML')}
-          <div id="rte-titreHTML" class="rte-field" contenteditable="true" data-placeholder="Laissez vide = texte brut" oninput="rteInput('titreHTML')" onblur="rteSave('titreHTML')"></div>
+          ${_rteFieldHTML('titreHTML','Laissez vide = texte brut')}
         </div>
         <div style="display:flex;gap:6px;margin-top:8px">
           <button class="ev-radio${(ev.titreCSSAlign||'center')==='left'?' active':''}"   onclick="saveEvenementField('titreCSSAlign','left')">⟵</button>
@@ -8503,11 +8526,11 @@ function renderSettingsEvenement(c) {
       <div class="ev-section">
         <div class="ev-section-label">💬 Sous-titre</div>
         <div class="ev-field-label">Texte brut</div>
-        <input class="event-field-inline" style="margin-bottom:12px" value="${(ev.sousTitre||'').replace(/"/g,'&quot;')}" onblur="saveEvenementField('sousTitre',this.value)">
+        <input class="event-field-inline" style="margin-bottom:12px" value="${(ev.sousTitre||'').replace(/"/g,'&quot;')}" oninput="saveEvenementField('sousTitre',this.value)">
         <div class="ev-field-label">Sous-titre enrichi (optionnel)</div>
         <div class="rte-editor-wrap">
           ${_rteToolbarHTML('sousTitreHTML')}
-          <div id="rte-sousTitreHTML" class="rte-field" contenteditable="true" data-placeholder="Laissez vide = texte brut" oninput="rteInput('sousTitreHTML')" onblur="rteSave('sousTitreHTML')"></div>
+          ${_rteFieldHTML('sousTitreHTML','Laissez vide = texte brut')}
         </div>
         <div style="display:flex;gap:6px;margin-top:8px">
           <button class="ev-radio${(ev.sousTitreCSSAlign||'center')==='left'?' active':''}"   onclick="saveEvenementField('sousTitreCSSAlign','left')">⟵</button>
@@ -8517,7 +8540,7 @@ function renderSettingsEvenement(c) {
       </div>
       <div class="ev-section">
         <div class="ev-section-label">📍 Lieu</div>
-        <input class="event-field-inline" value="${(ev.lieu||'').replace(/"/g,'&quot;')}" onblur="saveEvenementField('lieu',this.value)">
+        <input class="event-field-inline" value="${(ev.lieu||'').replace(/"/g,'&quot;')}" oninput="saveEvenementField('lieu',this.value)">
       </div>
       <div class="ev-section">
         <div class="ev-section-label">📅 Dates (surlignées dans le calendrier)</div>
@@ -8528,10 +8551,10 @@ function renderSettingsEvenement(c) {
       </div>
     </div>
 
-    <div class="ev-editor-panel" data-panel="carton">
+    <div class="ev-editor-panel${tabActive('carton')}" data-panel="carton">
       <div class="ev-section">
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.85rem;font-weight:600">
-          <input type="checkbox" ${cartonVisible?'checked':''} onchange="toggleCartonVisible(this.checked)">
+          <input type="checkbox" ${cartonVisible?'checked':''} onchange="saveEvenementField('cartonVisible',this.checked)">
           Afficher le carton dans Infos
         </label>
       </div>
@@ -8543,7 +8566,7 @@ function renderSettingsEvenement(c) {
         </label>
         <div class="rte-editor-wrap">
           ${_rteToolbarHTML('cartonEyHTML', {align:false, color:false})}
-          <div id="rte-cartonEyHTML" class="rte-field" contenteditable="true" data-placeholder="Ex : Votre séjour au Gîte du Bonheur" oninput="rteInput('cartonEyHTML')" onblur="rteSave('cartonEyHTML')"></div>
+          ${_rteFieldHTML('cartonEyHTML','Ex : Votre séjour au Gîte du Bonheur')}
         </div>
         <div style="display:flex;gap:6px;margin-top:8px">
           <button class="ev-radio${(ev.cartonEyAlign||'center')==='left'?' active':''}"   onclick="saveEvenementField('cartonEyAlign','left')">⟵</button>
@@ -8555,7 +8578,7 @@ function renderSettingsEvenement(c) {
         <div class="ev-section-label">🎴 Titre du carton</div>
         <div class="rte-editor-wrap">
           ${_rteToolbarHTML('cartonTitreHTML')}
-          <div id="rte-cartonTitreHTML" class="rte-field" contenteditable="true" data-placeholder="Ex : Sarah &amp; Antoine (laissez vide = titre App)" oninput="rteInput('cartonTitreHTML')" onblur="rteSave('cartonTitreHTML')"></div>
+          ${_rteFieldHTML('cartonTitreHTML','Ex : Sarah &amp; Antoine (vide = titre App)')}
         </div>
         <div style="display:flex;gap:6px;margin-top:8px">
           <button class="ev-radio${(ev.cartonTitreAlign||'center')==='left'?' active':''}"   onclick="saveEvenementField('cartonTitreAlign','left')">⟵</button>
@@ -8567,7 +8590,7 @@ function renderSettingsEvenement(c) {
         <div class="ev-section-label">💌 Message personnalisé</div>
         <div class="rte-editor-wrap">
           ${_rteToolbarHTML('cartonMsg')}
-          <div id="rte-cartonMsg" class="rte-field" contenteditable="true" data-placeholder="Message affiché en bas du carton…" style="min-height:64px" oninput="rteInput('cartonMsg')" onblur="rteSave('cartonMsg')"></div>
+          ${_rteFieldHTML('cartonMsg','Message affiché en bas du carton…','min-height:64px')}
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
           <div>
@@ -8605,7 +8628,7 @@ function renderSettingsEvenement(c) {
       </div>
     </div>
 
-    <div class="ev-editor-panel" data-panel="style">
+    <div class="ev-editor-panel${tabActive('style')}" data-panel="style">
       <div class="ev-section">
         <div class="ev-section-label">🎨 Couleurs du carton</div>
         <div style="display:flex;flex-direction:column;gap:12px">
@@ -8631,14 +8654,62 @@ function renderSettingsEvenement(c) {
       </div>
       <div class="ev-section">
         <div class="ev-section-label">🌿 Décoration</div>
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.85rem;font-weight:600">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.85rem;font-weight:600;margin-bottom:8px">
           <input type="checkbox" ${ev.cartonLeaves!==false?'checked':''} onchange="saveEvenementField('cartonLeaves',this.checked)">
           Afficher les feuilles décoratives
         </label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.85rem;font-weight:600">
+          <input type="checkbox" ${lieuVisible?'checked':''} onchange="saveEvenementField('cartonLieuVisible',this.checked)">
+          Afficher le lieu sur le carton
+        </label>
       </div>
     </div>
-  </div>
 
+    <div style="display:flex;gap:8px;margin-top:16px;padding-top:12px;border-top:1px solid var(--border)">
+      <button class="btn btn-acc" style="flex:1;font-weight:700" onclick="applyEvChanges()">✓ Appliquer</button>
+      <button class="btn btn-ghost" onclick="cancelEvChanges()">✕ Annuler</button>
+    </div>`;
+}
+
+function _restoreRteAndTab(ev) {
+  ev = ev || _evDraft || DATA.evenement || {};
+  ['titreHTML','sousTitreHTML','cartonEyHTML','cartonTitreHTML','cartonMsg'].forEach(f => {
+    const el = document.getElementById('rte-' + f);
+    if (el) el.innerHTML = ev[f] || '';
+  });
+  const msgEl = document.getElementById('rte-cartonMsg');
+  if (msgEl) {
+    msgEl.style.fontFamily  = ev.cartonMsgFont   ? `'${ev.cartonMsgFont}',sans-serif` : '';
+    msgEl.style.fontSize    = ev.cartonMsgSize   ? ev.cartonMsgSize + 'px' : '';
+    msgEl.style.fontWeight  = ev.cartonMsgBold   ? '700'    : '';
+    msgEl.style.fontStyle   = ev.cartonMsgItalic ? 'italic' : '';
+    msgEl.style.color       = ev.cartonMsgColor  || '';
+    msgEl.style.textAlign   = ev.cartonMsgAlign  || '';
+  }
+  document.querySelectorAll('.ev-editor-tab').forEach(b  => b.classList.toggle('active', b.dataset.tab   === _activeEvTab));
+  document.querySelectorAll('.ev-editor-panel').forEach(p => p.classList.toggle('active', p.dataset.panel === _activeEvTab));
+}
+
+function _refreshEvSettings() {
+  const leftEl = document.getElementById('ev-left-col');
+  if (!leftEl) {
+    if (_evSettingsContainer) renderSettingsEvenement(_evSettingsContainer);
+    return;
+  }
+  const ev = _evDraft || DATA.evenement || {};
+  leftEl.innerHTML = _buildEvLeftHTML(ev);
+  setTimeout(() => _restoreRteAndTab(ev), 50);
+}
+
+function renderSettingsEvenement(c) {
+  _evSettingsContainer = c;
+  if (!_evDraft) _evDraft = JSON.parse(JSON.stringify(DATA.evenement || {}));
+  const ev = _evDraft;
+
+  const html = `<div style="display:flex;flex-wrap:wrap;gap:20px;align-items:start">
+  <div id="ev-left-col" style="flex:0 0 300px;min-width:260px;max-width:360px">
+    ${_buildEvLeftHTML(ev)}
+  </div>
   <div class="ev-preview-right">
     <div class="ev-section">
       <div class="ev-section-label">Aperçu Header</div>
@@ -8652,41 +8723,42 @@ function renderSettingsEvenement(c) {
 </div>`;
 
   smoothUpdate(c, html);
-  setTimeout(() => {
-    ['titreHTML','sousTitreHTML','cartonEyHTML','cartonTitreHTML','cartonMsg'].forEach(f => {
-      const el = document.getElementById('rte-' + f);
-      if (el) el.innerHTML = ev[f] || '';
-    });
-    const msgEl = document.getElementById('rte-cartonMsg');
-    if (msgEl) {
-      if (ev.cartonMsgFont)   msgEl.style.fontFamily  = `'${ev.cartonMsgFont}',sans-serif`;
-      if (ev.cartonMsgSize)   msgEl.style.fontSize    = ev.cartonMsgSize + 'px';
-      msgEl.style.fontWeight  = ev.cartonMsgBold   ? '700'    : '';
-      msgEl.style.fontStyle   = ev.cartonMsgItalic ? 'italic' : '';
-      if (ev.cartonMsgColor)  msgEl.style.color       = ev.cartonMsgColor;
-      if (ev.cartonMsgAlign)  msgEl.style.textAlign   = ev.cartonMsgAlign;
-    }
-  }, 50);
+  setTimeout(() => _restoreRteAndTab(ev), 50);
 }
 
 window.evTab = function(tab) {
+  _activeEvTab = tab;
   document.querySelectorAll('.ev-editor-tab').forEach(b  => b.classList.toggle('active', b.dataset.tab   === tab));
   document.querySelectorAll('.ev-editor-panel').forEach(p => p.classList.toggle('active', p.dataset.panel === tab));
 };
 
+window.saveRteRange = function(fieldId) {
+  const sel = window.getSelection();
+  if (sel && sel.rangeCount) {
+    try { _rteSavedRanges[fieldId] = sel.getRangeAt(0).cloneRange(); } catch(e) {}
+  }
+};
+
 window.rteInput = function(field) {
   const el = document.getElementById('rte-' + field);
-  if (!el || !DATA.evenement) return;
-  DATA.evenement[field] = el.innerHTML;
+  if (!el) return;
+  if (!_evDraft) _evDraft = JSON.parse(JSON.stringify(DATA.evenement || {}));
+  _evDraft[field] = el.innerHTML;
   _refreshEvPreview();
 };
 
 window.rteSave = function(field) {
   const el = document.getElementById('rte-' + field);
-  if (!el || !DATA.evenement) return;
-  DATA.evenement[field] = el.innerHTML;
-  pushData();
-  if (field === 'titreHTML' || field === 'sousTitreHTML') _renderEventHeader();
+  if (!el) return;
+  // Save selection before blur loses it
+  const sel = window.getSelection();
+  if (sel && sel.rangeCount) {
+    try { _rteSavedRanges[field] = sel.getRangeAt(0).cloneRange(); } catch(e) {}
+  }
+  if (!_evDraft) _evDraft = JSON.parse(JSON.stringify(DATA.evenement || {}));
+  // Empty check: "<br>" or whitespace only → ''
+  const cleaned = el.innerHTML.replace(/<br\s*\/?>/gi,'').replace(/<[^>]+>/g,'').trim();
+  _evDraft[field] = cleaned ? el.innerHTML : '';
   _refreshEvPreview();
 };
 
@@ -8694,9 +8766,23 @@ window.rteExec = function(field, cmd, val) {
   const el = document.getElementById('rte-' + field);
   if (!el) return;
   el.focus();
+  // Restore saved selection
+  const saved = _rteSavedRanges[field];
+  const sel = window.getSelection();
+  if (saved) {
+    try { sel.removeAllRanges(); sel.addRange(saved.cloneRange()); } catch(e) {}
+  }
+  // If no valid selection in this element, select all content
+  if (!sel.rangeCount || !el.contains(sel.getRangeAt(0).commonAncestorContainer)) {
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
   document.execCommand('styleWithCSS', false, true);
-  document.execCommand(cmd, false, val || null);
-  if (DATA.evenement) DATA.evenement[field] = el.innerHTML;
+  document.execCommand(cmd, false, val !== undefined ? val : null);
+  if (!_evDraft) _evDraft = {};
+  _evDraft[field] = el.innerHTML;
   _refreshEvPreview();
 };
 
@@ -8704,7 +8790,11 @@ window.rteFontSize = function(field, size) {
   const el = document.getElementById('rte-' + field);
   if (!el) return;
   el.focus();
+  const saved = _rteSavedRanges[field];
   const sel = window.getSelection();
+  if (saved) {
+    try { sel.removeAllRanges(); sel.addRange(saved.cloneRange()); } catch(e) {}
+  }
   if (sel && sel.rangeCount && !sel.isCollapsed) {
     const range = sel.getRangeAt(0);
     const fragment = range.extractContents();
@@ -8716,17 +8806,18 @@ window.rteFontSize = function(field, size) {
     const nr = document.createRange();
     nr.selectNodeContents(span);
     sel.addRange(nr);
+    _rteSavedRanges[field] = nr.cloneRange();
   } else {
     el.style.fontSize = size + 'px';
   }
-  if (DATA.evenement) DATA.evenement[field] = el.innerHTML;
+  if (!_evDraft) _evDraft = {};
+  _evDraft[field] = el.innerHTML;
   _refreshEvPreview();
 };
 
 window.saveMsgStyle = function(field, value) {
-  if (!DATA.evenement) DATA.evenement = {};
-  DATA.evenement[field] = value;
-  pushData();
+  if (!_evDraft) _evDraft = JSON.parse(JSON.stringify(DATA.evenement || {}));
+  _evDraft[field] = value;
   const el = document.getElementById('rte-cartonMsg');
   if (el) {
     if (field === 'cartonMsgFont')   el.style.fontFamily  = `'${value}',sans-serif`;
@@ -8739,50 +8830,57 @@ window.saveMsgStyle = function(field, value) {
   _refreshEvPreview();
 };
 
-window.setEvenementType = function(type) {
-  if (!DATA.evenement) DATA.evenement = {};
-  DATA.evenement.type = type;
+window.applyEvChanges = function() {
+  if (!_evDraft || !DATA.evenement) return;
+  Object.assign(DATA.evenement, _evDraft);
   pushData();
-  renderSettings();
+  _renderEventHeader();
+  renderInfos();
+  toast('✅ Événement mis à jour');
+  // Keep draft in sync with saved state
+  _evDraft = JSON.parse(JSON.stringify(DATA.evenement));
+  _refreshEvPreview();
+};
+
+window.cancelEvChanges = function() {
+  _evDraft = null;
+  _refreshEvSettings();
+};
+
+window.setEvenementType = function(type) {
+  if (!_evDraft) _evDraft = JSON.parse(JSON.stringify(DATA.evenement || {}));
+  _evDraft.type = type;
+  _refreshEvSettings();
 };
 
 window.saveEvenementField = function(field, value) {
-  if (!DATA.evenement) DATA.evenement = {};
-  DATA.evenement[field] = value;
-  pushData();
-  const headerFields = ['titreCouple','sousTitre','lieu','titreHTML','sousTitreHTML','titreCSSAlign','sousTitreCSSAlign'];
-  if (headerFields.includes(field)) _renderEventHeader();
+  if (!_evDraft) _evDraft = JSON.parse(JSON.stringify(DATA.evenement || {}));
+  _evDraft[field] = value;
   _refreshEvPreview();
-  if (field === 'cartonDateMode') renderSettings();
-  if (['cartonVisible','titreCouple','sousTitre','lieu','cartonEyVisible'].includes(field)) renderInfos();
+  if (field === 'cartonDateMode') _refreshEvSettings();
 };
 
 window.addEvenementDate = function() {
   openDatePicker(iso => {
     if (!iso || iso === 'amont') return;
-    if (!DATA.evenement) DATA.evenement = {};
-    if (!Array.isArray(DATA.evenement.calDates)) DATA.evenement.calDates = [];
-    if (!DATA.evenement.calDates.includes(iso)) {
-      DATA.evenement.calDates.push(iso);
-      DATA.evenement.calDates.sort();
-      pushData();
-      renderSettings();
+    if (!_evDraft) _evDraft = JSON.parse(JSON.stringify(DATA.evenement || {}));
+    if (!Array.isArray(_evDraft.calDates)) _evDraft.calDates = [];
+    if (!_evDraft.calDates.includes(iso)) {
+      _evDraft.calDates.push(iso);
+      _evDraft.calDates.sort();
+      _refreshEvSettings();
     }
   }, '2026-07-12');
 };
 
 window.removeEvenementDate = function(iso) {
-  if (!DATA.evenement?.calDates) return;
-  DATA.evenement.calDates = DATA.evenement.calDates.filter(d => d !== iso);
-  pushData();
-  renderSettings();
+  if (!_evDraft) _evDraft = JSON.parse(JSON.stringify(DATA.evenement || {}));
+  _evDraft.calDates = (_evDraft.calDates || []).filter(d => d !== iso);
+  _refreshEvSettings();
 };
 
 window.toggleCartonVisible = function(visible) {
-  if (!DATA.evenement) DATA.evenement = {};
-  DATA.evenement.cartonVisible = !!visible;
-  pushData();
-  renderInfos();
+  saveEvenementField('cartonVisible', !!visible);
 };
 
 window.evPickDate = function(field) {
@@ -8791,7 +8889,7 @@ window.evPickDate = function(field) {
     saveEvenementField(field, iso);
     const btn = document.querySelector(`[onclick="evPickDate('${field}')"]`);
     if (btn) btn.textContent = iso;
-  }, DATA.evenement?.[field] || '2026-07-12');
+  }, (_evDraft || DATA.evenement)?.[field] || '2026-07-12');
 };
 
 window.evPickTime = function(field) {
@@ -8800,7 +8898,7 @@ window.evPickTime = function(field) {
     saveEvenementField(field, time);
     const btn = document.querySelector(`[onclick="evPickTime('${field}')"]`);
     if (btn) btn.textContent = time;
-  }, DATA.evenement?.[field] || '');
+  }, (_evDraft || DATA.evenement)?.[field] || '');
 };
 
 // ── Gestion des appareils ─────────────────────────────────────
@@ -10202,7 +10300,7 @@ window.renderInfos = function() {
       if (arrBlk || depBlk) datesHtml = `<div class="infos-carton-dates">${arrBlk}${depBlk}</div>`;
     }
 
-    const lieuHtml = l.nom ? `<div class="infos-carton-lieu"><strong>${l.nom}</strong>${l.adresse ? ' — ' + l.adresse.split('\n')[0] : ''}</div>` : '';
+    const lieuHtml = (_ev.cartonLieuVisible !== false) && l.nom ? `<div class="infos-carton-lieu"><strong>${l.nom}</strong>${l.adresse ? ' — ' + l.adresse.split('\n')[0] : ''}</div>` : '';
 
     let msgHtml = '';
     if (_ev.cartonMsg) {
@@ -10223,7 +10321,12 @@ window.renderInfos = function() {
       _ev.cartonBorder      ? `border:1.5px solid ${_ev.cartonBorder}` : ''
     ].filter(Boolean).join(';');
 
-    cartonWrap.innerHTML = `<div class="infos-carton${_ev.cartonLeaves === false ? ' no-leaves' : ''}"${cardStyle ? ` style="${cardStyle}"` : ''}>
+    const leavesHtml = _ev.cartonLeaves !== false
+      ? '<span class="carton-leaf carton-leaf-tl" aria-hidden="true">🌿</span><span class="carton-leaf carton-leaf-br" aria-hidden="true">🌿</span>'
+      : '';
+
+    cartonWrap.innerHTML = `<div class="infos-carton"${cardStyle ? ` style="${cardStyle}"` : ''}>
+      ${leavesHtml}
       ${eyebrowHtml}
       ${titreHtml}
       <div class="infos-carton-ornament">✿</div>
