@@ -3634,7 +3634,7 @@ window.dpRender = function() {
     const iso = `${_dpYear}-${String(_dpMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const dt = new Date(iso+'T00:00:00');
     const isToday = dt.getTime()===today.getTime();
-    const _evDates = DATA.evenement?.calDates || [];
+    const _evDates = (typeof _evDraft !== 'undefined' && _evDraft ? _evDraft : DATA.evenement)?.calDates || [];
     const isEaster = !!DATE_EASTER[iso] || _evDates.includes(iso);
     const title = DATE_EASTER[iso] ? DATE_EASTER[iso].label : '';
     html += `<div class="dp-day${isToday?' dp-today':''}${isEaster?' dp-special':''}"
