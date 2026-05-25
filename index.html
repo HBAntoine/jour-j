@@ -511,13 +511,13 @@ textarea{resize:vertical;min-height:60px;}
 .menu-sep{height:1px;background:#e8ddd0;margin:12px 32px;}
 
 /* Cards de plat */
-.menu-card{background:transparent;border:none;border-radius:0;padding:5px 0;margin-bottom:0;display:flex;align-items:flex-start;gap:8px;position:relative;}
+.menu-card{background:transparent;border:none;border-radius:0;padding:5px 0;margin-bottom:0;display:grid;grid-template-columns:52px 1fr 52px;align-items:start;position:relative;}
 .menu-card:hover{box-shadow:none;}
-.menu-card-body{flex:1;min-width:0;text-align:center;}
+.menu-card-body{min-width:0;text-align:center;}
 .menu-card-name{font-family:Georgia,serif;font-size:0.9rem;font-weight:normal;color:#3d3530;}
 .menu-card-detail{font-style:italic;color:#9a8878;font-size:0.75rem;margin-top:2px;}
 .menu-card-details{font-style:italic;font-size:0.78rem;color:#9a8878;margin-top:5px;line-height:1.5;}
-.menu-card-actions{display:flex;gap:4px;flex-shrink:0;align-items:flex-start;}
+.menu-card-actions{display:flex;gap:4px;align-items:flex-start;justify-content:flex-end;}
 .menu-card-btn{background:none;border:none;cursor:pointer;padding:4px 6px;border-radius:8px;font-size:0.78rem;color:var(--muted);transition:all 0.15s;}
 .menu-card-btn:hover{background:rgba(30,77,183,0.07);color:var(--text);}
 .menu-drag-handle{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:3px;cursor:grab;padding:4px 3px;opacity:0.2;transition:opacity 0.15s;flex-shrink:0;touch-action:none;margin-top:3px;}
@@ -10406,7 +10406,7 @@ window.renderMenu = function() {
           : '';
         const handleHtml = canMove
           ? `<div class="menu-drag-handle"><span></span><span></span><span></span></div>`
-          : `<div style="width:18px"></div>`;
+          : `<div></div>`;
         const editBtn = canEdit
           ? `<button class="menu-card-btn" onclick="openEditMenuModal('${item.id}')" title="Modifier">✏️</button>`
           : '';
