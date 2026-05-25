@@ -402,6 +402,14 @@ textarea{resize:vertical;min-height:60px;}
 .rte-toolbar button{padding:3px 8px;border:1px solid var(--border);border-radius:6px;background:#fff;font-size:0.78rem;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:600;transition:all 0.12s;line-height:1.4;}
 .rte-toolbar button:hover{background:var(--acc);color:#fff;border-color:var(--acc);}
 .rte-toolbar button.rte-active{background:rgba(30,77,183,.1);border-color:var(--acc);color:var(--acc);}
+.theme-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-bottom:12px;}
+.theme-card{display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 6px;border:1.5px solid var(--border);border-radius:12px;cursor:pointer;transition:all .15s;text-align:center;background:var(--g2);}
+.theme-card:hover{border-color:var(--acc);background:rgba(30,77,183,.03);}
+.theme-card.active{border-color:var(--acc);background:rgba(30,77,183,.06);}
+.theme-card-dot{width:32px;height:32px;border-radius:50%;border:2px solid rgba(0,0,0,.08);flex-shrink:0;}
+.theme-card-name{font-size:0.74rem;font-weight:700;color:var(--text);line-height:1.2;}
+.theme-card-desc{font-size:0.62rem;color:var(--muted);line-height:1.3;}
+.theme-card-check{font-size:0.8rem;color:var(--acc);font-weight:700;min-height:1em;}
 .rte-toolbar select{padding:3px 6px;border:1px solid var(--border);border-radius:6px;background:#fff;font-size:0.75rem;cursor:pointer;font-family:'Nunito',sans-serif;outline:none;max-width:120px;}
 .font-picker{position:relative;display:inline-block;}
 .font-picker-btn{padding:2px 7px;border:1px solid var(--border);border-radius:6px;background:#fff;font-size:0.78rem;cursor:pointer;display:inline-flex;align-items:center;gap:3px;white-space:nowrap;height:26px;font-family:inherit;}
@@ -477,6 +485,7 @@ textarea{resize:vertical;min-height:60px;}
 .menu-day-card{background:#fdf9f4;border:1px solid #e8ddd0;border-radius:16px;padding:24px 20px;margin-bottom:20px;position:relative;overflow:hidden;text-align:center;}
 .menu-day-card::before{content:'🌿';position:absolute;top:8px;left:10px;font-size:2rem;opacity:0.1;pointer-events:none;line-height:1;}
 .menu-day-card::after{content:'🌿';position:absolute;bottom:8px;right:10px;font-size:2rem;opacity:0.1;pointer-events:none;line-height:1;}
+.menu-day-card.no-leaves::before,.menu-day-card.no-leaves::after{display:none;}
 
 /* Entête de date */
 .menu-date-header{font-family:Georgia,serif;font-style:italic;font-size:0.75rem;letter-spacing:0.14em;color:#9a8878;text-align:center;margin-bottom:16px;padding:0;border:none;font-weight:normal;}
@@ -3109,7 +3118,17 @@ const DEFAULT_DATA = {
     cartonArrDate:'', cartonArrHeure:'', cartonDepDate:'', cartonDepHeure:'',
     cartonAccentColor:'', cartonBg:'', cartonBorder:'',
     cartonLeaves:true,
-    cartonLieuVisible:true
+    cartonLieuVisible:true,
+    activeTheme:'botanique',
+    cartonOrnament:'✿', cartonEyColor:'#9a8878',
+    cartonNamesColor:'#1E4DB7', cartonTitreFont:'Georgia,serif', cartonTitreFontStyle:'italic', cartonTitreSize:22,
+    cartonLieuColor:'#3d3530',
+    menuPageBg:'#f0f4ff', menuCardBg:'#fdf9f4', menuCardBorder:'#e8ddd0',
+    menuLeaves:true, menuAccentColor:'#1E4DB7', menuTitleColor:'#059669',
+    menuDayLblColor:'#9a8878', menuPlatColor:'#3d3530', menuDetColor:'#9a8878',
+    menuSvcColor:'#1E4DB7', menuSepColor:'#e8ddd0',
+    menuDatePillBg:'#fdf9f4', menuDatePillBorder:'#e8ddd0', menuDatePillTopBorder:'#1E4DB7',
+    menuDateNumColor:'#1E4DB7', menuDateMoColor:'#9a8878', menuDateActiveBg:'#1E4DB7'
   }
 };
 
@@ -3269,10 +3288,41 @@ async function initFirebase(cfg) {
           if (_evinit.cartonAccentColor=== undefined) _evinit.cartonAccentColor= '';
           if (_evinit.cartonBg         === undefined) _evinit.cartonBg         = '';
           if (_evinit.cartonBorder     === undefined) _evinit.cartonBorder     = '';
-          if (_evinit.cartonLeaves      === undefined) _evinit.cartonLeaves      = true;
-          if (_evinit.cartonLieuVisible === undefined) _evinit.cartonLieuVisible = true;
+          if (_evinit.cartonLeaves       === undefined) _evinit.cartonLeaves       = true;
+          if (_evinit.cartonLieuVisible  === undefined) _evinit.cartonLieuVisible  = true;
           if (_evinit.titreEmojiVisible  === undefined) _evinit.titreEmojiVisible  = true;
           if (_evinit.titreEmojiPosition === undefined) _evinit.titreEmojiPosition = 'left';
+          if (_evinit.activeTheme        === undefined) _evinit.activeTheme        = 'botanique';
+          if (_evinit.cartonOrnament     === undefined) _evinit.cartonOrnament     = '✿';
+          if (_evinit.cartonEyColor      === undefined) _evinit.cartonEyColor      = '#9a8878';
+          if (_evinit.cartonNamesColor   === undefined) _evinit.cartonNamesColor   = '#1E4DB7';
+          if (_evinit.cartonTitreFont    === undefined) _evinit.cartonTitreFont    = 'Georgia,serif';
+          if (_evinit.cartonTitreFontStyle=== undefined)_evinit.cartonTitreFontStyle='italic';
+          if (_evinit.cartonTitreSize    === undefined) _evinit.cartonTitreSize    = 22;
+          if (_evinit.cartonLieuColor    === undefined) _evinit.cartonLieuColor    = '#3d3530';
+          if (_evinit.menuPageBg         === undefined) _evinit.menuPageBg         = '#f0f4ff';
+          if (_evinit.menuCardBg         === undefined) _evinit.menuCardBg         = '#fdf9f4';
+          if (_evinit.menuCardBorder     === undefined) _evinit.menuCardBorder     = '#e8ddd0';
+          if (_evinit.menuLeaves         === undefined) _evinit.menuLeaves         = true;
+          if (_evinit.menuAccentColor    === undefined) _evinit.menuAccentColor    = '#1E4DB7';
+          if (_evinit.menuTitleColor     === undefined) _evinit.menuTitleColor     = '#059669';
+          if (_evinit.menuDayLblColor    === undefined) _evinit.menuDayLblColor    = '#9a8878';
+          if (_evinit.menuPlatColor      === undefined) _evinit.menuPlatColor      = '#3d3530';
+          if (_evinit.menuDetColor       === undefined) _evinit.menuDetColor       = '#9a8878';
+          if (_evinit.menuSvcColor       === undefined) _evinit.menuSvcColor       = '#1E4DB7';
+          if (_evinit.menuSepColor       === undefined) _evinit.menuSepColor       = '#e8ddd0';
+          if (_evinit.menuDatePillBg     === undefined) _evinit.menuDatePillBg     = '#fdf9f4';
+          if (_evinit.menuDatePillBorder === undefined) _evinit.menuDatePillBorder = '#e8ddd0';
+          if (_evinit.menuDatePillTopBorder=== undefined)_evinit.menuDatePillTopBorder='#1E4DB7';
+          if (_evinit.menuDateNumColor   === undefined) _evinit.menuDateNumColor   = '#1E4DB7';
+          if (_evinit.menuDateMoColor    === undefined) _evinit.menuDateMoColor    = '#9a8878';
+          if (_evinit.menuDateActiveBg   === undefined) _evinit.menuDateActiveBg   = '#1E4DB7';
+          // Fallback: si activeTheme défini mais champs menu/carton manquants, appliquer le thème
+          if (_evinit.activeTheme && typeof CARTON_THEMES !== 'undefined' && CARTON_THEMES[_evinit.activeTheme]) {
+            const _th = CARTON_THEMES[_evinit.activeTheme];
+            Object.keys(_th.carton).forEach(k => { if (_evinit[k] === undefined) _evinit[k] = _th.carton[k]; });
+            Object.keys(_th.menu).forEach(k => { if (_evinit[k] === undefined) _evinit[k] = _th.menu[k]; });
+          }
         }
 
         // Appliquer les permissions Firebase avant le rendu
@@ -8357,11 +8407,24 @@ function _buildCartonPreviewHTML(evOverride) {
   let eyebrowHtml = '';
   if (ev.cartonEyVisible !== false) {
     const eyContent = ev.cartonEyHTML || (ev.lieu ? 'Votre séjour au ' + ev.lieu : (ev.sousTitre || ''));
-    eyebrowHtml = `<div class="infos-carton-eyebrow" style="text-align:${ev.cartonEyAlign||'center'}">${eyContent}</div>`;
+    const eyColorStyle = ev.cartonEyColor ? `;color:${ev.cartonEyColor}` : '';
+    eyebrowHtml = `<div class="infos-carton-eyebrow" style="text-align:${ev.cartonEyAlign||'center'}${eyColorStyle}">${eyContent}</div>`;
   }
 
-  const titreContent = ev.cartonTitreHTML || (ev.titreCouple||'Sarah & Antoine').replace(/&/g,'&amp;');
-  const titreHtml = `<div class="infos-carton-names" style="text-align:${ev.cartonTitreAlign||'center'}">${titreContent}</div>`;
+  let titreHtml;
+  if (ev.cartonTitreHTML) {
+    titreHtml = `<div class="infos-carton-names" style="text-align:${ev.cartonTitreAlign||'center'}">${ev.cartonTitreHTML}</div>`;
+  } else {
+    const titreContent = (ev.titreCouple||'Sarah & Antoine').replace(/&/g,'&amp;');
+    const ts = [
+      ev.cartonTitreFont      ? `font-family:${ev.cartonTitreFont}` : '',
+      ev.cartonTitreFontStyle ? `font-style:${ev.cartonTitreFontStyle}` : '',
+      ev.cartonTitreSize      ? `font-size:${ev.cartonTitreSize}px` : '',
+      ev.cartonNamesColor     ? `color:${ev.cartonNamesColor}` : '',
+      `text-align:${ev.cartonTitreAlign||'center'}`
+    ].filter(Boolean).join(';');
+    titreHtml = `<div class="infos-carton-names" style="${ts}">${titreContent}</div>`;
+  }
 
   let datesHtml = '';
   const dateMode = ev.cartonDateMode || 'guest';
@@ -8379,8 +8442,9 @@ function _buildCartonPreviewHTML(evOverride) {
   }
 
   const l = DATA.infosLieu || {};
+  const lieuColorStyle = ev.cartonLieuColor ? ` style="color:${ev.cartonLieuColor}"` : '';
   const lieuHtml = (ev.cartonLieuVisible !== false) && l.nom
-    ? `<div class="infos-carton-lieu"><strong>${l.nom}</strong>${l.adresse ? ' — ' + l.adresse.split('\n')[0] : ''}</div>`
+    ? `<div class="infos-carton-lieu"${lieuColorStyle}><strong>${l.nom}</strong>${l.adresse ? ' — ' + l.adresse.split('\n')[0] : ''}</div>`
     : '';
 
   let msgHtml = '';
@@ -8406,11 +8470,13 @@ function _buildCartonPreviewHTML(evOverride) {
     ? '<span class="carton-leaf carton-leaf-tl" aria-hidden="true">🌿</span><span class="carton-leaf carton-leaf-br" aria-hidden="true">🌿</span>'
     : '';
 
+  const ornament = ev.cartonOrnament || '✿';
+
   return `<div class="infos-carton"${cardStyle ? ` style="${cardStyle}"` : ''}>
     ${leavesHtml}
     ${eyebrowHtml}
     ${titreHtml}
-    <div class="infos-carton-ornament">✿</div>
+    <div class="infos-carton-ornament">${ornament}</div>
     <div class="infos-carton-sep"></div>
     ${datesHtml}
     ${lieuHtml}
@@ -8687,6 +8753,21 @@ function _buildEvLeftHTML(ev) {
 
     <div class="ev-editor-panel${tabActive('style')}" data-panel="style">
       <div class="ev-section">
+        <div class="ev-section-label">🎨 Thème visuel</div>
+        <div class="theme-grid">${Object.entries(CARTON_THEMES).map(([key, th]) => {
+          const isActive = (ev.activeTheme || 'botanique') === key;
+          const bg = th.carton.cartonBg || '#fff';
+          const ac = th.carton.cartonAccentColor || '#1E4DB7';
+          const dotStyle = `background:linear-gradient(135deg,${bg} 50%,${ac} 50%)`;
+          return `<div class="theme-card${isActive?' active':''}" onclick="applyEvTheme('${key}')">
+            <div class="theme-card-dot" style="${dotStyle}"></div>
+            <div class="theme-card-name">${th.label}</div>
+            <div class="theme-card-desc">${th.desc}</div>
+            <div class="theme-card-check">${isActive?'✓':''}</div>
+          </div>`;
+        }).join('')}</div>
+      </div>
+      <div class="ev-section">
         <div class="ev-section-label">🎨 Couleurs du carton</div>
         <div style="display:flex;flex-direction:column;gap:12px">
           <div style="display:flex;align-items:center;justify-content:space-between">
@@ -8758,6 +8839,34 @@ function _refreshEvSettings() {
   setTimeout(() => _restoreRteAndTab(ev), 50);
 }
 
+const CARTON_THEMES = {
+  botanique: {
+    label:'Botanique', desc:'Ivoire & bleu · Actuel',
+    carton:{cartonBg:'#fdf9f4',cartonBorder:'#e8ddd0',cartonLeaves:true,cartonAccentColor:'#1E4DB7',cartonEyColor:'#9a8878',cartonTitreFont:'Georgia,serif',cartonTitreFontStyle:'italic',cartonTitreSize:22,cartonNamesColor:'#1E4DB7',cartonMsgColor:'#9a8878',cartonMsgFont:'Nunito',cartonMsgItalic:true,cartonOrnament:'✿',cartonLieuColor:'#3d3530'},
+    menu:{menuPageBg:'#f0f4ff',menuCardBg:'#fdf9f4',menuCardBorder:'#e8ddd0',menuLeaves:true,menuAccentColor:'#1E4DB7',menuTitleColor:'#059669',menuDayLblColor:'#9a8878',menuPlatColor:'#3d3530',menuDetColor:'#9a8878',menuSvcColor:'#1E4DB7',menuSepColor:'#e8ddd0',menuDatePillBg:'#fdf9f4',menuDatePillBorder:'#e8ddd0',menuDatePillTopBorder:'#1E4DB7',menuDateNumColor:'#1E4DB7',menuDateMoColor:'#9a8878',menuDateActiveBg:'#1E4DB7'}
+  },
+  nuit: {
+    label:'Velours Nuit', desc:'Sombre & doré',
+    carton:{cartonBg:'#12203a',cartonBorder:'rgba(201,168,76,.3)',cartonLeaves:true,cartonAccentColor:'#c9a84c',cartonEyColor:'rgba(201,168,76,.7)',cartonTitreFont:'Georgia,serif',cartonTitreFontStyle:'italic',cartonTitreSize:22,cartonNamesColor:'#f0e6c8',cartonMsgColor:'rgba(240,230,200,.5)',cartonMsgFont:'Nunito',cartonMsgItalic:true,cartonOrnament:'✦',cartonLieuColor:'#f0e6c8'},
+    menu:{menuPageBg:'#0a1219',menuCardBg:'#12243a',menuCardBorder:'rgba(201,168,76,.18)',menuLeaves:true,menuAccentColor:'#c9a84c',menuTitleColor:'#f0e6c8',menuDayLblColor:'rgba(201,168,76,.6)',menuPlatColor:'#f0e6c8',menuDetColor:'rgba(240,230,200,.45)',menuSvcColor:'#c9a84c',menuSepColor:'rgba(201,168,76,.18)',menuDatePillBg:'rgba(201,168,76,.05)',menuDatePillBorder:'rgba(201,168,76,.2)',menuDatePillTopBorder:'#c9a84c',menuDateNumColor:'#c9a84c',menuDateMoColor:'rgba(201,168,76,.5)',menuDateActiveBg:'rgba(201,168,76,.2)'}
+  },
+  rose: {
+    label:'Marbre Rose', desc:'Blanc & rose poudré',
+    carton:{cartonBg:'#faf7f5',cartonBorder:'#e8d0d2',cartonLeaves:false,cartonAccentColor:'#c4727a',cartonEyColor:'#c8b0b5',cartonTitreFont:'Georgia,serif',cartonTitreFontStyle:'italic',cartonTitreSize:22,cartonNamesColor:'#c4727a',cartonMsgColor:'#c8b0b5',cartonMsgFont:'Nunito',cartonMsgItalic:true,cartonOrnament:'✿',cartonLieuColor:'#2c2c2c'},
+    menu:{menuPageBg:'#faf7f5',menuCardBg:'#ffffff',menuCardBorder:'#e8d0d2',menuLeaves:false,menuAccentColor:'#c4727a',menuTitleColor:'#c4727a',menuDayLblColor:'#c8b0b5',menuPlatColor:'#2c2c2c',menuDetColor:'#c8b0b5',menuSvcColor:'#c4727a',menuSepColor:'#e8d0d2',menuDatePillBg:'#ffffff',menuDatePillBorder:'#e8d0d2',menuDatePillTopBorder:'#c4727a',menuDateNumColor:'#c4727a',menuDateMoColor:'#c8b0b5',menuDateActiveBg:'#c4727a'}
+  },
+  jardin: {
+    label:'Jardin', desc:'Crème & vert olive',
+    carton:{cartonBg:'#f9f7f3',cartonBorder:'#d4c9b5',cartonLeaves:true,cartonAccentColor:'#7c9a5e',cartonEyColor:'#b0a090',cartonTitreFont:'Georgia,serif',cartonTitreFontStyle:'italic',cartonTitreSize:22,cartonNamesColor:'#7c9a5e',cartonMsgColor:'#b0a090',cartonMsgFont:'Nunito',cartonMsgItalic:true,cartonOrnament:'✿',cartonLieuColor:'#3a3228'},
+    menu:{menuPageBg:'#f5f0e8',menuCardBg:'#ffffff',menuCardBorder:'#d4c9b5',menuLeaves:true,menuAccentColor:'#7c9a5e',menuTitleColor:'#7c9a5e',menuDayLblColor:'#b0a090',menuPlatColor:'#3a3228',menuDetColor:'#b0a090',menuSvcColor:'#7c9a5e',menuSepColor:'#d4c9b5',menuDatePillBg:'#ffffff',menuDatePillBorder:'#d4c9b5',menuDatePillTopBorder:'#7c9a5e',menuDateNumColor:'#7c9a5e',menuDateMoColor:'#b0a090',menuDateActiveBg:'#7c9a5e'}
+  },
+  epure: {
+    label:'Épuré', desc:'Blanc pur & minimaliste',
+    carton:{cartonBg:'#ffffff',cartonBorder:'#e5e7eb',cartonLeaves:false,cartonAccentColor:'#1E4DB7',cartonEyColor:'#9ca3af',cartonTitreFont:"'DM Sans',sans-serif",cartonTitreFontStyle:'normal',cartonTitreSize:18,cartonNamesColor:'#1E4DB7',cartonMsgColor:'#6b7280',cartonMsgFont:'DM Sans',cartonMsgItalic:false,cartonOrnament:'—',cartonLieuColor:'#111827'},
+    menu:{menuPageBg:'#f8faff',menuCardBg:'#ffffff',menuCardBorder:'#e5e7eb',menuLeaves:false,menuAccentColor:'#1E4DB7',menuTitleColor:'#1E4DB7',menuDayLblColor:'#9ca3af',menuPlatColor:'#111827',menuDetColor:'#6b7280',menuSvcColor:'#1E4DB7',menuSepColor:'#e5e7eb',menuDatePillBg:'#ffffff',menuDatePillBorder:'#e5e7eb',menuDatePillTopBorder:'#1E4DB7',menuDateNumColor:'#1E4DB7',menuDateMoColor:'#9ca3af',menuDateActiveBg:'#1E4DB7'}
+  }
+};
+
 function renderSettingsEvenement(c) {
   _evSettingsContainer = c;
   if (!_evDraft) _evDraft = JSON.parse(JSON.stringify(DATA.evenement || {}));
@@ -8787,6 +8896,39 @@ window.evTab = function(tab) {
   _activeEvTab = tab;
   document.querySelectorAll('.ev-editor-tab').forEach(b  => b.classList.toggle('active', b.dataset.tab   === tab));
   document.querySelectorAll('.ev-editor-panel').forEach(p => p.classList.toggle('active', p.dataset.panel === tab));
+};
+
+function _applyMenuTheme() {
+  const ev = DATA.evenement || {};
+  let s = document.getElementById('_menu-theme-css');
+  if (!s) { s = document.createElement('style'); s.id = '_menu-theme-css'; document.head.appendChild(s); }
+  const pg  = ev.menuPageBg          || '#f0f4ff';
+  const pb  = ev.menuDatePillBg      || '#fdf9f4';
+  const pbd = ev.menuDatePillBorder  || '#e8ddd0';
+  const pbt = ev.menuDatePillTopBorder||'#1E4DB7';
+  const pn  = ev.menuDateNumColor    || '#1E4DB7';
+  const pm  = ev.menuDateMoColor     || '#9a8878';
+  const pa  = ev.menuDateActiveBg    || '#1E4DB7';
+  const tc  = ev.menuTitleColor      || '#059669';
+  s.textContent = `
+    #tab-menu{background:${pg}!important;}
+    #menu-filter-dates .date-pill{background:${pb}!important;border-color:${pbd}!important;border-top-color:${pbt}!important;}
+    #menu-filter-dates .date-pill.active{background:${pa}!important;border-color:${pa}!important;}
+    #menu-filter-dates .date-pill .dp-num{color:${pn}!important;}
+    #menu-filter-dates .date-pill .dp-month{color:${pm}!important;}
+    #menu-filter-dates .date-pill.active .dp-num,#menu-filter-dates .date-pill.active .dp-month,#menu-filter-dates .date-pill.active .dp-tous{color:#fff!important;}
+    #tab-menu .section-title{color:${tc}!important;}
+  `;
+}
+
+window.applyEvTheme = function(themeKey) {
+  const th = CARTON_THEMES[themeKey];
+  if (!th) return;
+  if (!_evDraft) _evDraft = JSON.parse(JSON.stringify(DATA.evenement || {}));
+  _evDraft.activeTheme = themeKey;
+  Object.assign(_evDraft, th.carton, th.menu);
+  _refreshEvSettings();
+  _refreshEvPreview();
 };
 
 window.toggleFontPicker = function(id) {
@@ -10131,6 +10273,9 @@ window.renderMenu = function() {
   const el = document.getElementById('menu-list');
   if (!el) return;
 
+  // Apply theme CSS vars
+  _applyMenuTheme();
+
   // Show/hide add button
   const addBtn = document.getElementById('btn-add-menu');
   if (addBtn) addBtn.style.display = _canDo('menu','create') ? '' : 'none';
@@ -10173,13 +10318,28 @@ window.renderMenu = function() {
     byDate[d][s].push(item);
   });
 
+  const _mev = DATA.evenement || {};
+  const _mCardStyle = [
+    _mev.menuCardBg     ? `background:${_mev.menuCardBg}` : '',
+    _mev.menuCardBorder ? `border-color:${_mev.menuCardBorder}` : ''
+  ].filter(Boolean).join(';');
+  const _mLeaves = _mev.menuLeaves !== false;
+  const _mDayLbl = _mev.menuDayLblColor || '';
+  const _mSvcClr = _mev.menuSvcColor || '';
+  const _mSepClr = _mev.menuSepColor || '';
+  const _mPlatClr= _mev.menuPlatColor || '';
+  const _mDetClr = _mev.menuDetColor  || '';
+
   let html = '';
   const sortedDates = Object.keys(byDate).sort((a,b) => normalizeDate(a).localeCompare(normalizeDate(b)));
 
   sortedDates.forEach(date => {
     const dLabel = dateLabel(normalizeDate(date)).replace(/^\S+\s/, '');
-    html += `<div class="menu-day-card">`;
-    html += `<div class="menu-date-header">${dLabel} <span class="menu-date-ornament">✿</span></div>`;
+    const cardClasses = 'menu-day-card' + (_mLeaves ? '' : ' no-leaves');
+    html += `<div class="${cardClasses}"${_mCardStyle ? ` style="${_mCardStyle}"` : ''}>`;
+    const hdrStyle = _mDayLbl ? ` style="color:${_mDayLbl}"` : '';
+    const ornStyle = _mSvcClr ? ` style="color:${_mSvcClr}"` : '';
+    html += `<div class="menu-date-header"${hdrStyle}>${dLabel} <span class="menu-date-ornament"${ornStyle}>✿</span></div>`;
 
     const services = byDate[date];
     const sortedServices = Object.keys(services).sort((a,b) => {
@@ -10189,7 +10349,8 @@ window.renderMenu = function() {
 
     sortedServices.forEach((service, sIdx) => {
       const meta = MENU_SERVICE_META[service] || { label: service, emoji: '🍴', color: 'var(--muted)' };
-      html += `<div class="menu-service-title"><span>${meta.emoji} ${meta.label}</span></div>`;
+      const svcStyle = _mSvcClr ? ` style="color:${_mSvcClr};--svc-line:${_mSvcClr}"` : '';
+      html += `<div class="menu-service-title"${svcStyle}><span>${meta.emoji} ${meta.label}</span></div>`;
 
       services[service].forEach(item => {
         const dragAttrs = canMove
@@ -10204,14 +10365,16 @@ window.renderMenu = function() {
         const deleteBtn = canDelete
           ? `<button class="menu-card-btn" onclick="deleteMenu('${item.id}')" title="Supprimer">🗑️</button>`
           : '';
+        const nameStyle = _mPlatClr ? ` style="color:${_mPlatClr}"` : '';
+        const detStyle  = _mDetClr  ? ` style="color:${_mDetClr}"` : '';
         const detailsHtml = item.details
-          ? `<div class="menu-card-details" id="menu-det-${item.id}">${item.details.replace(/\n/g,'<br>')}</div>`
+          ? `<div class="menu-card-details" id="menu-det-${item.id}"${detStyle}>${item.details.replace(/\n/g,'<br>')}</div>`
           : '';
 
         html += `<div class="menu-card" id="mc-${item.id}" ${dragAttrs}>
           ${handleHtml}
           <div class="menu-card-body">
-            <div class="menu-card-name">${item.name || '(sans nom)'}</div>
+            <div class="menu-card-name"${nameStyle}>${item.name || '(sans nom)'}</div>
             ${detailsHtml}
           </div>
           <div class="menu-card-actions">
@@ -10220,7 +10383,10 @@ window.renderMenu = function() {
         </div>`;
       });
 
-      if (sIdx < sortedServices.length - 1) html += `<div class="menu-sep"></div>`;
+      if (sIdx < sortedServices.length - 1) {
+        const sepStyle = _mSepClr ? ` style="background:${_mSepClr}"` : '';
+        html += `<div class="menu-sep"${sepStyle}></div>`;
+      }
     });
 
     html += `</div>`;
@@ -10405,11 +10571,24 @@ window.renderInfos = function() {
     let eyebrowHtml = '';
     if (_ev.cartonEyVisible !== false) {
       const eyContent = _ev.cartonEyHTML || (_ev.lieu ? 'Votre séjour au ' + _ev.lieu : (_ev.sousTitre || ''));
-      eyebrowHtml = `<div class="infos-carton-eyebrow" style="text-align:${_ev.cartonEyAlign||'center'}">${eyContent}</div>`;
+      const eyColorStyle = _ev.cartonEyColor ? `;color:${_ev.cartonEyColor}` : '';
+      eyebrowHtml = `<div class="infos-carton-eyebrow" style="text-align:${_ev.cartonEyAlign||'center'}${eyColorStyle}">${eyContent}</div>`;
     }
 
-    const titreContent = _ev.cartonTitreHTML || (_ev.titreCouple||'Sarah & Antoine').replace(/&/g,'&amp;');
-    const titreHtml = `<div class="infos-carton-names" style="text-align:${_ev.cartonTitreAlign||'center'}">${titreContent}</div>`;
+    let titreHtml;
+    if (_ev.cartonTitreHTML) {
+      titreHtml = `<div class="infos-carton-names" style="text-align:${_ev.cartonTitreAlign||'center'}">${_ev.cartonTitreHTML}</div>`;
+    } else {
+      const titreContent = (_ev.titreCouple||'Sarah & Antoine').replace(/&/g,'&amp;');
+      const ts = [
+        _ev.cartonTitreFont      ? `font-family:${_ev.cartonTitreFont}` : '',
+        _ev.cartonTitreFontStyle ? `font-style:${_ev.cartonTitreFontStyle}` : '',
+        _ev.cartonTitreSize      ? `font-size:${_ev.cartonTitreSize}px` : '',
+        _ev.cartonNamesColor     ? `color:${_ev.cartonNamesColor}` : '',
+        `text-align:${_ev.cartonTitreAlign||'center'}`
+      ].filter(Boolean).join(';');
+      titreHtml = `<div class="infos-carton-names" style="${ts}">${titreContent}</div>`;
+    }
 
     let datesHtml = '';
     const dateMode = _ev.cartonDateMode || 'guest';
@@ -10434,7 +10613,8 @@ window.renderInfos = function() {
       if (arrBlk || depBlk) datesHtml = `<div class="infos-carton-dates">${arrBlk}${depBlk}</div>`;
     }
 
-    const lieuHtml = (_ev.cartonLieuVisible !== false) && l.nom ? `<div class="infos-carton-lieu"><strong>${l.nom}</strong>${l.adresse ? ' — ' + l.adresse.split('\n')[0] : ''}</div>` : '';
+    const lieuColorStyleRI = _ev.cartonLieuColor ? ` style="color:${_ev.cartonLieuColor}"` : '';
+    const lieuHtml = (_ev.cartonLieuVisible !== false) && l.nom ? `<div class="infos-carton-lieu"${lieuColorStyleRI}><strong>${l.nom}</strong>${l.adresse ? ' — ' + l.adresse.split('\n')[0] : ''}</div>` : '';
 
     let msgHtml = '';
     if (_ev.cartonMsg) {
@@ -10459,11 +10639,12 @@ window.renderInfos = function() {
       ? '<span class="carton-leaf carton-leaf-tl" aria-hidden="true">🌿</span><span class="carton-leaf carton-leaf-br" aria-hidden="true">🌿</span>'
       : '';
 
+    const ornamentRI = _ev.cartonOrnament || '✿';
     cartonWrap.innerHTML = `<div class="infos-carton"${cardStyle ? ` style="${cardStyle}"` : ''}>
       ${leavesHtml}
       ${eyebrowHtml}
       ${titreHtml}
-      <div class="infos-carton-ornament">✿</div>
+      <div class="infos-carton-ornament">${ornamentRI}</div>
       <div class="infos-carton-sep"></div>
       ${datesHtml}
       ${lieuHtml}
