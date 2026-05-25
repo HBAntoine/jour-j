@@ -2780,7 +2780,11 @@ input, select, textarea { font-family: 'Fredoka', sans-serif !important; font-we
     </div>
     <div class="form-group">
       <label>Message personnel <span style="color:var(--muted);font-weight:400;font-size:0.7rem">— affiché à la 1ère connexion</span></label>
-      <textarea id="new-guest-msg-perso" rows="3" placeholder="Un mot personnalisé affiché à la première connexion de cet invité…" style="resize:vertical"></textarea>
+      <div id="guest-msg-rte-container"></div>
+      <div style="margin-top:8px">
+        <div style="font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Signature <span style="font-weight:400;text-transform:none;letter-spacing:0">(optionnelle)</span></div>
+        <input type="text" id="new-guest-msg-sig" placeholder="Antoine, Sarah &amp; Antoine, Nous deux…" style="font-size:0.85rem">
+      </div>
       <div id="guest-welcome-reset-wrap" style="display:none;margin-top:6px;text-align:right">
         <button type="button" class="btn btn-ghost btn-sm" onclick="resetGuestWelcome()">🔄 Réafficher le message à la prochaine connexion</button>
       </div>
@@ -6505,6 +6509,18 @@ window.toggleGuestDay = function(day) {
   _renderGuestDaysPicker();
 };
 
+function _injectGuestMsgRte(html, sig) {
+  const c = document.getElementById('guest-msg-rte-container');
+  if (!c) return;
+  c.innerHTML = `<div class="rte-editor-wrap">${_rteToolbarHTML('guestMsg')}${_rteFieldHTML('guestMsg','Un mot personnalisé affiché à la 1ère connexion…','min-height:72px')}</div>`;
+  setTimeout(() => {
+    const el = document.getElementById('rte-guestMsg');
+    if (el) el.innerHTML = html || '';
+  }, 30);
+  const sigEl = document.getElementById('new-guest-msg-sig');
+  if (sigEl) sigEl.value = sig || '';
+}
+
 window.openAddGuestModal = function() {
   document.getElementById('guest-modal-title').textContent = '👥 Nouvel invité';
   document.getElementById('guest-modal-btn').textContent = 'Ajouter';
@@ -6526,6 +6542,7 @@ window.openAddGuestModal = function() {
   _guestRolesSelected = [];
   _guestDaysSelected = [];
   setGuestAge('Adulte');
+  _injectGuestMsgRte('', '');
   _renderGuestRolesPicker();
   _renderGuestDaysPicker();
   openModal('modal-addguest');
@@ -6556,8 +6573,7 @@ window.editGuest = function(id) {
   _guestRolesSelected = [...(g.roles||[])];
   _guestDaysSelected = [...(g.days||[])];
   setGuestAge(g.age || 'Adulte');
-  const msgPersoEl = document.getElementById('new-guest-msg-perso');
-  if (msgPersoEl) msgPersoEl.value = g.messagePerso || '';
+  _injectGuestMsgRte(g.messagePerso || '', g.messagePersoSig || '');
   const resetWrap = document.getElementById('guest-welcome-reset-wrap');
   if (resetWrap) resetWrap.style.display = g.welcomeSeen ? 'block' : 'none';
   _renderGuestRolesPicker();
@@ -6578,13 +6594,14 @@ window.saveGuestModal = function() {
   const toHeure   = document.getElementById('new-guest-to-heure').value;
   const days = [..._guestDaysSelected];
   const age = document.getElementById('new-guest-age').value || 'Adulte';
-  const messagePerso = (document.getElementById('new-guest-msg-perso')?.value || '').trim();
+  const messagePerso = document.getElementById('rte-guestMsg')?.innerHTML || '';
+  const messagePersoSig = (document.getElementById('new-guest-msg-sig')?.value || '').trim();
   if (editId) {
     const g = DATA.guests.find(x=>x.id===editId);
-    if (g) { g.fname=fname; g.lname=lname; g.rsvp=rsvp; g.roles=roles; g.role=roles[0]||''; g.fromDate=fromDate; g.toDate=toDate; g.fromHeure=fromHeure; g.toHeure=toHeure; g.days=days; g.age=age; g.messagePerso=messagePerso; }
+    if (g) { g.fname=fname; g.lname=lname; g.rsvp=rsvp; g.roles=roles; g.role=roles[0]||''; g.fromDate=fromDate; g.toDate=toDate; g.fromHeure=fromHeure; g.toHeure=toHeure; g.days=days; g.age=age; g.messagePerso=messagePerso; g.messagePersoSig=messagePersoSig; }
     toast('✏️ Invité mis à jour');
   } else {
-    DATA.guests.push({ id:'G'+uid(), fname, lname, rsvp, roles, role:roles[0]||'', fromDate, toDate, fromHeure, toHeure, days, age, messagePerso });
+    DATA.guests.push({ id:'G'+uid(), fname, lname, rsvp, roles, role:roles[0]||'', fromDate, toDate, fromHeure, toHeure, days, age, messagePerso, messagePersoSig });
     toast('👥 Invité ajouté');
   }
   closeModal('modal-addguest');
@@ -9498,7 +9515,7 @@ function showWelcomeScreen() {
   const ev = DATA.evenement || {};
   const g = CURRENT_USER?.id ? DATA.guests?.find(x => x.id === CURRENT_USER.id) : null;
   const fname = g?.fname || CURRENT_USER?.fname || 'toi';
-  const hasMsg = !!(g?.messagePerso?.trim());
+  const hasMsg = !!(g?.messagePerso && !_isHtmlEmpty(g.messagePerso));
 
   // ── Eyebrow ──
   let eyebrowHtml = '';
@@ -9564,11 +9581,12 @@ function showWelcomeScreen() {
   if (hasMsg) {
     const accent = ev.cartonAccentColor || '#1E4DB7';
     const bdr    = ev.cartonBorder || '#e8ddd0';
-    const sig    = (ev.titreCouple || 'Sarah & Antoine').replace(/&/g,'&amp;');
+    const sig    = g.messagePersoSig ? g.messagePersoSig.replace(/</g,'&lt;') : '';
+    const sigHtml = sig ? `<div class="welcome-msg-sig" style="color:${accent}">${sig}</div>` : '';
     persoHtml = `<div class="welcome-msg-perso-block" style="border-color:${bdr};background:rgba(0,0,0,.025)">
       <div class="welcome-msg-from" style="color:${accent}">Un mot pour toi 💌</div>
-      <div class="welcome-msg-text">${g.messagePerso.replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>
-      <div class="welcome-msg-sig" style="color:${accent}">${sig}</div>
+      <div class="welcome-msg-text">${g.messagePerso}</div>
+      ${sigHtml}
     </div>`;
   }
 
