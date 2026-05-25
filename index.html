@@ -402,6 +402,13 @@ textarea{resize:vertical;min-height:60px;}
 .rte-toolbar button{padding:3px 8px;border:1px solid var(--border);border-radius:6px;background:#fff;font-size:0.78rem;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:600;transition:all 0.12s;line-height:1.4;}
 .rte-toolbar button:hover{background:var(--acc);color:#fff;border-color:var(--acc);}
 .rte-toolbar select{padding:3px 6px;border:1px solid var(--border);border-radius:6px;background:#fff;font-size:0.75rem;cursor:pointer;font-family:'Nunito',sans-serif;outline:none;max-width:120px;}
+.font-picker{position:relative;display:inline-block;}
+.font-picker-btn{padding:2px 7px;border:1px solid var(--border);border-radius:6px;background:#fff;font-size:0.78rem;cursor:pointer;display:inline-flex;align-items:center;gap:3px;white-space:nowrap;height:26px;font-family:inherit;}
+.font-picker-list{position:absolute;top:calc(100% + 3px);left:0;z-index:300;background:#fff;border:1px solid var(--border);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.15);min-width:200px;max-height:230px;overflow-y:auto;display:none;}
+.font-picker-list.open{display:block;}
+.font-picker-item{padding:7px 14px;cursor:pointer;font-size:0.9rem;line-height:1.3;transition:background .1s;}
+.font-picker-item:hover{background:rgba(30,77,183,.07);}
+.font-picker-item.selected{color:var(--acc);background:rgba(30,77,183,.05);font-weight:700;}
 .rte-field{min-height:40px;padding:10px 12px;font-size:1rem;outline:none;line-height:1.5;}
 .rte-field:empty::before{content:attr(data-placeholder);color:var(--muted);font-style:italic;pointer-events:none;}
 .cal-date-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:rgba(30,77,183,0.08);color:var(--acc);border-radius:50px;font-size:0.78rem;font-weight:700;}
@@ -8271,6 +8278,8 @@ let _evDraft = null;
 let _activeEvTab = 'app';
 let _evSettingsContainer = null;
 const _rteSavedRanges = {};
+const _rteCurrentSizes = {};
+document.addEventListener('click', () => { document.querySelectorAll('.font-picker-list.open').forEach(el => el.classList.remove('open')); });
 
 function _isHtmlEmpty(html) {
   return !html || !html.replace(/<br\s*\/?>/gi,'').replace(/<[^>]+>/g,'').trim();
@@ -8440,19 +8449,32 @@ function _refreshEvPreview() {
   if (hp) hp.innerHTML = _buildHeaderPreviewHTML();
 }
 
+function _fontPickerHTML(pickerId, currentFont, callFn, fieldData) {
+  const fonts = ['Nunito','DM Sans','Playfair Display','Cormorant Garamond','Great Vibes','Lora','Montserrat','DM Mono'];
+  const label = currentFont || 'Police';
+  const btnStyle = currentFont ? ` style="font-family:'${currentFont}',sans-serif"` : '';
+  const dataAttr = fieldData ? ` data-field="${fieldData}"` : '';
+  const items = fonts.map(f =>
+    `<div class="font-picker-item${f===currentFont?' selected':''}" style="font-family:'${f}',sans-serif" onclick="${callFn}('${pickerId}','${f}')">${f}</div>`
+  ).join('');
+  return `<div class="font-picker" onclick="event.stopPropagation()"><button type="button" id="${pickerId}-btn" class="font-picker-btn"${btnStyle} onclick="toggleFontPicker('${pickerId}')"><span class="fp-label">${label}</span><span style="opacity:.45;font-size:.6em;margin-left:3px">▾</span></button><div id="${pickerId}-list" class="font-picker-list"${dataAttr}>${items}</div></div>`;
+}
+
+function _rteSizeStepper(fieldId) {
+  const sz = _rteCurrentSizes[fieldId] || 14;
+  return `<div style="display:inline-flex;align-items:center;border:1px solid var(--border);border-radius:6px;overflow:hidden;background:#fff;height:26px"><button type="button" style="padding:0 8px;border:none;border-right:1px solid var(--border);background:none;cursor:pointer;font-size:1.1rem;line-height:1;color:var(--text)" onmousedown="event.preventDefault();rteSizeStep('${fieldId}',-1)">−</button><span id="rte-sz-${fieldId}" style="min-width:38px;text-align:center;font-size:0.72rem;font-family:'Nunito',sans-serif">${sz}px</span><button type="button" style="padding:0 8px;border:none;border-left:1px solid var(--border);background:none;cursor:pointer;font-size:1.1rem;line-height:1;color:var(--text)" onmousedown="event.preventDefault();rteSizeStep('${fieldId}',1)">+</button></div>`;
+}
+
 function _rteToolbarHTML(fieldId, opts) {
   opts = opts || {};
-  const fonts = ['Nunito','DM Sans','Playfair Display','Cormorant Garamond','Great Vibes','Lora','Montserrat','DM Mono'];
-  const fontOpts = fonts.map(f => `<option value="${f}">${f}</option>`).join('');
-  const sizeOpts = [10,11,12,13,14,16,18,20,22,24,28,32,36,40,48].map(s => `<option value="${s}">${s}px</option>`).join('');
   const alignBtns = opts.align === false ? '' : `
     <button title="Gauche"  onmousedown="event.preventDefault();rteExec('${fieldId}','justifyLeft')">⟵</button>
     <button title="Centre"  onmousedown="event.preventDefault();rteExec('${fieldId}','justifyCenter')">☰</button>
     <button title="Droite"  onmousedown="event.preventDefault();rteExec('${fieldId}','justifyRight')">⟶</button>`;
   const colorBtn = opts.color === false ? '' : `<input type="color" title="Couleur texte" style="width:26px;height:22px;padding:1px;border:1px solid var(--border);border-radius:4px;cursor:pointer;vertical-align:middle" onchange="rteExec('${fieldId}','foreColor',this.value)">`;
   return `<div class="rte-toolbar">
-    <select title="Police" onchange="rteExec('${fieldId}','fontName',this.value)">${fontOpts}</select>
-    <select title="Taille" onchange="rteFontSize('${fieldId}',this.value)">${sizeOpts}</select>
+    ${_fontPickerHTML('rte-fp-'+fieldId, null, 'pickRteFont', fieldId)}
+    ${_rteSizeStepper(fieldId)}
     <button title="Gras"      onmousedown="event.preventDefault();rteExec('${fieldId}','bold')"><b>G</b></button>
     <button title="Italique"  onmousedown="event.preventDefault();rteExec('${fieldId}','italic')"><i>I</i></button>
     ${alignBtns}
@@ -8631,13 +8653,11 @@ function _buildEvLeftHTML(ev) {
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
           <div>
             <div class="ev-field-label">Police (conteneur)</div>
-            <select style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:4px 6px;font-size:0.78rem;background:#fff" onchange="saveMsgStyle('cartonMsgFont',this.value)">
-              ${fontList.map(f=>`<option value="${f}"${ev.cartonMsgFont===f?' selected':''}>${f}</option>`).join('')}
-            </select>
+            ${_fontPickerHTML('msg-fp', ev.cartonMsgFont||'Nunito', 'pickMsgFont')}
           </div>
           <div>
             <div class="ev-field-label">Taille</div>
-            <input type="number" style="width:70px;border:1.5px solid var(--border);border-radius:6px;padding:4px 6px;font-size:0.78rem" value="${ev.cartonMsgSize||14}" min="8" max="48" onchange="saveMsgStyle('cartonMsgSize',+this.value)">
+            <div style="display:flex;align-items:center;border:1px solid var(--border);border-radius:6px;overflow:hidden;background:#fff;height:30px"><button type="button" style="padding:0 9px;border:none;border-right:1px solid var(--border);background:none;cursor:pointer;font-size:1.1rem;line-height:1;color:var(--text)" onclick="msgSizeStep(-1)">−</button><span id="msg-sz-display" style="flex:1;text-align:center;font-size:0.8rem;font-family:'Nunito',sans-serif">${ev.cartonMsgSize||14}px</span><button type="button" style="padding:0 9px;border:none;border-left:1px solid var(--border);background:none;cursor:pointer;font-size:1.1rem;line-height:1;color:var(--text)" onclick="msgSizeStep(1)">+</button></div>
           </div>
           <div>
             <div class="ev-field-label">Couleur</div>
@@ -8766,6 +8786,48 @@ window.evTab = function(tab) {
   _activeEvTab = tab;
   document.querySelectorAll('.ev-editor-tab').forEach(b  => b.classList.toggle('active', b.dataset.tab   === tab));
   document.querySelectorAll('.ev-editor-panel').forEach(p => p.classList.toggle('active', p.dataset.panel === tab));
+};
+
+window.toggleFontPicker = function(id) {
+  const list = document.getElementById(id+'-list');
+  if (!list) return;
+  const open = list.classList.contains('open');
+  document.querySelectorAll('.font-picker-list.open').forEach(el => el.classList.remove('open'));
+  if (!open) list.classList.add('open');
+};
+
+window.pickRteFont = function(pickerId, font) {
+  document.querySelectorAll('.font-picker-list.open').forEach(el => el.classList.remove('open'));
+  const list = document.getElementById(pickerId+'-list');
+  const fieldId = list ? list.dataset.field : null;
+  const btn = document.getElementById(pickerId+'-btn');
+  if (btn) { const lbl = btn.querySelector('.fp-label'); if (lbl) lbl.textContent = font; btn.style.fontFamily = `'${font}',sans-serif`; }
+  if (list) list.querySelectorAll('.font-picker-item').forEach(el => el.classList.toggle('selected', el.textContent.trim()===font));
+  if (fieldId) rteExec(fieldId, 'fontName', font);
+};
+
+window.pickMsgFont = function(pickerId, font) {
+  document.querySelectorAll('.font-picker-list.open').forEach(el => el.classList.remove('open'));
+  const btn = document.getElementById(pickerId+'-btn');
+  if (btn) { const lbl = btn.querySelector('.fp-label'); if (lbl) lbl.textContent = font; btn.style.fontFamily = `'${font}',sans-serif`; }
+  const list = document.getElementById(pickerId+'-list');
+  if (list) list.querySelectorAll('.font-picker-item').forEach(el => el.classList.toggle('selected', el.textContent.trim()===font));
+  saveMsgStyle('cartonMsgFont', font);
+};
+
+window.rteSizeStep = function(fieldId, delta) {
+  _rteCurrentSizes[fieldId] = Math.max(1, Math.min(200, (_rteCurrentSizes[fieldId] || 14) + delta));
+  const disp = document.getElementById('rte-sz-'+fieldId);
+  if (disp) disp.textContent = _rteCurrentSizes[fieldId]+'px';
+  rteFontSize(fieldId, _rteCurrentSizes[fieldId]);
+};
+
+window.msgSizeStep = function(delta) {
+  if (!_evDraft) _evDraft = JSON.parse(JSON.stringify(DATA.evenement||{}));
+  const newSz = Math.max(1, Math.min(200, Number(_evDraft.cartonMsgSize||14) + delta));
+  saveMsgStyle('cartonMsgSize', newSz);
+  const disp = document.getElementById('msg-sz-display');
+  if (disp) disp.textContent = newSz+'px';
 };
 
 window.saveRteRange = function(fieldId) {
