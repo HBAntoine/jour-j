@@ -3128,7 +3128,10 @@ const DEFAULT_DATA = {
     menuDayLblColor:'#9a8878', menuPlatColor:'#3d3530', menuDetColor:'#9a8878',
     menuSvcColor:'#1E4DB7', menuSepColor:'#e8ddd0',
     menuDatePillBg:'#fdf9f4', menuDatePillBorder:'#e8ddd0', menuDatePillTopBorder:'#1E4DB7',
-    menuDateNumColor:'#1E4DB7', menuDateMoColor:'#9a8878', menuDateActiveBg:'#1E4DB7'
+    menuDateNumColor:'#1E4DB7', menuDateMoColor:'#9a8878', menuDateActiveBg:'#1E4DB7',
+    infosPageBg:'#f0f4ff', infosBlocBg:'#fdf9f4', infosBlocBorder:'#e8ddd0',
+    infosTitleColor:'#2d2520', infosLineColor:'#e8ddd0', infosOrnamentColor:'#c4a882',
+    infosTextColor:'', infosMutedColor:''
   }
 };
 
@@ -3322,6 +3325,7 @@ async function initFirebase(cfg) {
             const _th = CARTON_THEMES[_evinit.activeTheme];
             Object.keys(_th.carton).forEach(k => { if (_evinit[k] === undefined) _evinit[k] = _th.carton[k]; });
             Object.keys(_th.menu).forEach(k => { if (_evinit[k] === undefined) _evinit[k] = _th.menu[k]; });
+            Object.keys(_th.infos||{}).forEach(k => { if (_evinit[k] === undefined) _evinit[k] = _th.infos[k]; });
           }
         }
 
@@ -8843,27 +8847,32 @@ const CARTON_THEMES = {
   botanique: {
     label:'Botanique', desc:'Ivoire & bleu · Actuel',
     carton:{cartonBg:'#fdf9f4',cartonBorder:'#e8ddd0',cartonLeaves:true,cartonAccentColor:'#1E4DB7',cartonEyColor:'#9a8878',cartonTitreFont:'Georgia,serif',cartonTitreFontStyle:'italic',cartonTitreSize:22,cartonNamesColor:'#1E4DB7',cartonMsgColor:'#9a8878',cartonMsgFont:'Nunito',cartonMsgItalic:true,cartonOrnament:'✿',cartonLieuColor:'#3d3530'},
-    menu:{menuPageBg:'#f0f4ff',menuCardBg:'#fdf9f4',menuCardBorder:'#e8ddd0',menuLeaves:true,menuAccentColor:'#1E4DB7',menuTitleColor:'#059669',menuDayLblColor:'#9a8878',menuPlatColor:'#3d3530',menuDetColor:'#9a8878',menuSvcColor:'#1E4DB7',menuSepColor:'#e8ddd0',menuDatePillBg:'#fdf9f4',menuDatePillBorder:'#e8ddd0',menuDatePillTopBorder:'#1E4DB7',menuDateNumColor:'#1E4DB7',menuDateMoColor:'#9a8878',menuDateActiveBg:'#1E4DB7'}
+    menu:{menuPageBg:'#f0f4ff',menuCardBg:'#fdf9f4',menuCardBorder:'#e8ddd0',menuLeaves:true,menuAccentColor:'#1E4DB7',menuTitleColor:'#059669',menuDayLblColor:'#9a8878',menuPlatColor:'#3d3530',menuDetColor:'#9a8878',menuSvcColor:'#1E4DB7',menuSepColor:'#e8ddd0',menuDatePillBg:'#fdf9f4',menuDatePillBorder:'#e8ddd0',menuDatePillTopBorder:'#1E4DB7',menuDateNumColor:'#1E4DB7',menuDateMoColor:'#9a8878',menuDateActiveBg:'#1E4DB7'},
+    infos:{infosPageBg:'#f0f4ff',infosBlocBg:'#fdf9f4',infosBlocBorder:'#e8ddd0',infosTitleColor:'#2d2520',infosLineColor:'#e8ddd0',infosOrnamentColor:'#c4a882',infosTextColor:'',infosMutedColor:''}
   },
   nuit: {
     label:'Velours Nuit', desc:'Sombre & doré',
     carton:{cartonBg:'#12203a',cartonBorder:'rgba(201,168,76,.3)',cartonLeaves:true,cartonAccentColor:'#c9a84c',cartonEyColor:'rgba(201,168,76,.7)',cartonTitreFont:'Georgia,serif',cartonTitreFontStyle:'italic',cartonTitreSize:22,cartonNamesColor:'#f0e6c8',cartonMsgColor:'rgba(240,230,200,.5)',cartonMsgFont:'Nunito',cartonMsgItalic:true,cartonOrnament:'✦',cartonLieuColor:'#f0e6c8'},
-    menu:{menuPageBg:'#0a1219',menuCardBg:'#12243a',menuCardBorder:'rgba(201,168,76,.18)',menuLeaves:true,menuAccentColor:'#c9a84c',menuTitleColor:'#f0e6c8',menuDayLblColor:'rgba(201,168,76,.6)',menuPlatColor:'#f0e6c8',menuDetColor:'rgba(240,230,200,.45)',menuSvcColor:'#c9a84c',menuSepColor:'rgba(201,168,76,.18)',menuDatePillBg:'rgba(201,168,76,.05)',menuDatePillBorder:'rgba(201,168,76,.2)',menuDatePillTopBorder:'#c9a84c',menuDateNumColor:'#c9a84c',menuDateMoColor:'rgba(201,168,76,.5)',menuDateActiveBg:'rgba(201,168,76,.2)'}
+    menu:{menuPageBg:'#0a1219',menuCardBg:'#12243a',menuCardBorder:'rgba(201,168,76,.18)',menuLeaves:true,menuAccentColor:'#c9a84c',menuTitleColor:'#f0e6c8',menuDayLblColor:'rgba(201,168,76,.6)',menuPlatColor:'#f0e6c8',menuDetColor:'rgba(240,230,200,.45)',menuSvcColor:'#c9a84c',menuSepColor:'rgba(201,168,76,.18)',menuDatePillBg:'rgba(201,168,76,.05)',menuDatePillBorder:'rgba(201,168,76,.2)',menuDatePillTopBorder:'#c9a84c',menuDateNumColor:'#c9a84c',menuDateMoColor:'rgba(201,168,76,.5)',menuDateActiveBg:'rgba(201,168,76,.2)'},
+    infos:{infosPageBg:'#0a1219',infosBlocBg:'#12243a',infosBlocBorder:'rgba(201,168,76,.18)',infosTitleColor:'#c9a84c',infosLineColor:'rgba(201,168,76,.18)',infosOrnamentColor:'rgba(201,168,76,.35)',infosTextColor:'#f0e6c8',infosMutedColor:'rgba(240,230,200,.5)'}
   },
   rose: {
     label:'Marbre Rose', desc:'Blanc & rose poudré',
     carton:{cartonBg:'#faf7f5',cartonBorder:'#e8d0d2',cartonLeaves:false,cartonAccentColor:'#c4727a',cartonEyColor:'#c8b0b5',cartonTitreFont:'Georgia,serif',cartonTitreFontStyle:'italic',cartonTitreSize:22,cartonNamesColor:'#c4727a',cartonMsgColor:'#c8b0b5',cartonMsgFont:'Nunito',cartonMsgItalic:true,cartonOrnament:'✿',cartonLieuColor:'#2c2c2c'},
-    menu:{menuPageBg:'#faf7f5',menuCardBg:'#ffffff',menuCardBorder:'#e8d0d2',menuLeaves:false,menuAccentColor:'#c4727a',menuTitleColor:'#c4727a',menuDayLblColor:'#c8b0b5',menuPlatColor:'#2c2c2c',menuDetColor:'#c8b0b5',menuSvcColor:'#c4727a',menuSepColor:'#e8d0d2',menuDatePillBg:'#ffffff',menuDatePillBorder:'#e8d0d2',menuDatePillTopBorder:'#c4727a',menuDateNumColor:'#c4727a',menuDateMoColor:'#c8b0b5',menuDateActiveBg:'#c4727a'}
+    menu:{menuPageBg:'#faf7f5',menuCardBg:'#ffffff',menuCardBorder:'#e8d0d2',menuLeaves:false,menuAccentColor:'#c4727a',menuTitleColor:'#c4727a',menuDayLblColor:'#c8b0b5',menuPlatColor:'#2c2c2c',menuDetColor:'#c8b0b5',menuSvcColor:'#c4727a',menuSepColor:'#e8d0d2',menuDatePillBg:'#ffffff',menuDatePillBorder:'#e8d0d2',menuDatePillTopBorder:'#c4727a',menuDateNumColor:'#c4727a',menuDateMoColor:'#c8b0b5',menuDateActiveBg:'#c4727a'},
+    infos:{infosPageBg:'#faf7f5',infosBlocBg:'#ffffff',infosBlocBorder:'#e8d0d2',infosTitleColor:'#c4727a',infosLineColor:'#e8d0d2',infosOrnamentColor:'#c4727a',infosTextColor:'',infosMutedColor:''}
   },
   jardin: {
     label:'Jardin', desc:'Crème & vert olive',
     carton:{cartonBg:'#f9f7f3',cartonBorder:'#d4c9b5',cartonLeaves:true,cartonAccentColor:'#7c9a5e',cartonEyColor:'#b0a090',cartonTitreFont:'Georgia,serif',cartonTitreFontStyle:'italic',cartonTitreSize:22,cartonNamesColor:'#7c9a5e',cartonMsgColor:'#b0a090',cartonMsgFont:'Nunito',cartonMsgItalic:true,cartonOrnament:'✿',cartonLieuColor:'#3a3228'},
-    menu:{menuPageBg:'#f5f0e8',menuCardBg:'#ffffff',menuCardBorder:'#d4c9b5',menuLeaves:true,menuAccentColor:'#7c9a5e',menuTitleColor:'#7c9a5e',menuDayLblColor:'#b0a090',menuPlatColor:'#3a3228',menuDetColor:'#b0a090',menuSvcColor:'#7c9a5e',menuSepColor:'#d4c9b5',menuDatePillBg:'#ffffff',menuDatePillBorder:'#d4c9b5',menuDatePillTopBorder:'#7c9a5e',menuDateNumColor:'#7c9a5e',menuDateMoColor:'#b0a090',menuDateActiveBg:'#7c9a5e'}
+    menu:{menuPageBg:'#f5f0e8',menuCardBg:'#ffffff',menuCardBorder:'#d4c9b5',menuLeaves:true,menuAccentColor:'#7c9a5e',menuTitleColor:'#7c9a5e',menuDayLblColor:'#b0a090',menuPlatColor:'#3a3228',menuDetColor:'#b0a090',menuSvcColor:'#7c9a5e',menuSepColor:'#d4c9b5',menuDatePillBg:'#ffffff',menuDatePillBorder:'#d4c9b5',menuDatePillTopBorder:'#7c9a5e',menuDateNumColor:'#7c9a5e',menuDateMoColor:'#b0a090',menuDateActiveBg:'#7c9a5e'},
+    infos:{infosPageBg:'#f5f0e8',infosBlocBg:'#ffffff',infosBlocBorder:'#d4c9b5',infosTitleColor:'#7c9a5e',infosLineColor:'#d4c9b5',infosOrnamentColor:'#b0a090',infosTextColor:'',infosMutedColor:''}
   },
   epure: {
     label:'Épuré', desc:'Blanc pur & minimaliste',
     carton:{cartonBg:'#ffffff',cartonBorder:'#e5e7eb',cartonLeaves:false,cartonAccentColor:'#1E4DB7',cartonEyColor:'#9ca3af',cartonTitreFont:"'DM Sans',sans-serif",cartonTitreFontStyle:'normal',cartonTitreSize:18,cartonNamesColor:'#1E4DB7',cartonMsgColor:'#6b7280',cartonMsgFont:'DM Sans',cartonMsgItalic:false,cartonOrnament:'—',cartonLieuColor:'#111827'},
-    menu:{menuPageBg:'#f8faff',menuCardBg:'#ffffff',menuCardBorder:'#e5e7eb',menuLeaves:false,menuAccentColor:'#1E4DB7',menuTitleColor:'#1E4DB7',menuDayLblColor:'#9ca3af',menuPlatColor:'#111827',menuDetColor:'#6b7280',menuSvcColor:'#1E4DB7',menuSepColor:'#e5e7eb',menuDatePillBg:'#ffffff',menuDatePillBorder:'#e5e7eb',menuDatePillTopBorder:'#1E4DB7',menuDateNumColor:'#1E4DB7',menuDateMoColor:'#9ca3af',menuDateActiveBg:'#1E4DB7'}
+    menu:{menuPageBg:'#f8faff',menuCardBg:'#ffffff',menuCardBorder:'#e5e7eb',menuLeaves:false,menuAccentColor:'#1E4DB7',menuTitleColor:'#1E4DB7',menuDayLblColor:'#9ca3af',menuPlatColor:'#111827',menuDetColor:'#6b7280',menuSvcColor:'#1E4DB7',menuSepColor:'#e5e7eb',menuDatePillBg:'#ffffff',menuDatePillBorder:'#e5e7eb',menuDatePillTopBorder:'#1E4DB7',menuDateNumColor:'#1E4DB7',menuDateMoColor:'#9ca3af',menuDateActiveBg:'#1E4DB7'},
+    infos:{infosPageBg:'#f8faff',infosBlocBg:'#ffffff',infosBlocBorder:'#e5e7eb',infosTitleColor:'#1E4DB7',infosLineColor:'#e5e7eb',infosOrnamentColor:'#9ca3af',infosTextColor:'',infosMutedColor:''}
   }
 };
 
@@ -8910,6 +8919,14 @@ function _applyMenuTheme() {
   const pm  = ev.menuDateMoColor     || '#9a8878';
   const pa  = ev.menuDateActiveBg    || '#1E4DB7';
   const tc  = ev.menuTitleColor      || '#059669';
+  const ipg = ev.infosPageBg        || '#f0f4ff';
+  const ibb = ev.infosBlocBg        || '#fdf9f4';
+  const ibd = ev.infosBlocBorder    || '#e8ddd0';
+  const itc = ev.infosTitleColor    || '#2d2520';
+  const ilc = ev.infosLineColor     || '#e8ddd0';
+  const ioc = ev.infosOrnamentColor || '#c4a882';
+  const ixt = ev.infosTextColor     || '';
+  const imt = ev.infosMutedColor    || '';
   s.textContent = `
     #tab-menu{background:${pg}!important;}
     #menu-filter-dates .date-pill{background:${pb}!important;border-color:${pbd}!important;border-top-color:${pbt}!important;}
@@ -8918,6 +8935,14 @@ function _applyMenuTheme() {
     #menu-filter-dates .date-pill .dp-month{color:${pm}!important;}
     #menu-filter-dates .date-pill.active .dp-num,#menu-filter-dates .date-pill.active .dp-month,#menu-filter-dates .date-pill.active .dp-tous{color:#fff!important;}
     #tab-menu .section-title{color:${tc}!important;}
+    #tab-infos{background:${ipg}!important;}
+    .infos-bloc{background:${ibb}!important;border-color:${ibd}!important;}
+    .infos-bloc-header{border-bottom-color:${ilc}!important;}
+    .infos-bloc-title{color:${itc}!important;}
+    .infos-bloc-title::before,.infos-bloc-title::after{background:${ilc}!important;}
+    .infos-bloc-body::before{color:${ioc}!important;}
+    ${ixt ? `#tab-infos .infos-bloc-body{color:${ixt}!important;}#tab-infos .infos-bloc-body a{color:${ixt}!important;}` : ''}
+    ${imt ? `#tab-infos .infos-lieu-addr{color:${imt}!important;}` : ''}
   `;
 }
 
@@ -8926,7 +8951,7 @@ window.applyEvTheme = function(themeKey) {
   if (!th) return;
   if (!_evDraft) _evDraft = JSON.parse(JSON.stringify(DATA.evenement || {}));
   _evDraft.activeTheme = themeKey;
-  Object.assign(_evDraft, th.carton, th.menu);
+  Object.assign(_evDraft, th.carton, th.menu, th.infos||{});
   _refreshEvSettings();
   _refreshEvPreview();
 };
@@ -10557,6 +10582,7 @@ function _ensureInfosDefaults() {
 
 window.renderInfos = function() {
   _ensureInfosDefaults();
+  _applyMenuTheme();
   const container = document.getElementById('infos-blocs-container');
   if (!container) return;
 
