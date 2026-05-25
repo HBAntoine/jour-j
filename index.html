@@ -3394,9 +3394,9 @@ async function initFirebase(cfg) {
           if (CURRENT_USER) setTimeout(_cleanOldSessions, 2000);
           if (!CURRENT_USER) setTimeout(showIdentityModal, 300);
           // Écran de bienvenue — session existante (retour d'un invité déjà identifié)
-          if (CURRENT_USER && !CURRENT_USER.isAdmin) {
+          if (CURRENT_USER) {
             const _wg = DATA.guests?.find(x => x.id === CURRENT_USER.id);
-            if (!_wg?.welcomeSeen) setTimeout(showWelcomeScreen, 700);
+            if (_wg && !_wg.welcomeSeen) setTimeout(showWelcomeScreen, 700);
           }
         }
         _suppressWrite = false;
@@ -9617,7 +9617,7 @@ window.selectIdentity = function(guestId) {
   switchTab(_getFirstVisibleTab());
   toast(`👋 Bienvenue ${g.fname} !`);
   // Écran de bienvenue — nouvelle connexion
-  if (!isAdmin && !g.welcomeSeen) {
+  if (!g.welcomeSeen) {
     setTimeout(showWelcomeScreen, 600);
   }
 };
