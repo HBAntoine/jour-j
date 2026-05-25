@@ -585,6 +585,20 @@ textarea{resize:vertical;min-height:60px;}
 .infos-carton-date-mois{font-size:0.62rem;text-transform:uppercase;letter-spacing:.08em;color:#9a8878;}
 .infos-carton-date-heure{font-size:0.72rem;font-weight:700;color:#6b5d54;margin-top:2px;}
 .infos-carton-lieu{font-size:0.72rem;color:#9a8878;line-height:1.5;}
+
+/* ── Écran de bienvenue ── */
+#welcome-overlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto;background:rgba(0,0,0,.52);}
+#welcome-modal{width:100%;max-width:360px;padding:28px 22px 22px;text-align:center;font-family:Georgia,serif;position:relative;overflow:hidden;border-radius:18px;animation:welcomeFadeIn .4s ease;}
+@keyframes welcomeFadeIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+#welcome-emoji{font-size:2rem;margin-bottom:6px;}
+#welcome-name{font-size:1.05rem;font-weight:700;margin-bottom:14px;font-family:'Nunito',sans-serif;}
+#welcome-divider{width:60px;height:1px;background:currentColor;opacity:.2;margin:0 auto 14px;}
+#welcome-btn{width:100%;padding:12px;border:none;border-radius:50px;font-family:'Nunito',sans-serif;font-size:0.88rem;font-weight:700;cursor:pointer;margin-top:18px;transition:all .15s;}
+#welcome-btn:hover{filter:brightness(1.09);transform:translateY(-1px);}
+.welcome-msg-perso-block{border-radius:12px;padding:14px 16px;margin-top:14px;text-align:left;border-width:1px;border-style:solid;}
+.welcome-msg-from{font-size:0.58rem;letter-spacing:.13em;text-transform:uppercase;font-weight:800;margin-bottom:7px;font-family:'Nunito',sans-serif;}
+.welcome-msg-text{font-size:0.8rem;line-height:1.75;font-style:italic;font-family:Georgia,serif;white-space:pre-wrap;}
+.welcome-msg-sig{font-size:0.72rem;font-weight:700;margin-top:10px;text-align:right;font-family:'Nunito',sans-serif;}
 .infos-carton-lieu strong{font-family:'Nunito',sans-serif;font-size:0.8rem;font-weight:800;color:#2d2520;display:block;}
 /* Blocs infos */
 .infos-blocs-container{display:flex;flex-direction:column;gap:14px;}
@@ -2763,6 +2777,10 @@ input, select, textarea { font-family: 'Fredoka', sans-serif !important; font-we
       </label>
       <div id="guest-days-picker" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"></div>
     </div>
+    <div class="form-group">
+      <label>Message personnel <span style="color:var(--muted);font-weight:400;font-size:0.7rem">— affiché à la 1ère connexion</span></label>
+      <textarea id="new-guest-msg-perso" rows="3" placeholder="Un mot personnalisé affiché à la première connexion de cet invité…" style="resize:vertical"></textarea>
+    </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('modal-addguest')">Annuler</button>
       <button class="btn btn-sky" id="guest-modal-btn" onclick="saveGuestModal()">Ajouter</button>
@@ -3370,8 +3388,11 @@ async function initFirebase(cfg) {
         if (!_identityInitialized) {
           _identityInitialized = true;
           if (CURRENT_USER) setTimeout(_cleanOldSessions, 2000);
-          // Si pas d'identité → montrer l'écran de sélection
           if (!CURRENT_USER) setTimeout(showIdentityModal, 300);
+          // Écran de bienvenue — session existante (retour d'un invité déjà identifié)
+          if (CURRENT_USER && !CURRENT_USER.isAdmin && !localStorage.getItem('welcome_seen_' + CURRENT_USER.id)) {
+            setTimeout(showWelcomeScreen, 700);
+          }
         }
         _suppressWrite = false;
       }
@@ -6530,6 +6551,8 @@ window.editGuest = function(id) {
   _guestRolesSelected = [...(g.roles||[])];
   _guestDaysSelected = [...(g.days||[])];
   setGuestAge(g.age || 'Adulte');
+  const msgPersoEl = document.getElementById('new-guest-msg-perso');
+  if (msgPersoEl) msgPersoEl.value = g.messagePerso || '';
   _renderGuestRolesPicker();
   _renderGuestDaysPicker();
   openModal('modal-addguest');
@@ -6548,12 +6571,13 @@ window.saveGuestModal = function() {
   const toHeure   = document.getElementById('new-guest-to-heure').value;
   const days = [..._guestDaysSelected];
   const age = document.getElementById('new-guest-age').value || 'Adulte';
+  const messagePerso = (document.getElementById('new-guest-msg-perso')?.value || '').trim();
   if (editId) {
     const g = DATA.guests.find(x=>x.id===editId);
-    if (g) { g.fname=fname; g.lname=lname; g.rsvp=rsvp; g.roles=roles; g.role=roles[0]||''; g.fromDate=fromDate; g.toDate=toDate; g.fromHeure=fromHeure; g.toHeure=toHeure; g.days=days; g.age=age; }
+    if (g) { g.fname=fname; g.lname=lname; g.rsvp=rsvp; g.roles=roles; g.role=roles[0]||''; g.fromDate=fromDate; g.toDate=toDate; g.fromHeure=fromHeure; g.toHeure=toHeure; g.days=days; g.age=age; g.messagePerso=messagePerso; }
     toast('✏️ Invité mis à jour');
   } else {
-    DATA.guests.push({ id:'G'+uid(), fname, lname, rsvp, roles, role:roles[0]||'', fromDate, toDate, fromHeure, toHeure, days, age });
+    DATA.guests.push({ id:'G'+uid(), fname, lname, rsvp, roles, role:roles[0]||'', fromDate, toDate, fromHeure, toHeure, days, age, messagePerso });
     toast('👥 Invité ajouté');
   }
   closeModal('modal-addguest');
@@ -9441,6 +9465,122 @@ function _renderIdentityList(q) {
   }).join('');
 }
 
+window._closeWelcome = function() {
+  const ov = document.getElementById('welcome-overlay');
+  if (ov) ov.remove();
+  if (CURRENT_USER) localStorage.setItem('welcome_seen_' + CURRENT_USER.id, '1');
+};
+
+function showWelcomeScreen() {
+  if (document.getElementById('welcome-overlay')) return;
+  const ev = DATA.evenement || {};
+  const g = CURRENT_USER?.id ? DATA.guests?.find(x => x.id === CURRENT_USER.id) : null;
+  const fname = g?.fname || CURRENT_USER?.fname || 'toi';
+  const hasMsg = !!(g?.messagePerso?.trim());
+
+  // ── Eyebrow ──
+  let eyebrowHtml = '';
+  if (ev.cartonEyVisible !== false) {
+    const eyContent = ev.cartonEyHTML || (ev.lieu ? 'Votre séjour au ' + ev.lieu : (ev.sousTitre || ''));
+    const eyColorStyle = ev.cartonEyColor ? `color:${ev.cartonEyColor}` : '';
+    eyebrowHtml = `<div class="infos-carton-eyebrow" style="text-align:center;${eyColorStyle}">${eyContent}</div>`;
+  }
+
+  // ── Titre ──
+  let titreHtml;
+  if (ev.cartonTitreHTML) {
+    titreHtml = `<div class="infos-carton-names" style="text-align:center">${ev.cartonTitreHTML}</div>`;
+  } else {
+    const tc = (ev.titreCouple||'Sarah & Antoine').replace(/&/g,'&amp;');
+    const ts = [
+      ev.cartonTitreFont      ? `font-family:${ev.cartonTitreFont}` : '',
+      ev.cartonTitreFontStyle ? `font-style:${ev.cartonTitreFontStyle}` : '',
+      ev.cartonTitreSize      ? `font-size:${ev.cartonTitreSize}px` : '',
+      ev.cartonNamesColor     ? `color:${ev.cartonNamesColor}` : '',
+      'text-align:center'
+    ].filter(Boolean).join(';');
+    titreHtml = `<div class="infos-carton-names" style="${ts}">${tc}</div>`;
+  }
+
+  // ── Dates (personnalisées si l'invité a ses propres dates) ──
+  let datesHtml = '';
+  const dateMode = ev.cartonDateMode || 'guest';
+  if (dateMode !== 'aucune') {
+    const p = DATA.infosPratique || {};
+    const arrDate = g?.fromDate  || (dateMode==='fixe' ? ev.cartonArrDate : p.arriveeDate);
+    const arrH    = g?.fromHeure || (dateMode==='fixe' ? ev.cartonArrHeure : p.arriveeHeure);
+    const depDate = g?.toDate    || (dateMode==='fixe' ? ev.cartonDepDate  : p.departDate);
+    const depH    = g?.toHeure   || (dateMode==='fixe' ? ev.cartonDepHeure : p.departHeure);
+    const arrBlk = _cDateBlk(arrDate, arrH, 'Arrivée');
+    const depBlk = _cDateBlk(depDate, depH, 'Départ');
+    if (arrBlk || depBlk) datesHtml = `<div class="infos-carton-dates">${arrBlk}${depBlk}</div>`;
+  }
+
+  // ── Lieu ──
+  const l = DATA.infosLieu || {};
+  const lieuColorStyle = ev.cartonLieuColor ? ` style="color:${ev.cartonLieuColor}"` : '';
+  const lieuHtml = (ev.cartonLieuVisible !== false) && l.nom
+    ? `<div class="infos-carton-lieu"${lieuColorStyle}><strong>${l.nom}</strong>${l.adresse ? ' — ' + l.adresse.split('\n')[0] : ''}</div>`
+    : '';
+
+  // ── Message (générique uniquement si pas de message perso) ──
+  let msgHtml = '';
+  if (!hasMsg && ev.cartonMsg) {
+    const ms = [
+      ev.cartonMsgFont   ? `font-family:'${ev.cartonMsgFont}',sans-serif` : '',
+      ev.cartonMsgSize   ? `font-size:${ev.cartonMsgSize}px` : '',
+      ev.cartonMsgBold   ? 'font-weight:700' : '',
+      ev.cartonMsgItalic ? 'font-style:italic' : '',
+      ev.cartonMsgColor  ? `color:${ev.cartonMsgColor}` : '',
+      ev.cartonMsgAlign  ? `text-align:${ev.cartonMsgAlign}` : 'text-align:center'
+    ].filter(Boolean).join(';');
+    msgHtml = `<div class="infos-carton-lieu" style="margin-top:12px;${ms}">${ev.cartonMsg}</div>`;
+  }
+
+  // ── Message personnel ──
+  let persoHtml = '';
+  if (hasMsg) {
+    const accent = ev.cartonAccentColor || '#1E4DB7';
+    const bdr    = ev.cartonBorder || '#e8ddd0';
+    const sig    = (ev.titreCouple || 'Sarah & Antoine').replace(/&/g,'&amp;');
+    persoHtml = `<div class="welcome-msg-perso-block" style="border-color:${bdr};background:rgba(0,0,0,.025)">
+      <div class="welcome-msg-from" style="color:${accent}">Un mot pour toi 💌</div>
+      <div class="welcome-msg-text">${g.messagePerso.replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>
+      <div class="welcome-msg-sig" style="color:${accent}">${sig}</div>
+    </div>`;
+  }
+
+  // ── Feuilles & ornement ──
+  const leavesHtml = ev.cartonLeaves !== false
+    ? '<span class="carton-leaf carton-leaf-tl" aria-hidden="true">🌿</span><span class="carton-leaf carton-leaf-br" aria-hidden="true">🌿</span>'
+    : '';
+  const ornament = ev.cartonOrnament || '✿';
+
+  // ── Couleurs thème ──
+  const accent  = ev.cartonAccentColor || '#1E4DB7';
+  const bg      = ev.cartonBg   || '#fdf9f4';
+  const bdr     = ev.cartonBorder || '#e8ddd0';
+
+  const html = `<div id="welcome-overlay">
+    <div id="welcome-modal" style="background:${bg};border:1.5px solid ${bdr}">
+      ${leavesHtml}
+      <div id="welcome-emoji">👋</div>
+      <div id="welcome-name" style="color:${accent}">Bienvenue ${fname.replace(/</g,'&lt;')} !</div>
+      <div id="welcome-divider"></div>
+      ${eyebrowHtml}
+      ${titreHtml}
+      <div class="infos-carton-ornament">${ornament}</div>
+      <div class="infos-carton-sep"></div>
+      ${datesHtml}
+      ${lieuHtml}
+      ${msgHtml}
+      ${persoHtml}
+      <button id="welcome-btn" style="background:${accent};color:#fff" onclick="window._closeWelcome()">Entrer dans l'app</button>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
 window.selectIdentity = function(guestId) {
   const g = DATA.guests.find(x => x.id === guestId);
   if (!g) return;
@@ -9454,6 +9594,10 @@ window.selectIdentity = function(guestId) {
   applyPermissions();
   switchTab(_getFirstVisibleTab());
   toast(`👋 Bienvenue ${g.fname} !`);
+  // Écran de bienvenue — nouvelle connexion
+  if (!isAdmin && !localStorage.getItem('welcome_seen_' + guestId)) {
+    setTimeout(showWelcomeScreen, 600);
+  }
 };
 
 window.requestIdentityChange = function() {
