@@ -585,13 +585,13 @@ textarea{resize:vertical;min-height:60px;}
 .infos-carton-date-mois{font-size:0.62rem;text-transform:uppercase;letter-spacing:.08em;color:#9a8878;}
 .infos-carton-date-heure{font-size:0.72rem;font-weight:700;color:#6b5d54;margin-top:2px;}
 .infos-carton-lieu{font-size:0.72rem;color:#9a8878;line-height:1.5;}
-.carton-face-default,.carton-face-perso{transition:opacity .22s;}
-.infos-carton.perso-visible .carton-face-default{display:none;}
-.carton-face-perso{display:none;}
-.infos-carton.perso-visible .carton-face-perso{display:block;}
-.carton-toggle-row{display:flex;justify-content:center;margin-top:14px;position:relative;z-index:1;}
-.carton-toggle-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 13px;border-radius:50px;border:1px solid currentColor;background:transparent;font-family:'Nunito',sans-serif;font-size:0.68rem;font-weight:700;letter-spacing:.03em;cursor:pointer;opacity:.55;transition:opacity .15s;}
-.carton-toggle-btn:hover{opacity:.9;}
+.carton-faces-wrap{display:grid;}
+.carton-face-default,.carton-face-perso{grid-area:1/1;transition:opacity .3s ease;}
+.carton-face-perso{opacity:0;pointer-events:none;}
+.infos-carton.perso-visible .carton-face-default{opacity:0;pointer-events:none;}
+.infos-carton.perso-visible .carton-face-perso{opacity:1;pointer-events:auto;}
+.carton-toggle-btn{position:absolute;top:12px;right:12px;z-index:2;display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:50px;border:1px solid currentColor;background:rgba(255,255,255,.55);backdrop-filter:blur(4px);font-family:'Nunito',sans-serif;font-size:0.65rem;font-weight:700;letter-spacing:.02em;cursor:pointer;opacity:.55;transition:opacity .15s;}
+.carton-toggle-btn:hover{opacity:1;}
 .carton-perso-body{text-align:left;padding:2px 0 4px;}
 .carton-perso-from{font-size:0.55rem;letter-spacing:.13em;text-transform:uppercase;font-weight:800;margin-bottom:8px;font-family:'Nunito',sans-serif;text-align:center;}
 .carton-perso-text{font-size:0.82rem;line-height:1.75;font-family:Georgia,serif;}
@@ -10901,10 +10901,10 @@ window.renderInfos = function() {
     const ornamentRI = _ev.cartonOrnament || '✿';
     const accent = _ev.cartonAccentColor || '#1E4DB7';
 
-    // Message perso de l'invité connecté (guests seulement)
+    // Message perso — visible pour tout utilisateur connecté ayant une fiche avec messagePerso
     let persoToggleHtml = '';
     let persoFaceHtml = '';
-    if (!_isAdmin() && CURRENT_USER?.id) {
+    if (CURRENT_USER?.id) {
       const _gu = (DATA.guests||[]).find(x => x.id === CURRENT_USER.id);
       if (_gu?.messagePerso && !_isHtmlEmpty(_gu.messagePerso)) {
         const sig = _gu.messagePersoSig ? `<div class="carton-perso-sig" style="color:${accent}">${_gu.messagePersoSig.replace(/</g,'&lt;')}</div>` : '';
@@ -10915,28 +10915,28 @@ window.renderInfos = function() {
             ${sig}
           </div>
         </div>`;
-        persoToggleHtml = `<div class="carton-toggle-row">
-          <button class="carton-toggle-btn" id="carton-toggle-btn" style="color:${accent}" onclick="window._toggleCartonFace()">
-            <span id="carton-toggle-icon">💌</span>
-            <span id="carton-toggle-label">Mon message</span>
-          </button>
-        </div>`;
+        persoToggleHtml = `<button class="carton-toggle-btn" id="carton-toggle-btn" style="color:${accent}" onclick="window._toggleCartonFace()">
+          <span id="carton-toggle-icon">💌</span>
+          <span id="carton-toggle-label">Mon message</span>
+        </button>`;
       }
     }
 
     cartonWrap.innerHTML = `<div class="infos-carton"${cardStyle ? ` style="${cardStyle}"` : ''} id="infos-carton-card">
       ${leavesHtml}
-      <div class="carton-face-default">
-        ${eyebrowHtml}
-        ${titreHtml}
-        <div class="infos-carton-ornament">${ornamentRI}</div>
-        <div class="infos-carton-sep"></div>
-        ${datesHtml}
-        ${lieuHtml}
-        ${msgHtml}
-      </div>
-      ${persoFaceHtml}
       ${persoToggleHtml}
+      <div class="carton-faces-wrap">
+        <div class="carton-face-default">
+          ${eyebrowHtml}
+          ${titreHtml}
+          <div class="infos-carton-ornament">${ornamentRI}</div>
+          <div class="infos-carton-sep"></div>
+          ${datesHtml}
+          ${lieuHtml}
+          ${msgHtml}
+        </div>
+        ${persoFaceHtml}
+      </div>
     </div>`;
   }
 
