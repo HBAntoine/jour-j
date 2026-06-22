@@ -597,6 +597,12 @@ textarea{resize:vertical;min-height:60px;}
 .carton-perso-text{font-size:0.82rem;line-height:1.75;font-family:Georgia,serif;}
 .carton-perso-sig{font-size:0.7rem;font-weight:700;margin-top:10px;text-align:right;font-family:'Nunito',sans-serif;}
 
+/* ── Bannière installation PWA ── */
+#pwa-install-banner{position:fixed;bottom:72px;left:50%;transform:translateX(-50%);z-index:800;background:#fff;border:1.5px solid rgba(30,77,183,.22);border-radius:16px;box-shadow:0 6px 28px rgba(30,77,183,.14);padding:11px 12px 11px 14px;display:flex;align-items:center;gap:10px;width:calc(100% - 32px);max-width:360px;animation:bannerUp .35s ease;}
+@keyframes bannerUp{from{opacity:0;transform:translateX(-50%) translateY(16px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+#pwa-install-banner .pwa-btn-install{padding:7px 15px;border-radius:50px;border:none;background:var(--acc);color:#fff;font-family:'Nunito',sans-serif;font-size:0.75rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+#pwa-install-banner .pwa-btn-dismiss{width:26px;height:26px;border-radius:50%;border:none;background:rgba(0,0,0,.06);color:var(--muted);font-size:0.72rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
 /* ── Écran de bienvenue ── */
 #welcome-overlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.52);}
 #welcome-modal{width:100%;max-width:420px;max-height:calc(100vh - 32px);overflow-y:auto;padding:22px 18px 18px;text-align:center;font-family:Georgia,serif;position:relative;border-radius:18px;animation:welcomeFadeIn .4s ease;}
@@ -4083,8 +4089,7 @@ function renderTasks() {
   const activeDates = taskDateFilter === 'all' ? allDates : [normalizeDate(taskDateFilter)];
   for (const d of activeDates) {
     let dateTasks = DATA.tasks.filter(t => normalizeDate(t.date) === d);
-    // Pour les invités : masquer les tâches faites automatiquement (toggle forcé)
-    if (_hideDone || !_isAdmin()) dateTasks = dateTasks.filter(t => !t.done);
+    if (_hideDone) dateTasks = dateTasks.filter(t => !t.done);
     if (_taskPersonFilters.size > 0) dateTasks = dateTasks.filter(t =>
       t.who && t.who.split(', ').some(p => _taskPersonFilters.has(p))
     );
@@ -4933,8 +4938,17 @@ window.deleteTask = function(id) {
 window.toggleTask = function(id) {
   const task = DATA.tasks.find(t => t.id === id);
   if (!task) return;
-  task.done = !task.done;
-  renderTasks(); pushData();
+  if (task.done) {
+    task.done = false;
+    renderTasks(); pushData();
+  } else {
+    openConfirm(
+      'Tâche terminée ?',
+      `Marquer "${task.label}" comme faite ?`,
+      () => { task.done = true; renderTasks(); pushData(); },
+      { emoji: '✅', okLabel: 'Valider', okClass: 'btn-acc' }
+    );
+  }
 };
 
 
@@ -9509,6 +9523,40 @@ function _renderIdentityList(q) {
   }).join('');
 }
 
+function _maybeShowInstallBanner() {
+  if (document.getElementById('pwa-install-banner')) return;
+  if (sessionStorage.getItem('pwa-banner-dismissed')) return;
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  if (isStandalone) return;
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  if (!_installPrompt && !isIOS) return;
+  const sub = isIOS
+    ? "Safari → Partager ↑ → Écran d'accueil"
+    : "Accès rapide depuis ton écran d'accueil";
+  const div = document.createElement('div');
+  div.id = 'pwa-install-banner';
+  div.innerHTML = `<span style="font-size:1.5rem;flex-shrink:0">📲</span>
+    <div style="flex:1;min-width:0">
+      <div style="font-family:'Nunito',sans-serif;font-size:0.82rem;font-weight:800;color:var(--acc)">Installer l'app</div>
+      <div style="font-size:0.68rem;color:var(--muted);margin-top:1px;line-height:1.3">${sub}</div>
+    </div>
+    <button class="pwa-btn-install" onclick="window._pwaInstall()">Installer</button>
+    <button class="pwa-btn-dismiss" onclick="window._pwaDismiss()">✕</button>`;
+  document.body.appendChild(div);
+}
+window._pwaInstall = function() {
+  window._pwaDismiss();
+  if (_installPrompt) {
+    _installPrompt.prompt();
+  } else if (/iphone|ipad|ipod/i.test(navigator.userAgent)) {
+    toast('Safari → bouton Partager ↑ → "Sur l\'écran d\'accueil"', 4000);
+  }
+};
+window._pwaDismiss = function() {
+  document.getElementById('pwa-install-banner')?.remove();
+  sessionStorage.setItem('pwa-banner-dismissed', '1');
+};
+
 window._copyWifi = function(btn) {
   const pass = btn.dataset.pass;
   navigator.clipboard.writeText(pass).then(() => {
@@ -9535,6 +9583,7 @@ window._closeWelcome = function() {
     const g = DATA.guests?.find(x => x.id === CURRENT_USER.id);
     if (g) { g.welcomeSeen = true; pushData(); }
   }
+  setTimeout(_maybeShowInstallBanner, 2000);
 };
 
 window.resetGuestWelcome = function() {
@@ -9676,6 +9725,8 @@ window.selectIdentity = function(guestId) {
   // Écran de bienvenue — nouvelle connexion
   if (!g.welcomeSeen) {
     setTimeout(showWelcomeScreen, 600);
+  } else {
+    setTimeout(_maybeShowInstallBanner, 3000);
   }
 };
 
@@ -9794,9 +9845,8 @@ function applyPermissions() {
     });
   }
 
-  // Toggle masquer faites — admin seulement, toujours caché pour les invités
   const hideDoneLabel = document.getElementById('hide-done-label');
-  if (hideDoneLabel) hideDoneLabel.style.display = isAdmin ? '' : 'none';
+  if (hideDoneLabel) hideDoneLabel.style.display = '';
   // Boutons admin — cibles par ID fixe
   const newTaskBtn = document.getElementById('btn-add-task');
   if (newTaskBtn) newTaskBtn.style.display = _canDo('tasks','create') ? '' : 'none';
