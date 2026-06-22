@@ -657,7 +657,11 @@ textarea{resize:vertical;min-height:60px;}
 .infos-notes-section{margin-top:12px;border:1px solid #e8ddd0;border-radius:10px;overflow:hidden;background:rgba(255,255,255,0.5);}
 .infos-note-item{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border-bottom:1px solid rgba(232,221,208,0.6);font-size:0.85rem;line-height:1.5;}
 .infos-note-text{flex:1;color:var(--text);}
+.infos-note-who{font-size:0.62rem;color:var(--acc);font-family:'Nunito',sans-serif;font-weight:700;margin-top:2px;opacity:.75;}
 .infos-add-note-btn{display:flex;width:100%;padding:9px 12px;background:none;border:none;cursor:pointer;color:var(--acc);font-family:'Nunito',sans-serif;font-size:0.82rem;font-weight:600;text-align:left;}
+.note-who-picker{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px;}
+.note-who-chip{padding:4px 11px;border-radius:50px;border:1.5px solid var(--border);font-size:0.73rem;font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;background:var(--g2);color:var(--muted);transition:all .15s;}
+.note-who-chip.selected{background:var(--acc);color:#fff;border-color:var(--acc);}
 .infos-add-note-btn:hover{background:rgba(255,255,255,0.6);}
 /* Cagnotte */
 .infos-cagnotte-wrapper{display:flex;flex-direction:column;gap:10px;}
@@ -2428,6 +2432,10 @@ input, select, textarea { font-family: 'Fredoka', sans-serif !important; font-we
     <div class="form-group">
       <label>Contenu</label>
       <textarea id="infos-note-texte" rows="3" placeholder="Ex : La piscine est accessible de 9h à 20h. Pensez à votre maillot !"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Visible pour <span style="color:var(--muted);font-weight:400;font-size:0.7rem">— vide = tous les invités</span></label>
+      <div id="note-who-picker" class="note-who-picker"></div>
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('modal-infos-note')">Annuler</button>
@@ -11060,11 +11068,19 @@ function _renderInfosPratique() {
   }
 
   const canEdit = _canDo('infos','edit');
-  const notes = DATA.infosPratiqueNotes || [];
+  const allNotes = DATA.infosPratiqueNotes || [];
+  const notes = canEdit
+    ? allNotes
+    : allNotes.filter(n => !n.who?.length || n.who.includes(CURRENT_USER?.id));
   const noteItems = notes.map(n => {
     const editBtn = canEdit ? `<button class="infos-person-btn" onclick="openEditInfosNote('${n.id}')" title="Modifier">✏️</button>` : '';
     const delBtn  = canEdit ? `<button class="infos-person-btn" onclick="deleteInfosNote('${n.id}')" title="Supprimer">✕</button>` : '';
-    return `<div class="infos-note-item"><span class="infos-note-text">${n.texte}</span><div style="display:flex;gap:2px">${editBtn}${delBtn}</div></div>`;
+    let whoLabel = '';
+    if (canEdit && n.who?.length) {
+      const names = n.who.map(id => { const g=(DATA.guests||[]).find(x=>x.id===id); return g?.fname||id; });
+      whoLabel = `<div class="infos-note-who">→ ${names.join(', ')}</div>`;
+    }
+    return `<div class="infos-note-item"><div class="infos-note-text">${n.texte}${whoLabel}</div><div style="display:flex;gap:2px">${editBtn}${delBtn}</div></div>`;
   }).join('');
   const addBtn = canEdit ? `<button class="infos-add-note-btn" onclick="openAddInfosNote()">＋ Ajouter une info</button>` : '';
   const notesHtml = (notes.length || canEdit) ? `<div class="infos-notes-section">${noteItems}${addBtn}</div>` : '';
@@ -11362,32 +11378,53 @@ window.deleteInfosCat = function(id) {
 
 // ── Notes libres infos pratiques ──────────────────────────────
 let _editInfosNoteId = null;
+let _noteWhoSelected = new Set();
+
+function _renderNoteWhoPicker() {
+  const el = document.getElementById('note-who-picker');
+  if (!el) return;
+  const guests = (DATA.guests||[]).filter(g => g.fname);
+  if (!guests.length) { el.innerHTML = '<span style="font-size:0.75rem;color:var(--muted)">Aucun invité renseigné</span>'; return; }
+  el.innerHTML = guests.map(g =>
+    `<button type="button" class="note-who-chip${_noteWhoSelected.has(g.id)?' selected':''}" onclick="window._toggleNoteWho('${g.id}')">${g.fname}${g.lname?' '+g.lname[0]+'.':''}</button>`
+  ).join('');
+}
+window._toggleNoteWho = function(id) {
+  if (_noteWhoSelected.has(id)) _noteWhoSelected.delete(id); else _noteWhoSelected.add(id);
+  _renderNoteWhoPicker();
+};
+
 window.openAddInfosNote = function() {
   _editInfosNoteId = null;
+  _noteWhoSelected = new Set();
   document.getElementById('modal-infos-note-title').textContent = 'Ajouter une info';
   document.getElementById('infos-note-texte').value = '';
   document.getElementById('modal-infos-note-save').textContent = 'Ajouter';
+  _renderNoteWhoPicker();
   openModal('modal-infos-note');
 };
 window.openEditInfosNote = function(id) {
   const n = (DATA.infosPratiqueNotes||[]).find(x=>x.id===id);
   if (!n) return;
   _editInfosNoteId = id;
+  _noteWhoSelected = new Set(n.who||[]);
   document.getElementById('modal-infos-note-title').textContent = "Modifier l'info";
   document.getElementById('infos-note-texte').value = n.texte || '';
   document.getElementById('modal-infos-note-save').textContent = 'Sauver';
+  _renderNoteWhoPicker();
   openModal('modal-infos-note');
 };
 window.saveInfosNote = function() {
   const texte = document.getElementById('infos-note-texte').value.trim();
   if (!texte) { toast('⚠️ Contenu requis', 'var(--red)'); return; }
+  const who = [..._noteWhoSelected];
   DATA.infosPratiqueNotes = DATA.infosPratiqueNotes || [];
   if (_editInfosNoteId) {
     const n = DATA.infosPratiqueNotes.find(x=>x.id===_editInfosNoteId);
-    if (n) n.texte = texte;
+    if (n) { n.texte = texte; n.who = who; }
     toast('✏️ Info mise à jour');
   } else {
-    DATA.infosPratiqueNotes.push({id:'IPN'+Date.now(), texte});
+    DATA.infosPratiqueNotes.push({id:'IPN'+Date.now(), texte, who});
     toast('➕ Info ajoutée');
   }
   closeModal('modal-infos-note');
